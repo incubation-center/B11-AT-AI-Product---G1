@@ -1,3 +1,8 @@
 import app from "./app";
 
-export default app;
+const port = Number(process.env.PORT) || 8080;
+
+export default {
+  port,
+  fetch: app.fetch,
+};

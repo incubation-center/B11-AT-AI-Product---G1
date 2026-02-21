@@ -6,5 +6,6 @@ export function buildVerifyEmailTemplate(verifyUrl: string): string {
     actionText: "Verify Email",
     actionUrl: verifyUrl,
     introText: "Confirm your email to finish setting up your account.",
+    footerNote: "If you didn't create an account, you can safely ignore this email.",
   });
 }
