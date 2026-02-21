@@ -45,21 +45,126 @@ import {
   
   export const paymentMethodEnum = pgEnum("payment_method", ["cod", "aba_transfer"]);
   
-  export const paymentStatusEnum = pgEnum("payment_status", [
-    "unpaid",
-    "paid",
-    "refunded",
-  ]);
-  
-  // --------------------
-  // Tables
-  // --------------------
-  export const users = pgTable(
-    "users",
-    {
-      id: uuid("id").primaryKey().defaultRandom(), // match Supabase auth user id
-      email: text("email").notNull().unique(),
-      fullName: text("full_name"),
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "unpaid",
+  "paid",
+  "refunded",
+]);
+
+// --------------------
+// Tables
+// --------------------
+export const authUsers = pgTable(
+  "user_auth",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    image: text("image"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    emailUnique: uniqueIndex("auth_user_email_unique").on(t.email),
+  })
+);
+
+export const authSessions = pgTable(
+  "session",
+  {
+    id: text("id").primaryKey(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    token: text("token").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    tokenUnique: uniqueIndex("auth_session_token_unique").on(t.token),
+    userIdIdx: index("auth_session_user_id_idx").on(t.userId),
+    expiresAtIdx: index("auth_session_expires_at_idx").on(t.expiresAt),
+  })
+);
+
+export const authAccounts = pgTable(
+  "account",
+  {
+    id: text("id").primaryKey(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+      withTimezone: true,
+    }),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    providerAccountUnique: uniqueIndex("auth_account_provider_account_unique").on(
+      t.providerId,
+      t.accountId
+    ),
+    userIdIdx: index("auth_account_user_id_idx").on(t.userId),
+  })
+);
+
+export const authVerifications = pgTable(
+  "verification",
+  {
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    valueUnique: uniqueIndex("auth_verification_value_unique").on(t.value),
+    identifierIdx: index("auth_verification_identifier_idx").on(t.identifier),
+    expiresAtIdx: index("auth_verification_expires_at_idx").on(t.expiresAt),
+  })
+);
+
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(), // match Supabase auth user id
+    authUserId: text("auth_user_id").references(() => authUsers.id, {
+      onDelete: "set null",
+    }),
+    email: text("email").notNull().unique(),
+    fullName: text("full_name"),
       tenantId: uuid("tenant_id"), // FK -> tenants.id (nullable until store created)
       isActive: boolean("is_active").notNull().default(true),
       createdAt: timestamp("created_at", { withTimezone: true })
@@ -68,12 +173,13 @@ import {
       updatedAt: timestamp("updated_at", { withTimezone: true })
         .notNull()
         .defaultNow(),
-    },
-    (t) => ({
-      tenantIdIdx: index("users_tenant_id_idx").on(t.tenantId),
-      isActiveIdx: index("users_is_active_idx").on(t.isActive),
-    })
-  );
+  },
+  (t) => ({
+    authUserIdUnique: uniqueIndex("users_auth_user_id_unique").on(t.authUserId),
+    tenantIdIdx: index("users_tenant_id_idx").on(t.tenantId),
+    isActiveIdx: index("users_is_active_idx").on(t.isActive),
+  })
+);
   
   export const tenants = pgTable(
     "tenants",
@@ -365,12 +471,39 @@ import {
   // --------------------
   // Relations (optional but helpful)
   // --------------------
-  export const usersRelations = relations(users, ({ one }) => ({
-    tenant: one(tenants, {
-      fields: [users.tenantId],
-      references: [tenants.id],
-    }),
-  }));
+export const usersRelations = relations(users, ({ one }) => ({
+  authUser: one(authUsers, {
+    fields: [users.authUserId],
+    references: [authUsers.id],
+  }),
+  tenant: one(tenants, {
+    fields: [users.tenantId],
+    references: [tenants.id],
+  }),
+}));
+
+export const authUsersRelations = relations(authUsers, ({ many, one }) => ({
+  sessions: many(authSessions),
+  accounts: many(authAccounts),
+  profile: one(users, {
+    fields: [authUsers.id],
+    references: [users.authUserId],
+  }),
+}));
+
+export const authSessionsRelations = relations(authSessions, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [authSessions.userId],
+    references: [authUsers.id],
+  }),
+}));
+
+export const authAccountsRelations = relations(authAccounts, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [authAccounts.userId],
+    references: [authUsers.id],
+  }),
+}));
   
   export const tenantsRelations = relations(tenants, ({ one, many }) => ({
     owner: one(users, {
@@ -456,11 +589,23 @@ import {
     }),
   }));
   
-  // --------------------
-  // Types (handy exports)
-  // --------------------
-  export type User = typeof users.$inferSelect;
-  export type NewUser = typeof users.$inferInsert;
+// --------------------
+// Types (handy exports)
+// --------------------
+export type AuthUser = typeof authUsers.$inferSelect;
+export type NewAuthUser = typeof authUsers.$inferInsert;
+
+export type AuthSession = typeof authSessions.$inferSelect;
+export type NewAuthSession = typeof authSessions.$inferInsert;
+
+export type AuthAccount = typeof authAccounts.$inferSelect;
+export type NewAuthAccount = typeof authAccounts.$inferInsert;
+
+export type AuthVerification = typeof authVerifications.$inferSelect;
+export type NewAuthVerification = typeof authVerifications.$inferInsert;
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
   
   export type Tenant = typeof tenants.$inferSelect;
   export type NewTenant = typeof tenants.$inferInsert;
