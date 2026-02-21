@@ -31,6 +31,46 @@ export async function getOrCreateProfile(authUser: SessionUser) {
   return profile;
 }
 
+export async function updateProfileFullName(authUser: SessionUser, fullName: string) {
+  const profile = await getOrCreateProfile(authUser);
+
+  if (!profile) {
+    return null;
+  }
+
+  await db
+    .update(users)
+    .set({
+      fullName,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, profile.id));
+
+  return db.query.users.findFirst({
+    where: eq(users.id, profile.id),
+  });
+}
+
+export async function deactivateProfile(authUser: SessionUser) {
+  const profile = await getOrCreateProfile(authUser);
+
+  if (!profile) {
+    return null;
+  }
+
+  await db
+    .update(users)
+    .set({
+      isActive: false,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, profile.id));
+
+  return db.query.users.findFirst({
+    where: eq(users.id, profile.id),
+  });
+}
+
 export function toMeResponse(authUser: SessionUser, profile: NonNullable<Awaited<ReturnType<typeof getOrCreateProfile>>>) {
   return {
     id: profile.id,

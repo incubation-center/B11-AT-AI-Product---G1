@@ -92,6 +92,33 @@ export const authOpenApiSpec = {
           },
         },
       },
+      UpdateMeBody: {
+        type: "object",
+        required: ["full_name"],
+        properties: {
+          full_name: { type: "string", example: "John Doe" },
+        },
+      },
+      DeactivateMeResponse: {
+        type: "object",
+        required: ["message", "profile"],
+        properties: {
+          message: { type: "string", example: "Account deactivated" },
+          profile: {
+            type: "object",
+            required: ["id", "isActive", "updatedAt"],
+            properties: {
+              id: {
+                type: "string",
+                format: "uuid",
+                example: "550e8400-e29b-41d4-a716-446655440000",
+              },
+              isActive: { type: "boolean", example: false },
+              updatedAt: { type: "string", format: "date-time" },
+            },
+          },
+        },
+      },
       ErrorResponse: {
         type: "object",
         properties: {
@@ -246,6 +273,70 @@ export const authOpenApiSpec = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/MeResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+      patch: {
+        tags: ["Profile"],
+        summary: "Update authenticated user profile full name",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UpdateMeBody" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Updated user profile",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MeResponse" },
+              },
+            },
+          },
+          "400": {
+            description: "Invalid request body",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/me/deactivate": {
+      patch: {
+        tags: ["Profile"],
+        summary: "Deactivate authenticated user account",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Account deactivated",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/DeactivateMeResponse" },
               },
             },
           },

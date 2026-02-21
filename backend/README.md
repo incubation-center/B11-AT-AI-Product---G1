@@ -69,6 +69,8 @@ Common endpoints used by frontend:
 | Method | Endpoint | Description | Auth |
 |---|---|---|---|
 | GET | `/me` | Return authenticated user + profile | `Authorization: Bearer <token>` |
+| PATCH | `/me` | Update authenticated user `full_name` | `Authorization: Bearer <token>` |
+| PATCH | `/me/deactivate` | Deactivate current user (`is_active=false`) | `Authorization: Bearer <token>` |
 
 If the token is missing/invalid, response is:
 
@@ -157,6 +159,36 @@ Expected response shape:
 ```ts
 await fetch(`${API_URL}/api/auth/sign-out`, {
   method: "POST",
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
+```
+
+### 6) Update profile full name
+
+```ts
+const token = "YOUR_BEARER_TOKEN";
+
+await fetch(`${API_URL}/me`, {
+  method: "PATCH",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    full_name: "John Doe"
+  })
+});
+```
+
+### 7) Deactivate account
+
+```ts
+const token = "YOUR_BEARER_TOKEN";
+
+await fetch(`${API_URL}/me/deactivate`, {
+  method: "PATCH",
   headers: {
     Authorization: `Bearer ${token}`
   }
