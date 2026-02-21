@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1771651522202,
+      "tag": "0000_odd_jubilee",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771652239323,
+      "tag": "0001_useful_bloodstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771654600000,
+      "tag": "0002_rename_auth_user_table",
+      "breakpoints": true
+    }
+  ]
+}
