@@ -1,4 +1,4 @@
-const serverUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+const serverUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:8080";
 const publicUrl = process.env.PUBLIC_URL ?? "http://localhost:5173";
 
 export const authOpenApiSpec = {

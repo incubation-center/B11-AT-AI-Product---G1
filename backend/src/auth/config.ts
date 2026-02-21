@@ -6,7 +6,7 @@ import { db } from "../db";
 import { authAccounts, authSessions, authUsers, authVerifications, users } from "../db/schema";
 import { sendResetPasswordEmail, sendVerifyEmail } from "../resend";
 
-const baseURL = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+const baseURL = process.env.BETTER_AUTH_URL ?? "http://localhost:8080";
 const defaultFrontendOrigin = process.env.PUBLIC_URL ?? "https://eavheang.me";
 
 function normalizeOrigin(value: string): string {
@@ -25,6 +25,7 @@ const trustedOrigins = Array.from(
       "https://eavheang.me",
       "https://www.eavheang.me",
       "http://localhost:3000",
+      "http://localhost:8080",
       "http://localhost:5173",
       ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").map((v) => v.trim()) ?? []),
     ]
