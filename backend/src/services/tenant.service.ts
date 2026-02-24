@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { tenants, users } from "../db/schema";
 import { getOrCreateProfile } from "./profile.service";
-import { ragService } from "./rag.service";
+import { aiClient } from "../lib/ai-client";
 import type { SessionUser } from "../types/auth";
 import type { CreateTenantInput, TenantConflictResult, UpdateTenantInput } from "../types/tenant";
 
@@ -81,7 +81,7 @@ async function findOwnerTenant(ownerUserId: string) {
 }
 
 function triggerTenantIndex(tenantId: string) {
-  void ragService.indexTenant(tenantId).catch((error) => {
+  void aiClient.indexTenant(tenantId).catch((error) => {
     console.error("[rag] indexTenant failed", { tenantId, error });
   });
 }

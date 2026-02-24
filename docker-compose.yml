@@ -1,0 +1,89 @@
+version: "3.9"
+
+# ---------------------------------------------------------------------------
+# Microservice architecture
+#
+# Services
+#   auth-service  – authentication & email verification  (port 8081)
+#   user-service  – user profile management              (port 8082)
+#   store-service – tenant / store management            (port 8083)
+#   ai-service    – RAG indexing & semantic search       (port 8084)
+#   frontend      – Next.js web application              (port 3000)
+#
+# All backend services share the same codebase built from backend/Dockerfile.
+# The SERVICE_ENTRY build arg selects which entry point is used.
+#
+# Copy backend/.env.example to backend/.env and fill in the values before
+# running `docker compose up`.
+# ---------------------------------------------------------------------------
+
+x-backend-common: &backend-common
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  env_file:
+    - ./backend/.env
+  restart: unless-stopped
+
+services:
+  auth-service:
+    <<: *backend-common
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_ENTRY: auth-service
+    environment:
+      PORT: "8081"
+    ports:
+      - "8081:8081"
+
+  user-service:
+    <<: *backend-common
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_ENTRY: user-service
+    environment:
+      PORT: "8082"
+    ports:
+      - "8082:8082"
+    depends_on:
+      - auth-service
+
+  store-service:
+    <<: *backend-common
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_ENTRY: store-service
+    environment:
+      PORT: "8083"
+      AI_SERVICE_URL: "http://ai-service:8084"
+    ports:
+      - "8083:8083"
+    depends_on:
+      - auth-service
+      - ai-service
+
+  ai-service:
+    <<: *backend-common
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_ENTRY: ai-service
+    environment:
+      PORT: "8084"
+    ports:
+      - "8084:8084"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

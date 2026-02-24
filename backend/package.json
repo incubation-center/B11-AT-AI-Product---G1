@@ -2,6 +2,14 @@
   "name": "backend",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
+    "dev:auth": "PORT=8081 bun run --hot src/auth-service.ts",
+    "dev:user": "PORT=8082 bun run --hot src/user-service.ts",
+    "dev:store": "PORT=8083 bun run --hot src/store-service.ts",
+    "dev:ai": "PORT=8084 bun run --hot src/ai-service.ts",
+    "start:auth": "PORT=8081 bun run src/auth-service.ts",
+    "start:user": "PORT=8082 bun run src/user-service.ts",
+    "start:store": "PORT=8083 bun run src/store-service.ts",
+    "start:ai": "PORT=8084 bun run src/ai-service.ts",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
