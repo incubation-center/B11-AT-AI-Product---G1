@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { db } from "../db";
 import { products, tenants } from "../db/schema";
+import { env } from "../env";
 
 type PineconeMetadata = {
   tenantId: string;
@@ -16,14 +17,6 @@ type PineconeMetadata = {
   relationNode: string;
   text: string;
 };
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`${name} is required.`);
-  }
-  return value;
-}
 
 function toUnitFloat(hash: Buffer, i: number): number {
   const value = hash.readUInt16BE((i * 2) % (hash.length - 1));
@@ -73,19 +66,17 @@ function productText(row: typeof products.$inferSelect): string {
 }
 
 function shouldSkip(): boolean {
-  return !process.env.PINECONE_API_KEY || !process.env.PINECONE_INDEX;
+  return !env.PINECONE_API_KEY || !env.PINECONE_INDEX;
 }
 
 export const ragService = {
   async indexTenant(tenantId: string): Promise<void> {
     if (shouldSkip()) return;
 
-    const apiKey = requireEnv("PINECONE_API_KEY");
-    const indexName = requireEnv("PINECONE_INDEX");
-    const namespace = process.env.PINECONE_NAMESPACE_PREFIX
-      ? `${process.env.PINECONE_NAMESPACE_PREFIX}-${tenantId}`
-      : tenantId;
-    const dimensions = Number(process.env.PINECONE_VECTOR_DIM ?? "256");
+    const apiKey = env.PINECONE_API_KEY!;
+    const indexName = env.PINECONE_INDEX!;
+    const namespace = `${env.PINECONE_NAMESPACE_PREFIX}-${tenantId}`;
+    const dimensions = env.PINECONE_VECTOR_DIM;
 
     const tenant = await db.query.tenants.findFirst({
       where: eq(tenants.id, tenantId),
@@ -138,12 +129,10 @@ export const ragService = {
   async searchTenant(tenantId: string, query: string, topK = 10) {
     if (shouldSkip()) return [];
 
-    const apiKey = requireEnv("PINECONE_API_KEY");
-    const indexName = requireEnv("PINECONE_INDEX");
-    const namespace = process.env.PINECONE_NAMESPACE_PREFIX
-      ? `${process.env.PINECONE_NAMESPACE_PREFIX}-${tenantId}`
-      : tenantId;
-    const dimensions = Number(process.env.PINECONE_VECTOR_DIM ?? "256");
+    const apiKey = env.PINECONE_API_KEY!;
+    const indexName = env.PINECONE_INDEX!;
+    const namespace = `${env.PINECONE_NAMESPACE_PREFIX}-${tenantId}`;
+    const dimensions = env.PINECONE_VECTOR_DIM;
 
     const client = new Pinecone({ apiKey });
     const index = client.index(indexName).namespace(namespace);

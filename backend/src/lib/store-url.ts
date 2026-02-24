@@ -1,8 +1,10 @@
+import { env } from "../env";
+
 export function buildStoreUrl(subdomain: string): string {
   const cleanedSubdomain = subdomain.trim().toLowerCase();
-  const protocol = process.env.STORE_URL_PROTOCOL?.trim() || "http";
-  const baseDomain = process.env.STORE_BASE_DOMAIN?.trim() || "lvh.me";
-  const port = process.env.STORE_URL_PORT?.trim() || "3000";
+  const protocol = env.STORE_URL_PROTOCOL;
+  const baseDomain = env.STORE_BASE_DOMAIN.trim();
+  const port = env.STORE_URL_PORT.trim();
 
   const base = port ? `${baseDomain}:${port}` : baseDomain;
   return `${protocol}://${cleanedSubdomain}.${base}`;

@@ -5,6 +5,7 @@ import { docsRoutes } from "./routes/docs.routes";
 import { meRoutes } from "./routes/me.routes";
 import { rootRoutes } from "./routes/root.routes";
 import { tenantRoutes } from "./routes/tenant.routes";
+import { env } from "./env";
 
 const app = new Hono();
 
@@ -19,7 +20,7 @@ const defaultOrigins = [
 const allowedOrigins = new Set(
   [
     ...defaultOrigins,
-    ...(process.env.CORS_ORIGINS?.split(",").map((v) => v.trim()).filter(Boolean) ?? []),
+    ...(env.CORS_ORIGINS?.split(",").map((v) => v.trim()).filter(Boolean) ?? []),
   ].map((v) => v.replace(/\/$/, ""))
 );
 
