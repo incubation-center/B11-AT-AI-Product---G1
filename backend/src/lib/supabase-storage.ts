@@ -1,13 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-
-type AssetType = "logo" | "banner";
-
-type SignedUploadResult = {
-  path: string;
-  signedUrl: string;
-  publicUrl: string;
-  bucket: string;
-};
+import type { AssetType, SignedUploadResult } from "../types/storage";
 
 const imageMimeTypes = new Set([
   "image/jpeg",

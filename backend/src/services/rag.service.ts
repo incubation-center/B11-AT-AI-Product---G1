@@ -4,19 +4,7 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { db } from "../db";
 import { products, tenants } from "../db/schema";
 import { env } from "../env";
-
-type PineconeMetadata = {
-  tenantId: string;
-  entityType: "tenant_profile" | "product";
-  entityId: string;
-  subdomain?: string;
-  shopType?: string;
-  productCategory?: string;
-  isActive: boolean;
-  relationTenantNode: string;
-  relationNode: string;
-  text: string;
-};
+import type { PineconeMetadata } from "../types/rag";
 
 function toUnitFloat(hash: Buffer, i: number): number {
   const value = hash.readUInt16BE((i * 2) % (hash.length - 1));

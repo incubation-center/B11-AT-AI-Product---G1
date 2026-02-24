@@ -3,34 +3,8 @@ import { db } from "../db";
 import { tenants, users } from "../db/schema";
 import { getOrCreateProfile } from "./profile.service";
 import { ragService } from "./rag.service";
-
-type SessionUser = {
-  id: string;
-  email: string;
-  name?: string | null;
-};
-
-type CreateTenantInput = {
-  shopName: string;
-  shopType: "beauty_cosmetics" | "fashion" | "food_beverage" | "electronic" | "services" | "others";
-  description?: string | null;
-  addressText?: string | null;
-  googleMapUrl?: string | null;
-  logoUrl?: string | null;
-  bannerUrl?: string | null;
-};
-
-type UpdateTenantInput = Partial<CreateTenantInput> & {
-  isActive?: boolean;
-};
-
-export type TenantConflictResult = {
-  code: "SUBDOMAIN_CONFLICT" | "TENANT_EXISTS";
-  message: string;
-  generatedSubdomain?: string;
-  alternatives?: string[];
-  existingTenantId?: string;
-};
+import type { SessionUser } from "../types/auth";
+import type { CreateTenantInput, TenantConflictResult, UpdateTenantInput } from "../types/tenant";
 
 function cleanText(value: unknown): string | null {
   if (typeof value !== "string") {

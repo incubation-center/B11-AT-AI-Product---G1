@@ -1,15 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-
-type AssetType = "logo" | "banner";
-
-type CloudinaryUploadResult = {
-  publicUrl: string;
-  assetId: string;
-  publicId: string;
-  resourceType: string;
-  format: string;
-  bytes: number;
-};
+import type { AssetType, CloudinaryUploadResult } from "../types/storage";
 
 const imageMimeTypes = new Set([
   "image/jpeg",

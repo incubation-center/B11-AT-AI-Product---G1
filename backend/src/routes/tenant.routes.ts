@@ -13,17 +13,9 @@ import {
   getStoreBySubdomain,
   updateMyTenant,
 } from "../services/tenant.service";
-
-const shopTypes = [
-  "beauty_cosmetics",
-  "fashion",
-  "food_beverage",
-  "electronic",
-  "services",
-  "others",
-] as const;
-type ShopType = (typeof shopTypes)[number];
-const shopTypeSet = new Set<ShopType>(shopTypes);
+import { SHOP_TYPES } from "../types/tenant";
+import type { ShopType } from "../types/tenant";
+const shopTypeSet = new Set<ShopType>(SHOP_TYPES);
 
 async function getSessionUser(c: Context) {
   const session = await auth.api.getSession({
