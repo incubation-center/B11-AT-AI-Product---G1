@@ -72,6 +72,21 @@ Common endpoints used by frontend:
 | PATCH | `/me` | Update authenticated user `full_name` | `Authorization: Bearer <token>` |
 | PATCH | `/me/deactivate` | Deactivate current user (`is_active=false`) | `Authorization: Bearer <token>` |
 
+### Tenant endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| GET | `/me/tenant` | Check whether current user has created a store | `Authorization: Bearer <token>` |
+| POST | `/tenants` | Create store tenant (1 user = 1 store) | `Authorization: Bearer <token>` |
+| PATCH | `/me/tenant` | Update current owner store (includes `logo_url`, `banner_url`) | `Authorization: Bearer <token>` |
+| PATCH | `/me/tenant/deactivate` | Soft delete store (`is_active=false`) | `Authorization: Bearer <token>` |
+| PATCH | `/tenants/:id` | Update current owner's store by tenant id | `Authorization: Bearer <token>` |
+| PATCH | `/tenants/:id/deactivate` | Deactivate current owner's store by tenant id | `Authorization: Bearer <token>` |
+| POST | `/tenants/upload-url` | Upload `logo`/`banner` image to Cloudinary | `Authorization: Bearer <token>` |
+| GET | `/tenants/subdomain-available?shop_name=...` | Validate generated subdomain from shop name | Public |
+| GET | `/store/by-subdomain/:subdomain` | Public storefront profile lookup | Public |
+| GET | `/store/by-host` | Public storefront profile lookup by host subdomain | Public |
+
 If the token is missing/invalid, response is:
 
 ```json
@@ -194,6 +209,142 @@ await fetch(`${API_URL}/me/deactivate`, {
   }
 });
 ```
+
+### 8) Create tenant (store)
+
+```ts
+await fetch(`${API_URL}/tenants`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    shop_name: "My Beauty Store",
+    shop_type: "beauty_cosmetics",
+    description: "Khmer beauty products",
+    address_text: "Phnom Penh",
+    google_map_url: "https://maps.google.com/...",
+    logo_url: "https://res.cloudinary.com/<cloud>/image/upload/...",
+    banner_url: "https://res.cloudinary.com/<cloud>/image/upload/..."
+  }),
+});
+```
+
+If generated subdomain conflicts, API returns `409` and suggestions:
+
+```json
+{
+  "code": "SUBDOMAIN_CONFLICT",
+  "message": "Generated subdomain already exists. Please choose a more unique shop_name. Suggestions are provided just in case.",
+  "generatedSubdomain": "my-beauty-store",
+  "alternatives": ["my-beauty-store-2", "my-beauty-store-3"]
+}
+```
+
+### 9) Upload logo/banner image (Cloudinary)
+
+```ts
+const form = new FormData();
+form.append("type", "logo"); // or "banner"
+form.append("file", fileInput.files[0]);
+
+const uploadRes = await fetch(`${API_URL}/tenants/upload-url`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  body: form,
+});
+
+const { upload } = await uploadRes.json();
+// upload = { publicUrl, assetId, publicId, resourceType, format, bytes }
+```
+
+Save `upload.publicUrl` into `logo_url` or `banner_url` through `POST /tenants` or `PATCH /me/tenant`.
+Tenant responses include `subdomain` and `storeUrl` so frontend can render a clickable storefront link.
+
+### Storage env vars
+
+```env
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
+PINECONE_API_KEY=...
+PINECONE_INDEX=...
+PINECONE_VECTOR_DIM=256
+PINECONE_NAMESPACE_PREFIX=tenant
+STORE_URL_PROTOCOL=http
+STORE_BASE_DOMAIN=lvh.me
+STORE_URL_PORT=3000
+```
+
+### Local subdomain testing
+
+If tenant subdomain is `my-shop`, generated store URL will be:
+
+`http://my-shop.lvh.me:3000`
+
+You can resolve the store on backend by host using:
+
+`http://my-shop.lvh.me:8080/store/by-host`
+
+## Pinecone tenant indexing (RAG)
+
+Tenant create/update automatically triggers:
+
+`ragService.indexTenant(tenantId)`
+
+Current implementation:
+
+- Uses Pinecone namespace per tenant (`<prefix>-<tenantId>`).
+- Indexes one tenant profile vector + product vectors for that tenant.
+- Stores graph-like relation metadata for filtering/traversal:
+  - `relationTenantNode` (e.g. `tenant:<tenantId>`)
+  - `relationNode` (e.g. `product:<productId>`)
+  - `entityType` (`tenant_profile` or `product`)
+
+If Pinecone env vars are missing, indexing is skipped (tenant API still succeeds).
+
+## Production subdomain setup (`eavheang.me`)
+
+Goal: allow storefronts like `https://my-shop.eavheang.me`.
+
+### 1) DNS
+
+- Add wildcard DNS record:
+  - `A` record: `*.eavheang.me` -> your server IP
+  - or `CNAME` wildcard if your provider/platform requires it
+
+### 2) SSL/TLS
+
+- Install wildcard certificate for `*.eavheang.me` (and root `eavheang.me`).
+- Ensure your reverse proxy/hosting serves HTTPS for wildcard hosts.
+
+### 3) Reverse proxy
+
+- Forward wildcard subdomain traffic to frontend/backend.
+- Preserve original `Host` header so backend can resolve tenant from host.
+
+### 4) Backend env for store URL generation
+
+```env
+STORE_URL_PROTOCOL=https
+STORE_BASE_DOMAIN=eavheang.me
+STORE_URL_PORT=
+```
+
+With this config, tenant `my-shop` will expose:
+
+`https://my-shop.eavheang.me`
+
+### 5) Backend host-based lookup test (production)
+
+Open:
+
+`https://my-shop.eavheang.me/store/by-host`
+
+It should return the tenant/store for subdomain `my-shop`.
 
 ## Frontend checklist
 

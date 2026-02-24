@@ -12,6 +12,7 @@ export const authOpenApiSpec = {
   tags: [
     { name: "Auth", description: "Better Auth endpoints" },
     { name: "Profile", description: "Authenticated profile endpoint" },
+    { name: "Tenant", description: "Store tenant management endpoints" },
   ],
   components: {
     securitySchemes: {
@@ -123,6 +124,36 @@ export const authOpenApiSpec = {
         type: "object",
         properties: {
           message: { type: "string", example: "Unauthorized" },
+        },
+      },
+      TenantResponse: {
+        type: "object",
+        required: ["id", "shopName", "shopType", "subdomain", "storeUrl", "isActive"],
+        properties: {
+          id: { type: "string", format: "uuid" },
+          shopName: { type: "string", example: "My Beauty Store" },
+          shopType: { type: "string", example: "beauty_cosmetics" },
+          description: { type: "string", nullable: true },
+          addressText: { type: "string", nullable: true },
+          googleMapUrl: { type: "string", nullable: true },
+          logoUrl: { type: "string", nullable: true },
+          bannerUrl: { type: "string", nullable: true },
+          subdomain: { type: "string", example: "my-beauty-store" },
+          storeUrl: { type: "string", example: "http://my-beauty-store.lvh.me:3000" },
+          isActive: { type: "boolean", example: true },
+        },
+      },
+      CreateTenantBody: {
+        type: "object",
+        required: ["shop_name", "shop_type"],
+        properties: {
+          shop_name: { type: "string", example: "My Beauty Store" },
+          shop_type: { type: "string", example: "beauty_cosmetics" },
+          description: { type: "string" },
+          address_text: { type: "string" },
+          google_map_url: { type: "string" },
+          logo_url: { type: "string" },
+          banner_url: { type: "string" },
         },
       },
     },
@@ -348,6 +379,187 @@ export const authOpenApiSpec = {
               },
             },
           },
+        },
+      },
+    },
+    "/me/tenant": {
+      get: {
+        tags: ["Tenant"],
+        summary: "Get current user's tenant",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": { description: "Tenant lookup result" },
+          "401": { description: "Unauthorized" },
+        },
+      },
+      patch: {
+        tags: ["Tenant"],
+        summary: "Update current user's tenant",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateTenantBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Tenant updated" },
+          "404": { description: "Tenant not found" },
+          "409": { description: "Subdomain conflict" },
+        },
+      },
+    },
+    "/me/tenant/deactivate": {
+      patch: {
+        tags: ["Tenant"],
+        summary: "Soft delete current tenant (is_active=false)",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": { description: "Tenant deactivated" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/tenants": {
+      post: {
+        tags: ["Tenant"],
+        summary: "Create tenant for current user",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateTenantBody" },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Tenant created" },
+          "409": { description: "Conflict (tenant exists or subdomain taken)" },
+        },
+      },
+    },
+    "/tenants/{id}": {
+      patch: {
+        tags: ["Tenant"],
+        summary: "Update current user's tenant by id",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateTenantBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Tenant updated" },
+          "403": { description: "Forbidden" },
+          "404": { description: "Tenant not found" },
+          "409": { description: "Subdomain conflict" },
+        },
+      },
+    },
+    "/tenants/{id}/deactivate": {
+      patch: {
+        tags: ["Tenant"],
+        summary: "Deactivate current user's tenant by id",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": { description: "Tenant deactivated" },
+          "403": { description: "Forbidden" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/tenants/upload-url": {
+      post: {
+        tags: ["Tenant"],
+        summary: "Upload logo/banner image to Cloudinary",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["type", "file"],
+                properties: {
+                  type: { type: "string", enum: ["logo", "banner"] },
+                  file: { type: "string", format: "binary" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Uploaded successfully" },
+          "400": { description: "Validation error" },
+        },
+      },
+    },
+    "/tenants/subdomain-available": {
+      get: {
+        tags: ["Tenant"],
+        summary: "Check generated subdomain availability from shop name",
+        parameters: [
+          {
+            name: "shop_name",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": { description: "Availability result" },
+          "400": { description: "Missing shop_name query" },
+        },
+      },
+    },
+    "/store/by-subdomain/{subdomain}": {
+      get: {
+        tags: ["Tenant"],
+        summary: "Get public store profile by subdomain",
+        parameters: [
+          {
+            name: "subdomain",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": { description: "Store profile found" },
+          "404": { description: "Store not found" },
+        },
+      },
+    },
+    "/store/by-host": {
+      get: {
+        tags: ["Tenant"],
+        summary: "Get public store profile by request host subdomain",
+        responses: {
+          "200": { description: "Store profile found" },
+          "400": { description: "No subdomain in host" },
+          "404": { description: "Store not found" },
         },
       },
     },
