@@ -1,16 +1,9 @@
 import { Resend } from "resend";
 import { buildInviteTemplate, buildResetPasswordTemplate, buildVerifyEmailTemplate } from "./templates";
+import { env } from "../env";
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`${name} is required.`);
-  }
-  return value;
-}
-
-const resendApiKey = requireEnv("RESEND_API_KEY");
-const resendFromEmail = requireEnv("RESEND_FROM_EMAIL");
+const resendApiKey = env.RESEND_API_KEY;
+const resendFromEmail = env.RESEND_FROM_EMAIL;
 const resend = new Resend(resendApiKey);
 
 async function sendEmail(input: {

@@ -1,13 +1,7 @@
 import { eq, or } from "drizzle-orm";
 import { db } from "../db";
 import { users } from "../db/schema";
-
-type SessionUser = {
-  id: string;
-  email: string;
-  name?: string | null;
-  emailVerified?: boolean;
-};
+import type { SessionUser } from "../types/auth";
 
 export async function getOrCreateProfile(authUser: SessionUser) {
   let profile = await db.query.users.findFirst({

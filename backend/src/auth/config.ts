@@ -5,9 +5,10 @@ import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { authAccounts, authSessions, authUsers, authVerifications, users } from "../db/schema";
 import { sendResetPasswordEmail, sendVerifyEmail } from "../resend";
+import { env } from "../env";
 
-const baseURL = process.env.BETTER_AUTH_URL ?? "http://localhost:8080";
-const defaultFrontendOrigin = process.env.PUBLIC_URL ?? "https://eavheang.me";
+const baseURL = env.BETTER_AUTH_URL;
+const defaultFrontendOrigin = env.PUBLIC_URL;
 
 function normalizeOrigin(value: string): string {
   try {
@@ -27,22 +28,14 @@ const trustedOrigins = Array.from(
       "http://localhost:3000",
       "http://localhost:8080",
       "http://localhost:5173",
-      ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").map((v) => v.trim()) ?? []),
+      ...(env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").map((v) => v.trim()) ?? []),
     ]
       .filter(Boolean)
       .map(normalizeOrigin)
   )
 );
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`${name} is required.`);
-  }
-  return value;
-}
-
-const authSecret = requireEnv("BETTER_AUTH_SECRET");
+const authSecret = env.BETTER_AUTH_SECRET;
 
 export const auth = betterAuth({
   baseURL,

@@ -1,11 +1,4 @@
-export type AuthActionTemplateInput = {
-  heading: string;
-  actionText: string;
-  actionUrl: string;
-  introText?: string;
-  /** Optional footer line (e.g. "If you didn't request this, you can ignore this email.") */
-  footerNote?: string;
-};
+import type { AuthActionTemplateInput } from "../../types/resend";
 
 const EMAIL_STYLES = {
   fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
