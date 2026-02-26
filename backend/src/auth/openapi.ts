@@ -15,6 +15,7 @@ export const authOpenApiSpec = {
     { name: "Auth", description: "Better Auth endpoints" },
     { name: "Profile", description: "Authenticated profile endpoint" },
     { name: "Tenant", description: "Store tenant management endpoints" },
+    { name: "Product", description: "Product and variant management endpoints" },
   ],
   components: {
     securitySchemes: {
@@ -156,6 +157,92 @@ export const authOpenApiSpec = {
           google_map_url: { type: "string" },
           logo_url: { type: "string" },
           banner_url: { type: "string" },
+        },
+      },
+      Product: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          tenantId: { type: "string", format: "uuid" },
+          name: { type: "string" },
+          description: { type: "string", nullable: true },
+          category: { type: "string", nullable: true },
+          basePriceUsd: { type: "string" },
+          basePriceKhr: { type: "string" },
+          trackInventory: { type: "boolean" },
+          stockQty: { type: "integer" },
+          lowStockThreshold: { type: "integer" },
+          hasVariants: { type: "boolean" },
+          imageUrls: { type: "array", items: { type: "string" } },
+          isActive: { type: "boolean" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+      ProductVariant: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          tenantId: { type: "string", format: "uuid" },
+          productId: { type: "string", format: "uuid" },
+          size: { type: "string", nullable: true },
+          color: { type: "string", nullable: true },
+          priceUsd: { type: "string", nullable: true },
+          priceKhr: { type: "string", nullable: true },
+          stockQty: { type: "integer" },
+          lowStockThreshold: { type: "integer" },
+          isActive: { type: "boolean" },
+        },
+      },
+      CreateProductBody: {
+        type: "object",
+        required: ["name"],
+        properties: {
+          name: { type: "string", example: "Hydrating Serum" },
+          description: { type: "string" },
+          category: { type: "string", example: "Skincare" },
+          base_price_usd: { type: "number", example: 12.5 },
+          base_price_khr: { type: "number", example: 50000 },
+          track_inventory: { type: "boolean", example: true },
+          stock_qty: { type: "integer", example: 10 },
+          low_stock_threshold: { type: "integer", example: 5 },
+          has_variants: { type: "boolean", example: false },
+          image_urls: { type: "array", items: { type: "string" } },
+        },
+      },
+      UpdateProductBody: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" },
+          category: { type: "string" },
+          base_price_usd: { type: "number" },
+          base_price_khr: { type: "number" },
+          track_inventory: { type: "boolean" },
+          stock_qty: { type: "integer" },
+          low_stock_threshold: { type: "integer" },
+          has_variants: { type: "boolean" },
+          image_urls: { type: "array", items: { type: "string" } },
+          is_active: { type: "boolean" },
+        },
+      },
+      CreateVariantBody: {
+        type: "object",
+        properties: {
+          size: { type: "string", example: "M" },
+          color: { type: "string", example: "Red" },
+          price_usd: { type: "number", example: 13.0 },
+          price_khr: { type: "number", example: 52000 },
+          stock_qty: { type: "integer", example: 8 },
+          low_stock_threshold: { type: "integer", example: 3 },
+          is_active: { type: "boolean", example: true },
+        },
+      },
+      UpdateStockBody: {
+        type: "object",
+        required: ["stock_qty"],
+        properties: {
+          stock_qty: { type: "integer", example: 25 },
         },
       },
     },
@@ -562,6 +649,270 @@ export const authOpenApiSpec = {
           "200": { description: "Store profile found" },
           "400": { description: "No subdomain in host" },
           "404": { description: "Store not found" },
+        },
+      },
+    },
+    "/products": {
+      post: {
+        tags: ["Product"],
+        summary: "Create product",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateProductBody" },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Product created" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+      get: {
+        tags: ["Product"],
+        summary: "List products with search and pagination",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "q", in: "query", required: false, schema: { type: "string" } },
+          { name: "page", in: "query", required: false, schema: { type: "integer", default: 1 } },
+          { name: "page_size", in: "query", required: false, schema: { type: "integer", default: 20 } },
+          { name: "include_inactive", in: "query", required: false, schema: { type: "boolean", default: false } },
+        ],
+        responses: {
+          "200": { description: "Products list" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/products/{id}": {
+      get: {
+        tags: ["Product"],
+        summary: "Get product detail by id",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Product detail" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Product or tenant not found" },
+        },
+      },
+      patch: {
+        tags: ["Product"],
+        summary: "Update product",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UpdateProductBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Product updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Product or tenant not found" },
+        },
+      },
+    },
+    "/products/{id}/deactivate": {
+      patch: {
+        tags: ["Product"],
+        summary: "Soft delete product (is_active=false)",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Product deactivated" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Product or tenant not found" },
+        },
+      },
+    },
+    "/products/{id}/stock": {
+      patch: {
+        tags: ["Product"],
+        summary: "Update product stock quantity",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UpdateStockBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Product stock updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Product or tenant not found" },
+        },
+      },
+    },
+    "/products/{id}/variants": {
+      post: {
+        tags: ["Product"],
+        summary: "Create variant under a product",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateVariantBody" },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Variant created" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Product or tenant not found" },
+          "409": { description: "Variant uniqueness conflict" },
+        },
+      },
+    },
+    "/variants/{id}": {
+      patch: {
+        tags: ["Product"],
+        summary: "Update variant",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateVariantBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Variant updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Variant or tenant not found" },
+          "409": { description: "Variant uniqueness conflict" },
+        },
+      },
+    },
+    "/variants/{id}/stock": {
+      patch: {
+        tags: ["Product"],
+        summary: "Update variant stock quantity",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UpdateStockBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Variant stock updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Variant or tenant not found" },
+        },
+      },
+    },
+    "/variants/{id}/deactivate": {
+      patch: {
+        tags: ["Product"],
+        summary: "Soft delete variant (is_active=false)",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Variant deactivated" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Variant or tenant not found" },
+        },
+      },
+    },
+    "/products/{id}/images": {
+      post: {
+        tags: ["Product"],
+        summary: "Upload product image to Cloudinary and append image_urls (max 3 images per product)",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["file"],
+                properties: {
+                  file: { type: "string", format: "binary" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Image uploaded and product updated" },
+          "400": { description: "Validation/upload error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Product or tenant not found" },
+        },
+      },
+    },
+    "/store/by-subdomain/{subdomain}/products": {
+      get: {
+        tags: ["Product"],
+        summary: "Public list of active products by store subdomain",
+        parameters: [
+          { name: "subdomain", in: "path", required: true, schema: { type: "string" } },
+          { name: "q", in: "query", required: false, schema: { type: "string" } },
+          { name: "page", in: "query", required: false, schema: { type: "integer", default: 1 } },
+          { name: "page_size", in: "query", required: false, schema: { type: "integer", default: 20 } },
+        ],
+        responses: {
+          "200": { description: "Store products list" },
+          "400": { description: "Missing/invalid subdomain" },
+          "404": { description: "Store not found" },
+        },
+      },
+    },
+    "/store/by-subdomain/{subdomain}/products/{id}": {
+      get: {
+        tags: ["Product"],
+        summary: "Public product detail by store subdomain and product id",
+        parameters: [
+          { name: "subdomain", in: "path", required: true, schema: { type: "string" } },
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Product detail" },
+          "400": { description: "Missing/invalid params" },
+          "404": { description: "Store or product not found" },
         },
       },
     },

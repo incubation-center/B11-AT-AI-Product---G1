@@ -123,3 +123,70 @@ export async function uploadStoreAssetToCloudinary(input: {
     bytes: typeof data?.bytes === "number" ? data.bytes : 0,
   };
 }
+
+export async function uploadProductImageToCloudinary(input: {
+  file: File;
+  tenantId: string;
+  productId: string;
+}): Promise<CloudinaryUploadResult> {
+  const { apiKey, apiSecret, cloudName } = parseCloudinaryUrl();
+
+  const contentType = input.file.type.trim().toLowerCase();
+  if (!imageMimeTypes.has(contentType)) {
+    throw new Error("Unsupported image type. Use jpeg, png, webp, gif, svg, or avif.");
+  }
+
+  const safeTenantId = sanitizePathPart(input.tenantId);
+  const safeProductId = sanitizePathPart(input.productId);
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = `tenants/${safeTenantId}/products/${safeProductId}`;
+  const publicId = `product-${Date.now()}-${randomUUID().slice(0, 8)}`;
+  const signature = signCloudinaryParams(
+    {
+      folder,
+      public_id: publicId,
+      timestamp,
+    },
+    apiSecret
+  );
+
+  const body = new FormData();
+  body.set("file", input.file);
+  body.set("api_key", apiKey);
+  body.set("timestamp", String(timestamp));
+  body.set("folder", folder);
+  body.set("public_id", publicId);
+  body.set("signature", signature);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: "POST",
+    body,
+  });
+
+  const text = await res.text();
+  let data: any = text;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = text;
+  }
+
+  if (!res.ok) {
+    const message = data?.error?.message ?? "Cloudinary upload failed.";
+    throw new Error(message);
+  }
+
+  const publicUrl = data?.secure_url;
+  if (typeof publicUrl !== "string" || !publicUrl) {
+    throw new Error("Cloudinary upload did not return secure_url.");
+  }
+
+  return {
+    publicUrl,
+    assetId: typeof data?.asset_id === "string" ? data.asset_id : "",
+    publicId: typeof data?.public_id === "string" ? data.public_id : "",
+    resourceType: typeof data?.resource_type === "string" ? data.resource_type : "image",
+    format: typeof data?.format === "string" ? data.format : "",
+    bytes: typeof data?.bytes === "number" ? data.bytes : 0,
+  };
+}

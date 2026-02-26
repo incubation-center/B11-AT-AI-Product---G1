@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { authRoutes } from "./routes/auth.routes";
 import { docsRoutes } from "./routes/docs.routes";
 import { meRoutes } from "./routes/me.routes";
+import { productRoutes } from "./routes/product.routes";
 import { rootRoutes } from "./routes/root.routes";
 import { tenantRoutes } from "./routes/tenant.routes";
 import { env } from "./env";
@@ -56,5 +57,6 @@ app.route("/", docsRoutes);
 app.route("/", authRoutes);
 app.route("/", meRoutes);
 app.route("/", tenantRoutes);
+app.route("/", productRoutes);
 
 export default app;
