@@ -5,6 +5,13 @@ import { uploadProductImageToCloudinary } from "../lib/cloudinary";
 import { requireBearer } from "../middleware/require-bearer";
 import { getMyTenant } from "../services/tenant.service";
 import {
+  answerProductDraft,
+  confirmProductDraft,
+  getProductDraftById,
+  listActiveProductDrafts,
+  startProductDraft,
+} from "../services/product-draft.service";
+import {
   appendProductImageUrl,
   createProduct,
   createVariant,
@@ -69,6 +76,123 @@ async function resolveTenant(c: Context): Promise<{ tenantId: string | null; res
 }
 
 export const productRoutes = new Hono();
+
+productRoutes.post("/products/ai/start", requireBearer, async (c) => {
+  const resolved = await resolveTenant(c);
+  if (resolved.response) return resolved.response;
+  const tenantId = resolved.tenantId!;
+
+  const body = await c.req.json().catch(() => null);
+  const name = cleanText(body?.name);
+  if (!name) return c.json({ message: "name is required" }, 400);
+
+  const basePriceUsd = toNumericString(body?.base_price_usd);
+  const basePriceKhr = toNumericString(body?.base_price_khr);
+  if (!basePriceUsd) return c.json({ message: "base_price_usd is required and must be a number" }, 400);
+  if (!basePriceKhr) return c.json({ message: "base_price_khr is required and must be a number" }, 400);
+
+  try {
+    const result = await startProductDraft(tenantId, {
+      lang: body?.lang,
+      name,
+      base_price_usd: basePriceUsd,
+      base_price_khr: basePriceKhr,
+      category: body?.category,
+    });
+
+    return c.json(
+      {
+        message: "Draft started",
+        draft: result.draft,
+        next_question: result.nextQuestion,
+      },
+      201
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to start AI draft";
+    return c.json({ message }, 400);
+  }
+});
+
+productRoutes.post("/products/ai/answer", requireBearer, async (c) => {
+  const resolved = await resolveTenant(c);
+  if (resolved.response) return resolved.response;
+  const tenantId = resolved.tenantId!;
+
+  const body = await c.req.json().catch(() => null);
+  const draftId = cleanText(body?.draft_id);
+  const answer = cleanText(body?.answer);
+  if (!draftId) return c.json({ message: "draft_id is required" }, 400);
+  if (!answer) return c.json({ message: "answer is required" }, 400);
+
+  try {
+    const result = await answerProductDraft(tenantId, {
+      draftId,
+      answer,
+    });
+
+    if (result.message) {
+      const status = result.message === "Draft not found" ? 404 : 400;
+      return c.json({ message: result.message }, status);
+    }
+
+    return c.json({
+      message: result.nextQuestion ? "Next question generated" : "Draft is ready to confirm",
+      draft: result.draft,
+      next_question: result.nextQuestion,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to answer AI draft";
+    return c.json({ message }, 400);
+  }
+});
+
+productRoutes.post("/products/ai/confirm", requireBearer, async (c) => {
+  const resolved = await resolveTenant(c);
+  if (resolved.response) return resolved.response;
+  const tenantId = resolved.tenantId!;
+
+  const body = await c.req.json().catch(() => null);
+  const draftId = cleanText(body?.draft_id);
+  if (!draftId) return c.json({ message: "draft_id is required" }, 400);
+
+  const result = await confirmProductDraft(tenantId, { draftId });
+  if (result.error) {
+    const status =
+      result.error === "Draft not found" ? 404 : result.error === "Unable to create product" ? 500 : 400;
+    return c.json({ message: result.error }, status);
+  }
+
+  return c.json({
+    message: "Draft confirmed and product created",
+    product: result.product,
+    variants: result.variants,
+    index: result.index,
+  });
+});
+
+productRoutes.get("/products/ai/drafts", requireBearer, async (c) => {
+  const resolved = await resolveTenant(c);
+  if (resolved.response) return resolved.response;
+  const tenantId = resolved.tenantId!;
+
+  const drafts = await listActiveProductDrafts(tenantId);
+  return c.json({ drafts });
+});
+
+productRoutes.get("/products/ai/drafts/:id", requireBearer, async (c) => {
+  const resolved = await resolveTenant(c);
+  if (resolved.response) return resolved.response;
+  const tenantId = resolved.tenantId!;
+
+  const draftId = cleanText(c.req.param("id"));
+  if (!draftId) return c.json({ message: "draft id is required" }, 400);
+
+  const draft = await getProductDraftById(tenantId, draftId);
+  if (!draft) return c.json({ message: "Draft not found" }, 404);
+
+  return c.json({ draft });
+});
 
 productRoutes.get("/store/by-subdomain/:subdomain/products", async (c) => {
   const subdomain = cleanSubdomain(c.req.param("subdomain"));

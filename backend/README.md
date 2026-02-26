@@ -87,6 +87,41 @@ Common endpoints used by frontend:
 | GET | `/store/by-subdomain/:subdomain` | Public storefront profile lookup | Public |
 | GET | `/store/by-host` | Public storefront profile lookup by host subdomain | Public |
 
+### Product + Variant endpoints
+
+#### Protected owner endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/products` | Create product | `Authorization: Bearer <token>` |
+| GET | `/products` | List owner products with search + pagination (`q`, `page`, `page_size`, `include_inactive`) | `Authorization: Bearer <token>` |
+| GET | `/products/:id` | Get owner product detail (with variants) | `Authorization: Bearer <token>` |
+| PATCH | `/products/:id` | Update product | `Authorization: Bearer <token>` |
+| PATCH | `/products/:id/deactivate` | Soft delete product (`is_active=false`) | `Authorization: Bearer <token>` |
+| PATCH | `/products/:id/stock` | Update product stock | `Authorization: Bearer <token>` |
+| POST | `/products/:id/variants` | Create variant under a product | `Authorization: Bearer <token>` |
+| PATCH | `/variants/:id` | Update variant | `Authorization: Bearer <token>` |
+| PATCH | `/variants/:id/stock` | Update variant stock | `Authorization: Bearer <token>` |
+| PATCH | `/variants/:id/deactivate` | Soft delete variant (`is_active=false`) | `Authorization: Bearer <token>` |
+| POST | `/products/:id/images` | Upload product image to Cloudinary and append to `image_urls[]` (max 3 images/product) | `Authorization: Bearer <token>` |
+
+#### Public buyer endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| GET | `/store/by-subdomain/:subdomain/products` | Public list of active products for a store | Public |
+| GET | `/store/by-subdomain/:subdomain/products/:id` | Public active product detail (active variants only) | Public |
+
+### AI Product Draft endpoints (one question at a time)
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/products/ai/start` | Start AI draft and get first question (`lang` default `km`) | `Authorization: Bearer <token>` |
+| POST | `/products/ai/answer` | Submit one answer and receive exactly one next question | `Authorization: Bearer <token>` |
+| POST | `/products/ai/confirm` | Confirm draft -> create product + variants, then trigger indexing | `Authorization: Bearer <token>` |
+| GET | `/products/ai/drafts` | List active drafts for resume | `Authorization: Bearer <token>` |
+| GET | `/products/ai/drafts/:id` | Get one draft for resume | `Authorization: Bearer <token>` |
+
 If the token is missing/invalid, response is:
 
 ```json
@@ -279,6 +314,27 @@ STORE_BASE_DOMAIN=lvh.me
 STORE_URL_PORT=3000
 ```
 
+### AI draft + Gemini env var
+
+```env
+GEMINI_API_KEY=...
+```
+
+### Product draft indexing migration
+
+New fields were added to `product_drafts`:
+
+- `index_status` (`pending` | `indexed`)
+- `index_error`
+- `index_attempts`
+- `indexed_at`
+
+Migration file:
+
+- `backend/supabase/migrations/0003_product_draft_index_tracking.sql`
+
+Apply migrations with your existing flow before using AI draft confirm in production.
+
 ### Local subdomain testing
 
 If tenant subdomain is `my-shop`, generated store URL will be:
@@ -305,6 +361,17 @@ Current implementation:
   - `entityType` (`tenant_profile` or `product`)
 
 If Pinecone env vars are missing, indexing is skipped (tenant API still succeeds).
+
+## Product indexing from AI draft confirm
+
+`POST /products/ai/confirm` now:
+
+1. Creates product + variants in Postgres.
+2. Triggers Pinecone indexing for that product.
+3. If indexing fails, product creation still succeeds and draft is marked as pending retry:
+   - `index_status = pending`
+   - `index_error = <reason>`
+   - `index_attempts` incremented
 
 ## Production subdomain setup (`eavheang.me`)
 

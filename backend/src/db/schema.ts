@@ -296,6 +296,10 @@ export const users = pgTable(
       questions: jsonb("questions"),
       answers: jsonb("answers"),
       finalPayload: jsonb("final_payload"),
+      indexStatus: text("index_status").notNull().default("pending"), // pending | indexed
+      indexError: text("index_error"),
+      indexAttempts: integer("index_attempts").notNull().default(0),
+      indexedAt: timestamp("indexed_at", { withTimezone: true }),
       createdAt: timestamp("created_at", { withTimezone: true })
         .notNull()
         .defaultNow(),
@@ -306,6 +310,7 @@ export const users = pgTable(
     (t) => ({
       tenantIdx: index("product_drafts_tenant_id_idx").on(t.tenantId),
       statusIdx: index("product_drafts_status_idx").on(t.status),
+      indexStatusIdx: index("product_drafts_index_status_idx").on(t.indexStatus),
     })
   );
   

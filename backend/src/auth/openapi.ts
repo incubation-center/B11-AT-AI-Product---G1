@@ -245,6 +245,32 @@ export const authOpenApiSpec = {
           stock_qty: { type: "integer", example: 25 },
         },
       },
+      AiDraftStartBody: {
+        type: "object",
+        required: ["name", "base_price_usd", "base_price_khr"],
+        properties: {
+          lang: { type: "string", enum: ["km", "en"], default: "km" },
+          name: { type: "string", example: "Vitamin C Serum" },
+          base_price_usd: { type: "number", example: 15.5 },
+          base_price_khr: { type: "number", example: 62000 },
+          category: { type: "string", example: "Skincare" },
+        },
+      },
+      AiDraftAnswerBody: {
+        type: "object",
+        required: ["draft_id", "answer"],
+        properties: {
+          draft_id: { type: "string", format: "uuid" },
+          answer: { type: "string", example: "អាចប្រើសម្រាប់ស្បែកខ្លាញ់ និងស្បែកស្ងួត" },
+        },
+      },
+      AiDraftConfirmBody: {
+        type: "object",
+        required: ["draft_id"],
+        properties: {
+          draft_id: { type: "string", format: "uuid" },
+        },
+      },
     },
   },
   paths: {
@@ -913,6 +939,96 @@ export const authOpenApiSpec = {
           "200": { description: "Product detail" },
           "400": { description: "Missing/invalid params" },
           "404": { description: "Store or product not found" },
+        },
+      },
+    },
+    "/products/ai/start": {
+      post: {
+        tags: ["Product"],
+        summary: "Start AI product draft and get one follow-up question",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/AiDraftStartBody" },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Draft started" },
+          "400": { description: "Validation or Gemini error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/products/ai/answer": {
+      post: {
+        tags: ["Product"],
+        summary: "Submit one answer and receive the next AI follow-up question",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/AiDraftAnswerBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Answer processed" },
+          "400": { description: "Validation or draft state error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Draft or tenant not found" },
+        },
+      },
+    },
+    "/products/ai/confirm": {
+      post: {
+        tags: ["Product"],
+        summary: "Confirm AI draft, create product + variants, and trigger indexing",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/AiDraftConfirmBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Product created from draft" },
+          "400": { description: "Draft not ready" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Draft or tenant not found" },
+        },
+      },
+    },
+    "/products/ai/drafts": {
+      get: {
+        tags: ["Product"],
+        summary: "List active AI drafts (resume support)",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": { description: "Draft list" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/products/ai/drafts/{id}": {
+      get: {
+        tags: ["Product"],
+        summary: "Get one AI draft by id (resume support)",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Draft detail" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Draft or tenant not found" },
         },
       },
     },

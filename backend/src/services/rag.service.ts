@@ -53,6 +53,19 @@ function productText(row: typeof products.$inferSelect): string {
     .join("\n");
 }
 
+function buildProductMetadata(row: typeof products.$inferSelect): PineconeMetadata {
+  return {
+    tenantId: row.tenantId,
+    entityType: "product",
+    entityId: row.id,
+    ...(row.category ? { productCategory: row.category } : {}),
+    isActive: row.isActive,
+    relationTenantNode: `tenant:${row.tenantId}`,
+    relationNode: `product:${row.id}`,
+    text: productText(row),
+  };
+}
+
 function shouldSkip(): boolean {
   return !env.PINECONE_API_KEY || !env.PINECONE_INDEX;
 }
@@ -97,21 +110,39 @@ export const ragService = {
       ...tenantProducts.map((product) => ({
         id: `tenant:${tenant.id}:product:${product.id}`,
         values: deterministicEmbed(productText(product), dimensions),
-        metadata: {
-          tenantId: tenant.id,
-          entityType: "product",
-          entityId: product.id,
-          productCategory: product.category ?? undefined,
-          isActive: product.isActive,
-          relationTenantNode: `tenant:${tenant.id}`,
-          relationNode: `product:${product.id}`,
-          text: productText(product),
-        } satisfies PineconeMetadata,
+        metadata: buildProductMetadata(product),
       })),
     ];
 
     if (vectors.length === 0) return;
     await index.upsert({ records: vectors });
+  },
+
+  async indexProduct(tenantId: string, productId: string): Promise<void> {
+    if (shouldSkip()) return;
+
+    const apiKey = env.PINECONE_API_KEY!;
+    const indexName = env.PINECONE_INDEX!;
+    const namespace = `${env.PINECONE_NAMESPACE_PREFIX}-${tenantId}`;
+    const dimensions = env.PINECONE_VECTOR_DIM;
+
+    const product = await db.query.products.findFirst({
+      where: eq(products.id, productId),
+    });
+    if (!product || product.tenantId !== tenantId) return;
+
+    const client = new Pinecone({ apiKey });
+    const index = client.index(indexName).namespace(namespace);
+
+    await index.upsert({
+      records: [
+        {
+          id: `tenant:${tenantId}:product:${product.id}`,
+          values: deterministicEmbed(productText(product), dimensions),
+          metadata: buildProductMetadata(product),
+        },
+      ],
+    });
   },
 
   async searchTenant(tenantId: string, query: string, topK = 10) {
