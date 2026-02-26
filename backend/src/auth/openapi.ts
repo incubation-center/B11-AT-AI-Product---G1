@@ -271,6 +271,53 @@ export const authOpenApiSpec = {
           draft_id: { type: "string", format: "uuid" },
         },
       },
+      CheckoutBody: {
+        type: "object",
+        required: ["customer_name", "address_text", "payment_method", "currency", "items"],
+        properties: {
+          customer_name: { type: "string", example: "Sok Dara" },
+          customer_phone: { type: "string", example: "012345678" },
+          address_text: { type: "string", example: "Phnom Penh" },
+          google_map_url: { type: "string" },
+          payment_method: { type: "string", enum: ["cod", "aba_transfer"] },
+          currency: { type: "string", enum: ["USD", "KHR"] },
+          notes: { type: "string" },
+          items: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              required: ["product_id", "qty"],
+              properties: {
+                product_id: { type: "string", format: "uuid" },
+                variant_id: { type: "string", format: "uuid", nullable: true },
+                qty: { type: "integer", minimum: 1 },
+              },
+            },
+          },
+        },
+      },
+      UpdateOrderStatusBody: {
+        type: "object",
+        required: ["status"],
+        properties: {
+          status: {
+            type: "string",
+            enum: ["pending", "confirmed", "delivering", "completed", "cancelled"],
+          },
+        },
+      },
+      UpdateOrderPaymentBody: {
+        type: "object",
+        required: ["payment_status"],
+        properties: {
+          payment_status: { type: "string", enum: ["unpaid", "paid", "refunded"] },
+          method: { type: "string", enum: ["cod", "aba_transfer"] },
+          amount: { type: "number" },
+          reference: { type: "string" },
+          paid_at: { type: "string", format: "date-time" },
+        },
+      },
     },
   },
   paths: {
@@ -1029,6 +1076,118 @@ export const authOpenApiSpec = {
           "200": { description: "Draft detail" },
           "401": { description: "Unauthorized" },
           "404": { description: "Draft or tenant not found" },
+        },
+      },
+    },
+    "/checkout": {
+      post: {
+        tags: ["Product"],
+        summary: "Public checkout endpoint (tenant resolved from request host subdomain)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CheckoutBody" },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Checkout created" },
+          "400": { description: "Validation error / stock error / missing subdomain" },
+          "404": { description: "Store not found" },
+        },
+      },
+    },
+    "/orders": {
+      get: {
+        tags: ["Product"],
+        summary: "Owner list orders with optional filters",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "status",
+            in: "query",
+            required: false,
+            schema: { type: "string", enum: ["pending", "confirmed", "delivering", "completed", "cancelled"] },
+          },
+          { name: "from", in: "query", required: false, schema: { type: "string", format: "date-time" } },
+          { name: "to", in: "query", required: false, schema: { type: "string", format: "date-time" } },
+        ],
+        responses: {
+          "200": { description: "Orders list" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/orders/{id}": {
+      get: {
+        tags: ["Product"],
+        summary: "Owner get order detail with items and payments",
+        security: [{ BearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: {
+          "200": { description: "Order detail" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Order or tenant not found" },
+        },
+      },
+    },
+    "/orders/{id}/status": {
+      patch: {
+        tags: ["Product"],
+        summary: "Owner update order status (with stock lifecycle handling)",
+        security: [{ BearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UpdateOrderStatusBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Order status updated" },
+          "400": { description: "Invalid transition / stock error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Order or tenant not found" },
+        },
+      },
+    },
+    "/orders/{id}/payment": {
+      patch: {
+        tags: ["Product"],
+        summary: "Owner update order payment status/method and log payment",
+        security: [{ BearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UpdateOrderPaymentBody" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Order payment updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Order or tenant not found" },
+        },
+      },
+    },
+    "/orders/{id}/cancel": {
+      post: {
+        tags: ["Product"],
+        summary: "Owner cancel order (restores stock if previously confirmed)",
+        security: [{ BearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: {
+          "200": { description: "Order cancelled" },
+          "400": { description: "Invalid transition" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Order or tenant not found" },
         },
       },
     },
