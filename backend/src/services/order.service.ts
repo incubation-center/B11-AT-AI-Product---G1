@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, ilike, lte } from "drizzle-orm";
 import { db } from "../db";
 import { orderItems, orders, payments, productVariants, products } from "../db/schema";
+import { applyOrderInventoryChange, notifyLowStockIfNeeded } from "./inventory.service";
 
 type CheckoutItemInput = {
   product_id: string;
@@ -145,46 +146,6 @@ async function buildCheckoutItemRows(tenantId: string, currency: "USD" | "KHR", 
   return rows;
 }
 
-type TxClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function applyStockChange(tx: TxClient, tenantId: string, orderId: string, change: "decrease" | "increase") {
-  const items = await tx.query.orderItems.findMany({
-    where: and(eq(orderItems.tenantId, tenantId), eq(orderItems.orderId, orderId)),
-  });
-
-  for (const item of items) {
-    const qty = item.qty;
-    if (item.variantId) {
-      const variant = await tx.query.productVariants.findFirst({
-        where: and(eq(productVariants.id, item.variantId), eq(productVariants.tenantId, tenantId)),
-      });
-      if (!variant) continue;
-
-      const nextStock = change === "decrease" ? variant.stockQty - qty : variant.stockQty + qty;
-      if (nextStock < 0) throw new Error("Insufficient variant stock");
-
-      await tx
-        .update(productVariants)
-        .set({ stockQty: nextStock })
-        .where(and(eq(productVariants.id, variant.id), eq(productVariants.tenantId, tenantId)));
-      continue;
-    }
-
-    const product = await tx.query.products.findFirst({
-      where: and(eq(products.id, item.productId), eq(products.tenantId, tenantId)),
-    });
-    if (!product || !product.trackInventory) continue;
-
-    const nextStock = change === "decrease" ? product.stockQty - qty : product.stockQty + qty;
-    if (nextStock < 0) throw new Error("Insufficient product stock");
-
-    await tx
-      .update(products)
-      .set({ stockQty: nextStock, updatedAt: new Date() })
-      .where(and(eq(products.id, product.id), eq(products.tenantId, tenantId)));
-  }
-}
-
 export async function createCheckoutOrder(tenantId: string, input: CheckoutInput) {
   if (!Array.isArray(input.items) || input.items.length === 0) {
     throw new Error("items is required");
@@ -299,7 +260,8 @@ export async function getOwnerOrderById(tenantId: string, orderId: string) {
 }
 
 export async function updateOwnerOrderStatus(tenantId: string, orderId: string, nextStatus: "pending" | "confirmed" | "delivering" | "completed" | "cancelled") {
-  return db.transaction(async (tx) => {
+  let inventoryTouched = false;
+  const updatedOrder = await db.transaction(async (tx) => {
     const order = await tx.query.orders.findFirst({
       where: and(eq(orders.id, orderId), eq(orders.tenantId, tenantId)),
     });
@@ -309,9 +271,11 @@ export async function updateOwnerOrderStatus(tenantId: string, orderId: string, 
     if (!allowed.includes(nextStatus)) throw new Error("Invalid order status transition");
 
     if (order.status !== "confirmed" && nextStatus === "confirmed") {
-      await applyStockChange(tx, tenantId, order.id, "decrease");
+      await applyOrderInventoryChange(tx, tenantId, order.id, "decrease");
+      inventoryTouched = true;
     } else if (order.status === "confirmed" && nextStatus === "cancelled") {
-      await applyStockChange(tx, tenantId, order.id, "increase");
+      await applyOrderInventoryChange(tx, tenantId, order.id, "increase");
+      inventoryTouched = true;
     }
 
     const updated = await tx
@@ -322,6 +286,14 @@ export async function updateOwnerOrderStatus(tenantId: string, orderId: string, 
 
     return updated[0] ?? null;
   });
+
+  if (inventoryTouched) {
+    void notifyLowStockIfNeeded(tenantId).catch((error) => {
+      console.error("[inventory] low stock notification failed", { tenantId, error });
+    });
+  }
+
+  return updatedOrder;
 }
 
 export async function updateOwnerOrderPayment(

@@ -99,6 +99,7 @@ Common endpoints used by frontend:
 | PATCH | `/products/:id` | Update product | `Authorization: Bearer <token>` |
 | PATCH | `/products/:id/deactivate` | Soft delete product (`is_active=false`) | `Authorization: Bearer <token>` |
 | PATCH | `/products/:id/stock` | Update product stock | `Authorization: Bearer <token>` |
+| GET | `/inventory/low-stock` | List low-stock products/variants (threshold-based) | `Authorization: Bearer <token>` |
 | POST | `/products/:id/variants` | Create variant under a product | `Authorization: Bearer <token>` |
 | PATCH | `/variants/:id` | Update variant | `Authorization: Bearer <token>` |
 | PATCH | `/variants/:id/stock` | Update variant stock | `Authorization: Bearer <token>` |

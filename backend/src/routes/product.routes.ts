@@ -3,6 +3,7 @@ import type { Context } from "hono";
 import { auth } from "../auth/config";
 import { uploadProductImageToCloudinary } from "../lib/cloudinary";
 import { requireBearer } from "../middleware/require-bearer";
+import { listLowStockItems } from "../services/inventory.service";
 import { getMyTenant } from "../services/tenant.service";
 import {
   answerProductDraft,
@@ -76,6 +77,15 @@ async function resolveTenant(c: Context): Promise<{ tenantId: string | null; res
 }
 
 export const productRoutes = new Hono();
+
+productRoutes.get("/inventory/low-stock", requireBearer, async (c) => {
+  const resolved = await resolveTenant(c);
+  if (resolved.response) return resolved.response;
+  const tenantId = resolved.tenantId!;
+
+  const items = await listLowStockItems(tenantId);
+  return c.json({ items, total: items.length });
+});
 
 productRoutes.post("/products/ai/start", requireBearer, async (c) => {
   const resolved = await resolveTenant(c);

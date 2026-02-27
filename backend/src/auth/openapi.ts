@@ -991,6 +991,18 @@ export const authOpenApiSpec = {
         },
       },
     },
+    "/inventory/low-stock": {
+      get: {
+        tags: ["Product"],
+        summary: "List low stock products and variants for current owner tenant",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": { description: "Low stock items list" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
     "/products/ai/start": {
       post: {
         tags: ["AI Product"],
