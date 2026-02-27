@@ -16,6 +16,8 @@ export const authOpenApiSpec = {
     { name: "Profile", description: "Authenticated profile endpoint" },
     { name: "Tenant", description: "Store tenant management endpoints" },
     { name: "Product", description: "Product and variant management endpoints" },
+    { name: "AI Product", description: "AI-assisted product draft endpoints" },
+    { name: "Order & Checkout", description: "Checkout and order management endpoints" },
   ],
   components: {
     securitySchemes: {
@@ -991,7 +993,7 @@ export const authOpenApiSpec = {
     },
     "/products/ai/start": {
       post: {
-        tags: ["Product"],
+        tags: ["AI Product"],
         summary: "Start AI product draft and get one follow-up question",
         security: [{ BearerAuth: [] }],
         requestBody: {
@@ -1004,7 +1006,7 @@ export const authOpenApiSpec = {
         },
         responses: {
           "201": { description: "Draft started" },
-          "400": { description: "Validation or Gemini error" },
+          "400": { description: "Validation or OpenAI error" },
           "401": { description: "Unauthorized" },
           "404": { description: "Tenant not found" },
         },
@@ -1012,7 +1014,7 @@ export const authOpenApiSpec = {
     },
     "/products/ai/answer": {
       post: {
-        tags: ["Product"],
+        tags: ["AI Product"],
         summary: "Submit one answer and receive the next AI follow-up question",
         security: [{ BearerAuth: [] }],
         requestBody: {
@@ -1033,7 +1035,7 @@ export const authOpenApiSpec = {
     },
     "/products/ai/confirm": {
       post: {
-        tags: ["Product"],
+        tags: ["AI Product"],
         summary: "Confirm AI draft, create product + variants, and trigger indexing",
         security: [{ BearerAuth: [] }],
         requestBody: {
@@ -1054,7 +1056,7 @@ export const authOpenApiSpec = {
     },
     "/products/ai/drafts": {
       get: {
-        tags: ["Product"],
+        tags: ["AI Product"],
         summary: "List active AI drafts (resume support)",
         security: [{ BearerAuth: [] }],
         responses: {
@@ -1066,7 +1068,7 @@ export const authOpenApiSpec = {
     },
     "/products/ai/drafts/{id}": {
       get: {
-        tags: ["Product"],
+        tags: ["AI Product"],
         summary: "Get one AI draft by id (resume support)",
         security: [{ BearerAuth: [] }],
         parameters: [
@@ -1081,7 +1083,7 @@ export const authOpenApiSpec = {
     },
     "/checkout": {
       post: {
-        tags: ["Product"],
+        tags: ["Order & Checkout"],
         summary: "Public checkout endpoint (tenant resolved from request host subdomain)",
         requestBody: {
           required: true,
@@ -1100,7 +1102,7 @@ export const authOpenApiSpec = {
     },
     "/orders": {
       get: {
-        tags: ["Product"],
+        tags: ["Order & Checkout"],
         summary: "Owner list orders with optional filters",
         security: [{ BearerAuth: [] }],
         parameters: [
@@ -1122,7 +1124,7 @@ export const authOpenApiSpec = {
     },
     "/orders/{id}": {
       get: {
-        tags: ["Product"],
+        tags: ["Order & Checkout"],
         summary: "Owner get order detail with items and payments",
         security: [{ BearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -1135,7 +1137,7 @@ export const authOpenApiSpec = {
     },
     "/orders/{id}/status": {
       patch: {
-        tags: ["Product"],
+        tags: ["Order & Checkout"],
         summary: "Owner update order status (with stock lifecycle handling)",
         security: [{ BearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -1157,7 +1159,7 @@ export const authOpenApiSpec = {
     },
     "/orders/{id}/payment": {
       patch: {
-        tags: ["Product"],
+        tags: ["Order & Checkout"],
         summary: "Owner update order payment status/method and log payment",
         security: [{ BearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -1179,7 +1181,7 @@ export const authOpenApiSpec = {
     },
     "/orders/{id}/cancel": {
       post: {
-        tags: ["Product"],
+        tags: ["Order & Checkout"],
         summary: "Owner cancel order (restores stock if previously confirmed)",
         security: [{ BearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],

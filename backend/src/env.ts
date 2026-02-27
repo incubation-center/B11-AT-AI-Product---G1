@@ -22,7 +22,8 @@ const envSchema = z.object({
   SUPABASE_STORAGE_BUCKET: z.string().default("store-assets"),
 
   CLOUDINARY_URL: z.string().optional(),
-  GEMINI_API_KEY: z.string().min(1).optional(),
+  OPEN_AI_API: z.string().min(1).optional(),
+  OPEN_AI_MODEL: z.string().min(1).default("gpt-4o-mini"),
 
   PINECONE_API_KEY: z.string().optional(),
   PINECONE_INDEX: z.string().optional(),

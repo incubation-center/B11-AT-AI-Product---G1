@@ -37,6 +37,9 @@ type DraftFinalPayload = {
   variants?: DraftVariant[];
 };
 
+const MAX_FOLLOW_UP_QUESTIONS = 5;
+type ProductDomain = "electronics" | "beauty" | "fashion" | "food" | "home" | "general";
+
 function normalizeLang(input: unknown): DraftLanguage {
   return input === "en" ? "en" : "km";
 }
@@ -99,12 +102,74 @@ function readAnswers(value: unknown): DraftAnswer[] {
   return Array.isArray(value) ? (value as DraftAnswer[]) : [];
 }
 
+function detectProductDomain(initialInput: unknown): ProductDomain {
+  const data = (initialInput ?? {}) as Record<string, unknown>;
+  const text = `${asString(data.category)} ${asString(data.name)}`.toLowerCase();
+
+  if (/(phone|smartphone|laptop|tablet|earbud|headphone|camera|monitor|charger|power bank|ssd|ram|keyboard|mouse|tv|router|electronic|electronics)/.test(text)) {
+    return "electronics";
+  }
+  if (/(skincare|serum|cream|cleanser|toner|sunscreen|makeup|lipstick|beauty|cosmetic|fragrance)/.test(text)) {
+    return "beauty";
+  }
+  if (/(shirt|t-shirt|dress|pants|jeans|shoe|sneaker|fashion|clothing|hoodie|jacket|bag)/.test(text)) {
+    return "fashion";
+  }
+  if (/(food|snack|drink|beverage|coffee|tea|sauce|noodle|rice|cookie|chocolate)/.test(text)) {
+    return "food";
+  }
+  if (/(furniture|sofa|chair|table|lamp|kitchen|home|mattress|blanket|pillow|decor)/.test(text)) {
+    return "home";
+  }
+  return "general";
+}
+
+function getDomainGuidance(domain: ProductDomain): { focus: string; variantHints: string } {
+  switch (domain) {
+    case "electronics":
+      return {
+        focus: "Focus on technical specs, compatibility, performance, warranty, and safety.",
+        variantHints: "Typical variants: storage/RAM tier, color, region plug type, bundle options.",
+      };
+    case "beauty":
+      return {
+        focus: "Focus on skin/hair concerns, ingredients, usage routine, safety notes, and expected results.",
+        variantHints: "Typical variants: size (ml/g), formula type, scent, shade/tone.",
+      };
+    case "fashion":
+      return {
+        focus: "Focus on fit, material, comfort, style use-case, and care instructions.",
+        variantHints: "Typical variants: size, color, fit/cut, material option.",
+      };
+    case "food":
+      return {
+        focus: "Focus on flavor profile, ingredients/allergens, serving method, and storage.",
+        variantHints: "Typical variants: pack size, flavor, spicy level, quantity bundle.",
+      };
+    case "home":
+      return {
+        focus: "Focus on dimensions, material, durability, installation/setup, and maintenance.",
+        variantHints: "Typical variants: size, color/finish, material grade, set quantity.",
+      };
+    default:
+      return {
+        focus: "Focus on core value, usage, suitability, and key distinguishing specs.",
+        variantHints: "Typical variants: size, color, package tier, or feature tier.",
+      };
+  }
+}
+
 function buildDraftPrompt(input: {
   preferredLang: DraftLanguage;
   initialInput: unknown;
   questions: DraftQuestion[];
   answers: DraftAnswer[];
+  maxFollowUpQuestions: number;
+  forceFinalize: boolean;
 }) {
+  const domain = detectProductDomain(input.initialInput);
+  const domainGuidance = getDomainGuidance(domain);
+
   return `
 You are an expert shop assistant trainer for a Cambodian storefront.
 You must ask exactly ONE follow-up question at a time unless information is sufficient.
@@ -141,37 +206,57 @@ Rules:
 - final_payload must be complete only when is_ready is true.
 - Keep faqs practical for customer support.
 - Include variant list only if relevant.
+- Ask high-value questions only, prioritizing missing details that most improve product knowledge.
+- Target coverage quality across: product benefit, usage, suitability, key ingredients/specs, and variant/stock differences.
+- Product domain is "${domain}". Ask ONLY domain-relevant questions.
+- Domain focus: ${domainGuidance.focus}
+- Variant guidance: ${domainGuidance.variantHints}
+- Prefer asking one question that combines missing variant details in one shot when possible.
+- Do not ask more than max_follow_up_questions total.
+- If questions_asked_so_far >= max_follow_up_questions or force_finalize is true:
+  - Set "is_ready": true
+  - Set "next_question": null
+  - Return the best complete "final_payload" possible from available context and reasonable assumptions.
 
 Context:
 preferredLang: ${input.preferredLang}
 initialInput: ${JSON.stringify(input.initialInput)}
 questions: ${JSON.stringify(input.questions)}
 answers: ${JSON.stringify(input.answers)}
+questions_asked_so_far: ${input.questions.length}
+max_follow_up_questions: ${input.maxFollowUpQuestions}
+force_finalize: ${input.forceFinalize}
 `;
 }
 
-async function askGeminiDraftQuestion(input: {
+async function askOpenAIDraftQuestion(input: {
   preferredLang: DraftLanguage;
   initialInput: unknown;
   questions: DraftQuestion[];
   answers: DraftAnswer[];
+  maxFollowUpQuestions: number;
+  forceFinalize: boolean;
 }) {
-  if (!env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is required for AI draft flow.");
+  if (!env.OPEN_AI_API) {
+    throw new Error("OPEN_AI_API is required for AI draft flow.");
   }
 
   const prompt = buildDraftPrompt(input);
-  const model = "gemini-2.0-flash";
+  const model = env.OPEN_AI_MODEL;
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
+    "https://api.openai.com/v1/chat/completions",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.OPEN_AI_API}`,
+      },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
+        model,
+        messages: [{ role: "user", content: prompt }],
+        response_format: {
+          type: "json_object",
         },
       }),
     }
@@ -179,19 +264,19 @@ async function askGeminiDraftQuestion(input: {
 
   const raw = await response.text();
   if (!response.ok) {
-    throw new Error(`Gemini request failed: ${raw}`);
+    throw new Error(`OpenAI request failed: ${raw}`);
   }
 
   let parsed: any;
   try {
     const envelope = JSON.parse(raw);
-    const text = envelope?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = envelope?.choices?.[0]?.message?.content;
     if (typeof text !== "string" || !text.trim()) {
-      throw new Error("No text response from Gemini.");
+      throw new Error("No text response from OpenAI.");
     }
     parsed = parseJsonText(text);
   } catch (error) {
-    throw new Error(`Unable to parse Gemini response: ${error instanceof Error ? error.message : "unknown error"}`);
+    throw new Error(`Unable to parse OpenAI response: ${error instanceof Error ? error.message : "unknown error"}`);
   }
 
   const detectedLanguage = normalizeLang(parsed?.detected_language ?? input.preferredLang);
@@ -248,11 +333,13 @@ export async function startProductDraft(
     .returning();
 
   const draft = inserted[0];
-  const ai = await askGeminiDraftQuestion({
+  const ai = await askOpenAIDraftQuestion({
     preferredLang: lang,
     initialInput: draft.initialInput,
     questions: [],
     answers: [],
+    maxFollowUpQuestions: MAX_FOLLOW_UP_QUESTIONS,
+    forceFinalize: false,
   });
 
   const now = new Date().toISOString();
@@ -300,15 +387,19 @@ export async function answerProductDraft(tenantId: string, input: { draftId: str
   ];
 
   const preferredLang = answers[answers.length - 1]?.lang ?? normalizeLang(draft.lang);
-  const ai = await askGeminiDraftQuestion({
+  const forceFinalize = questions.length >= MAX_FOLLOW_UP_QUESTIONS;
+  const ai = await askOpenAIDraftQuestion({
     preferredLang,
     initialInput: draft.initialInput,
     questions,
     answers,
+    maxFollowUpQuestions: MAX_FOLLOW_UP_QUESTIONS,
+    forceFinalize,
   });
 
   const canFinalize = ai.isReady && isValidFinalPayload(ai.finalPayload);
-  const nextQuestions = canFinalize
+  const canAskMore = questions.length < MAX_FOLLOW_UP_QUESTIONS;
+  const nextQuestions = canFinalize || !canAskMore
     ? questions
     : [
         ...questions,
@@ -334,8 +425,8 @@ export async function answerProductDraft(tenantId: string, input: { draftId: str
 
   return {
     draft: updated[0] ?? null,
-    nextQuestion: canFinalize ? null : nextQuestions[nextQuestions.length - 1]?.question ?? null,
-    message: null,
+    nextQuestion: canFinalize || !canAskMore ? null : nextQuestions[nextQuestions.length - 1]?.question ?? null,
+    message: canFinalize || canAskMore ? null : "Reached max 5 follow-up questions. Please confirm the draft.",
   };
 }
 

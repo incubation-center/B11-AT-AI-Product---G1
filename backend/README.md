@@ -122,6 +122,8 @@ Common endpoints used by frontend:
 | GET | `/products/ai/drafts` | List active drafts for resume | `Authorization: Bearer <token>` |
 | GET | `/products/ai/drafts/:id` | Get one draft for resume | `Authorization: Bearer <token>` |
 
+AI follow-up questions are capped at 5 maximum per draft. The assistant prioritizes high-impact product-knowledge questions, adapts questions by product domain (for example electronics vs beauty), and then prepares the best final draft for confirmation.
+
 If the token is missing/invalid, response is:
 
 ```json
@@ -314,10 +316,11 @@ STORE_BASE_DOMAIN=lvh.me
 STORE_URL_PORT=3000
 ```
 
-### AI draft + Gemini env var
+### AI draft + OpenAI env vars
 
 ```env
-GEMINI_API_KEY=...
+OPEN_AI_API=...
+OPEN_AI_MODEL=gpt-4o-mini
 ```
 
 ### Product draft indexing migration
