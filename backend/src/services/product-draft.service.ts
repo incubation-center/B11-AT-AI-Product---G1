@@ -1,6 +1,6 @@
 import { and, desc, eq, or } from "drizzle-orm";
 import { db } from "../db";
-import { productDrafts } from "../db/schema";
+import { productDrafts, productKnowledge, products, productVariants } from "../db/schema";
 import { env } from "../env";
 import { ragService } from "./rag.service";
 import { createProduct, createVariant } from "./product.service";
@@ -305,23 +305,145 @@ function composeProductDescription(finalPayload: DraftFinalPayload): string {
     .join("\n\n");
 }
 
+async function upsertProductKnowledgeFromDraft(
+  tenantId: string,
+  productId: string,
+  lang: DraftLanguage,
+  draft: typeof productDrafts.$inferSelect,
+  finalPayload: DraftFinalPayload
+) {
+  const faqs = finalPayload.faqs.map((faq) => asString(faq)).filter(Boolean);
+  const questions = readQuestions(draft.questions);
+  const answers = readAnswers(draft.answers);
+
+  const payload =
+    lang === "km"
+      ? {
+          overviewKm: asString(finalPayload.description),
+          usageKm: asString(finalPayload.usage),
+          suitabilityKm: asString(finalPayload.suitability),
+          keySpecsKm: asString(finalPayload.key_specs_or_ingredients),
+          faqsKm: faqs,
+        }
+      : {
+          overviewEn: asString(finalPayload.description),
+          usageEn: asString(finalPayload.usage),
+          suitabilityEn: asString(finalPayload.suitability),
+          keySpecsEn: asString(finalPayload.key_specs_or_ingredients),
+          faqsEn: faqs,
+        };
+
+  const existing = await db.query.productKnowledge.findFirst({
+    where: and(eq(productKnowledge.tenantId, tenantId), eq(productKnowledge.productId, productId)),
+    columns: { id: true },
+  });
+
+  const patch = {
+    tenantId,
+    productId,
+    ...payload,
+    qaHistory: {
+      questions,
+      answers,
+    },
+    readinessStatus: "ready",
+    missingFields: null,
+    updatedAt: new Date(),
+  };
+
+  if (!existing) {
+    await db.insert(productKnowledge).values({
+      ...patch,
+      createdAt: new Date(),
+    });
+    return;
+  }
+
+  await db
+    .update(productKnowledge)
+    .set(patch)
+    .where(and(eq(productKnowledge.id, existing.id), eq(productKnowledge.tenantId, tenantId)));
+}
+
 export async function startProductDraft(
   tenantId: string,
-  input: { lang?: unknown; name: string; base_price_usd: unknown; base_price_khr: unknown; category?: unknown }
+  input: {
+    lang?: unknown;
+    product_id?: unknown;
+    name?: string;
+    description?: unknown;
+    base_price_usd?: unknown;
+    base_price_khr?: unknown;
+    category?: unknown;
+    has_variants?: unknown;
+    track_inventory?: unknown;
+    stock_qty?: unknown;
+    low_stock_threshold?: unknown;
+    variants?: unknown;
+  }
 ) {
   const lang = normalizeLang(input.lang);
+  const linkedProductId = asString(input.product_id);
+
+  let normalizedInitialInput: Record<string, unknown>;
+  if (linkedProductId) {
+    const product = await db.query.products.findFirst({
+      where: and(eq(products.id, linkedProductId), eq(products.tenantId, tenantId)),
+    });
+    if (!product) throw new Error("Product not found");
+
+    const variants = await db.query.productVariants.findMany({
+      where: and(eq(productVariants.productId, product.id), eq(productVariants.tenantId, tenantId)),
+    });
+
+    normalizedInitialInput = {
+      product_id: product.id,
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      base_price_usd: asNumericString(product.basePriceUsd, "0"),
+      base_price_khr: asNumericString(product.basePriceKhr, "0"),
+      track_inventory: product.trackInventory,
+      stock_qty: product.stockQty,
+      low_stock_threshold: product.lowStockThreshold,
+      has_variants: product.hasVariants,
+      variants: variants.map((variant) => ({
+        id: variant.id,
+        size: variant.size,
+        color: variant.color,
+        price_usd: variant.priceUsd,
+        price_khr: variant.priceKhr,
+        stock_qty: variant.stockQty,
+        low_stock_threshold: variant.lowStockThreshold,
+        is_active: variant.isActive,
+      })),
+    };
+  } else {
+    const name = asString(input.name);
+    if (!name) {
+      throw new Error("name is required");
+    }
+    normalizedInitialInput = {
+      name,
+      description: asString(input.description) || null,
+      base_price_usd: asNumericString(input.base_price_usd, "0"),
+      base_price_khr: asNumericString(input.base_price_khr, "0"),
+      category: asString(input.category) || null,
+      has_variants: Boolean(input.has_variants),
+      track_inventory: typeof input.track_inventory === "boolean" ? input.track_inventory : true,
+      stock_qty: asInteger(input.stock_qty, 0),
+      low_stock_threshold: asInteger(input.low_stock_threshold, 5),
+      variants: Array.isArray(input.variants) ? input.variants : [],
+    };
+  }
+
   const inserted = await db
     .insert(productDrafts)
     .values({
       tenantId,
       status: "questioning",
       lang,
-      initialInput: {
-        name: input.name.trim(),
-        base_price_usd: asNumericString(input.base_price_usd, "0"),
-        base_price_khr: asNumericString(input.base_price_khr, "0"),
-        category: asString(input.category) || null,
-      },
+      initialInput: normalizedInitialInput,
       questions: [],
       answers: [],
       finalPayload: null,
@@ -441,6 +563,58 @@ export async function confirmProductDraft(tenantId: string, input: { draftId: st
 
   const initial = (draft.initialInput ?? {}) as Record<string, unknown>;
   const finalPayload = draft.finalPayload as DraftFinalPayload;
+  const knowledgeLang = normalizeLang(draft.lang);
+  const linkedProductId = asString(initial.product_id);
+
+  if (linkedProductId) {
+    const existingProduct = await db.query.products.findFirst({
+      where: and(eq(products.id, linkedProductId), eq(products.tenantId, tenantId)),
+    });
+    if (!existingProduct) return { error: "Product not found" as const };
+
+    await upsertProductKnowledgeFromDraft(tenantId, existingProduct.id, knowledgeLang, draft, finalPayload);
+
+    const nextAttempts = (draft.indexAttempts ?? 0) + 1;
+    let indexStatus: "indexed" | "pending" = "indexed";
+    let indexError: string | null = null;
+    let indexedAt: Date | null = new Date();
+
+    try {
+      await ragService.reindexProduct(tenantId, existingProduct.id);
+    } catch (error) {
+      indexStatus = "pending";
+      indexedAt = null;
+      indexError = error instanceof Error ? error.message.slice(0, 1000) : "Unknown indexing error";
+    }
+
+    await db
+      .update(productDrafts)
+      .set({
+        status: "confirmed",
+        finalPayload: {
+          ...finalPayload,
+          product_id: existingProduct.id,
+        },
+        indexStatus,
+        indexError,
+        indexAttempts: nextAttempts,
+        indexedAt,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(productDrafts.id, draft.id), eq(productDrafts.tenantId, tenantId)));
+
+    return {
+      error: null,
+      product: existingProduct,
+      variants: [],
+      index: {
+        status: indexStatus,
+        attempts: nextAttempts,
+        error: indexError,
+      },
+    };
+  }
+
   const variants = Array.isArray(finalPayload.variants) ? finalPayload.variants : [];
 
   const product = await createProduct(tenantId, {
@@ -453,6 +627,8 @@ export async function confirmProductDraft(tenantId: string, input: { draftId: st
   });
 
   if (!product) return { error: "Unable to create product" as const };
+
+  await upsertProductKnowledgeFromDraft(tenantId, product.id, knowledgeLang, draft, finalPayload);
 
   const createdVariants: any[] = [];
   const dedupe = new Set<string>();

@@ -76,6 +76,26 @@ async function resolveTenant(c: Context): Promise<{ tenantId: string | null; res
   return { tenantId: tenant.id, response: null };
 }
 
+function triggerAutoProductAiAnalysis(tenantId: string, productId: string, lang?: unknown) {
+  void (async () => {
+    try {
+      const draftResult = await startProductDraft(tenantId, {
+        lang,
+        product_id: productId,
+      });
+      if (draftResult.draft?.id && !draftResult.nextQuestion) {
+        await confirmProductDraft(tenantId, { draftId: draftResult.draft.id });
+      }
+    } catch (error) {
+      console.error("[ai] auto product analysis failed", {
+        tenantId,
+        productId,
+        error,
+      });
+    }
+  })();
+}
+
 export const productRoutes = new Hono();
 
 productRoutes.get("/inventory/low-stock", requireBearer, async (c) => {
@@ -93,21 +113,31 @@ productRoutes.post("/products/ai/start", requireBearer, async (c) => {
   const tenantId = resolved.tenantId!;
 
   const body = await c.req.json().catch(() => null);
+  const productId = cleanText(body?.product_id);
   const name = cleanText(body?.name);
-  if (!name) return c.json({ message: "name is required" }, 400);
-
   const basePriceUsd = toNumericString(body?.base_price_usd);
   const basePriceKhr = toNumericString(body?.base_price_khr);
-  if (!basePriceUsd) return c.json({ message: "base_price_usd is required and must be a number" }, 400);
-  if (!basePriceKhr) return c.json({ message: "base_price_khr is required and must be a number" }, 400);
+
+  if (!productId) {
+    if (!name) return c.json({ message: "name is required" }, 400);
+    if (!basePriceUsd) return c.json({ message: "base_price_usd is required and must be a number" }, 400);
+    if (!basePriceKhr) return c.json({ message: "base_price_khr is required and must be a number" }, 400);
+  }
 
   try {
     const result = await startProductDraft(tenantId, {
       lang: body?.lang,
-      name,
+      product_id: productId,
+      name: name ?? undefined,
+      description: body?.description,
       base_price_usd: basePriceUsd,
       base_price_khr: basePriceKhr,
       category: body?.category,
+      has_variants: body?.has_variants,
+      track_inventory: body?.track_inventory,
+      stock_qty: body?.stock_qty,
+      low_stock_threshold: body?.low_stock_threshold,
+      variants: body?.variants,
     });
 
     return c.json(
@@ -292,7 +322,11 @@ productRoutes.post("/products", requireBearer, async (c) => {
     imageUrls,
   });
 
-  return c.json({ message: "Product created", product }, 201);
+  if (product?.id) {
+    triggerAutoProductAiAnalysis(tenantId, product.id, body?.lang);
+  }
+
+  return c.json({ message: "Product created. AI analysis started.", product }, 201);
 });
 
 productRoutes.get("/products", requireBearer, async (c) => {
@@ -375,6 +409,7 @@ productRoutes.patch("/products/:id", requireBearer, async (c) => {
   });
 
   if (!product) return c.json({ message: "Product not found" }, 404);
+  triggerAutoProductAiAnalysis(tenantId, product.id, body?.lang);
   return c.json({ message: "Product updated", product });
 });
 

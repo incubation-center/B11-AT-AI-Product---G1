@@ -17,6 +17,7 @@ export const authOpenApiSpec = {
     { name: "Tenant", description: "Store tenant management endpoints" },
     { name: "Product", description: "Product and variant management endpoints" },
     { name: "AI Product", description: "AI-assisted product draft endpoints" },
+    { name: "Assistant", description: "Buyer assistant endpoints" },
     { name: "Order & Checkout", description: "Checkout and order management endpoints" },
     { name: "RAG", description: "Manual RAG indexing management endpoints" },
   ],
@@ -250,13 +251,21 @@ export const authOpenApiSpec = {
       },
       AiDraftStartBody: {
         type: "object",
-        required: ["name", "base_price_usd", "base_price_khr"],
+        description:
+          "Either provide product_id to load existing product context, or provide manual draft seed fields.",
         properties: {
           lang: { type: "string", enum: ["km", "en"], default: "km" },
+          product_id: { type: "string", format: "uuid" },
           name: { type: "string", example: "Vitamin C Serum" },
+          description: { type: "string" },
           base_price_usd: { type: "number", example: 15.5 },
           base_price_khr: { type: "number", example: 62000 },
           category: { type: "string", example: "Skincare" },
+          track_inventory: { type: "boolean" },
+          stock_qty: { type: "integer" },
+          low_stock_threshold: { type: "integer" },
+          has_variants: { type: "boolean" },
+          variants: { type: "array", items: { type: "object" } },
         },
       },
       AiDraftAnswerBody: {
@@ -1129,6 +1138,35 @@ export const authOpenApiSpec = {
           "200": { description: "Draft detail" },
           "401": { description: "Unauthorized" },
           "404": { description: "Draft or tenant not found" },
+        },
+      },
+    },
+    "/assistant/ask": {
+      post: {
+        tags: ["Assistant"],
+        summary: "Buyer ask shop assistant (RAG + live inventory fallback)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["question"],
+                properties: {
+                  question: { type: "string" },
+                  subdomain: { type: "string", description: "Optional when host subdomain is present" },
+                  language: { type: "string", enum: ["km", "en"] },
+                  session_id: { type: "string", format: "uuid" },
+                  anonymous_id: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Assistant answer generated" },
+          "400": { description: "Validation or assistant processing error" },
+          "404": { description: "Store not found" },
         },
       },
     },

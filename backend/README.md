@@ -132,6 +132,15 @@ Common endpoints used by frontend:
 | GET | `/products/ai/drafts/:id` | Get one draft for resume | `Authorization: Bearer <token>` |
 
 AI follow-up questions are capped at 5 maximum per draft. The assistant prioritizes high-impact product-knowledge questions, adapts questions by product domain (for example electronics vs beauty), and then prepares the best final draft for confirmation.
+`/products/ai/start` supports `product_id` so AI can load full product + variants context from DB.
+
+`POST /products` and `PATCH /products/:id` now auto-start AI analysis in background.
+
+### Buyer assistant endpoint
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/assistant/ask` | Buyer asks shop assistant (RAG + live Supabase facts). Provide `subdomain` in body or use subdomain host. | Public |
 
 If the token is missing/invalid, response is:
 

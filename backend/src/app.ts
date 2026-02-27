@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { assistantRoutes } from "./routes/assistant.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { docsRoutes } from "./routes/docs.routes";
 import { meRoutes } from "./routes/me.routes";
@@ -58,6 +59,7 @@ app.route("/", rootRoutes);
 app.route("/", docsRoutes);
 app.route("/", authRoutes);
 app.route("/", meRoutes);
+app.route("/", assistantRoutes);
 app.route("/", tenantRoutes);
 app.route("/", productRoutes);
 app.route("/", orderRoutes);
