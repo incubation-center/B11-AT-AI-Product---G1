@@ -13,9 +13,9 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function triggerTenantIndex(tenantId: string) {
-  void ragService.indexTenant(tenantId).catch((error) => {
-    console.error("[rag] indexTenant failed", { tenantId, error });
+function triggerProductReindex(tenantId: string, productId: string) {
+  void ragService.reindexProduct(tenantId, productId).catch((error) => {
+    console.error("[rag] reindexProduct failed", { tenantId, productId, error });
   });
 }
 
@@ -78,7 +78,7 @@ export async function createProduct(tenantId: string, input: CreateProductInput)
     .returning();
 
   const product = inserted[0] ?? null;
-  if (product) triggerTenantIndex(tenantId);
+  if (product) triggerProductReindex(tenantId, product.id);
   return product;
 }
 
@@ -168,7 +168,7 @@ export async function updateProduct(tenantId: string, productId: string, input: 
     .returning();
 
   const product = updated[0] ?? null;
-  if (product) triggerTenantIndex(tenantId);
+  if (product) triggerProductReindex(tenantId, product.id);
   return product;
 }
 
@@ -204,7 +204,7 @@ export async function createVariant(tenantId: string, productId: string, input: 
     .returning();
 
   const variant = inserted[0] ?? null;
-  if (variant) triggerTenantIndex(tenantId);
+  if (variant) triggerProductReindex(tenantId, variant.productId);
   return variant;
 }
 
@@ -226,7 +226,7 @@ export async function updateVariant(tenantId: string, variantId: string, input: 
     .returning();
 
   const variant = updated[0] ?? null;
-  if (variant) triggerTenantIndex(tenantId);
+  if (variant) triggerProductReindex(tenantId, variant.productId);
   return variant;
 }
 
@@ -258,7 +258,7 @@ export async function appendProductImageUrl(tenantId: string, productId: string,
     .returning();
 
   const product = updated[0] ?? null;
-  if (product) triggerTenantIndex(tenantId);
+  if (product) triggerProductReindex(tenantId, product.id);
   return product;
 }
 

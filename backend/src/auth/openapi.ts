@@ -18,6 +18,7 @@ export const authOpenApiSpec = {
     { name: "Product", description: "Product and variant management endpoints" },
     { name: "AI Product", description: "AI-assisted product draft endpoints" },
     { name: "Order & Checkout", description: "Checkout and order management endpoints" },
+    { name: "RAG", description: "Manual RAG indexing management endpoints" },
   ],
   components: {
     securitySchemes: {
@@ -998,6 +999,44 @@ export const authOpenApiSpec = {
         security: [{ BearerAuth: [] }],
         responses: {
           "200": { description: "Low stock items list" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/rag/index/tenant": {
+      post: {
+        tags: ["RAG"],
+        summary: "Manually re-index tenant profile + products into Pinecone",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": { description: "Tenant index refreshed" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/rag/index/product/{id}": {
+      post: {
+        tags: ["RAG"],
+        summary: "Manually delete old vectors and re-index one product (+ variants)",
+        security: [{ BearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: {
+          "200": { description: "Product index refreshed" },
+          "400": { description: "Missing/invalid product id" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Tenant not found" },
+        },
+      },
+      delete: {
+        tags: ["RAG"],
+        summary: "Manually delete one product vector from Pinecone",
+        security: [{ BearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: {
+          "200": { description: "Product vector deleted" },
+          "400": { description: "Missing/invalid product id" },
           "401": { description: "Unauthorized" },
           "404": { description: "Tenant not found" },
         },

@@ -29,6 +29,13 @@
       "when": 1772154600000,
       "tag": "0003_product_draft_index_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1772250000000,
+      "tag": "0004_product_knowledge",
+      "breakpoints": true
     }
   ]
 }

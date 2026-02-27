@@ -5,6 +5,7 @@ import { docsRoutes } from "./routes/docs.routes";
 import { meRoutes } from "./routes/me.routes";
 import { orderRoutes } from "./routes/order.routes";
 import { productRoutes } from "./routes/product.routes";
+import { ragRoutes } from "./routes/rag.routes";
 import { rootRoutes } from "./routes/root.routes";
 import { tenantRoutes } from "./routes/tenant.routes";
 import { env } from "./env";
@@ -60,5 +61,6 @@ app.route("/", meRoutes);
 app.route("/", tenantRoutes);
 app.route("/", productRoutes);
 app.route("/", orderRoutes);
+app.route("/", ragRoutes);
 
 export default app;

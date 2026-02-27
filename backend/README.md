@@ -106,6 +106,14 @@ Common endpoints used by frontend:
 | PATCH | `/variants/:id/deactivate` | Soft delete variant (`is_active=false`) | `Authorization: Bearer <token>` |
 | POST | `/products/:id/images` | Upload product image to Cloudinary and append to `image_urls[]` (max 3 images/product) | `Authorization: Bearer <token>` |
 
+### Manual RAG indexing endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/rag/index/tenant` | Re-index tenant profile + all tenant products into Pinecone | `Authorization: Bearer <token>` |
+| POST | `/rag/index/product/:id` | Delete old vectors then re-index one product (+ variants) into Pinecone | `Authorization: Bearer <token>` |
+| DELETE | `/rag/index/product/:id` | Delete one product vector from Pinecone | `Authorization: Bearer <token>` |
+
 #### Public buyer endpoints
 
 | Method | Endpoint | Description | Auth |
@@ -336,6 +344,7 @@ New fields were added to `product_drafts`:
 Migration file:
 
 - `backend/supabase/migrations/0003_product_draft_index_tracking.sql`
+- `backend/supabase/migrations/0004_product_knowledge.sql`
 
 Apply migrations with your existing flow before using AI draft confirm in production.
 
@@ -358,11 +367,11 @@ Tenant create/update automatically triggers:
 Current implementation:
 
 - Uses Pinecone namespace per tenant (`<prefix>-<tenantId>`).
-- Indexes one tenant profile vector + product vectors for that tenant.
+- Indexes one tenant profile vector + product vectors + variant vectors for that tenant.
 - Stores graph-like relation metadata for filtering/traversal:
   - `relationTenantNode` (e.g. `tenant:<tenantId>`)
   - `relationNode` (e.g. `product:<productId>`)
-  - `entityType` (`tenant_profile` or `product`)
+  - `entityType` (`tenant_profile`, `product`, `product_variant`)
 
 If Pinecone env vars are missing, indexing is skipped (tenant API still succeeds).
 

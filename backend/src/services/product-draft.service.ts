@@ -479,7 +479,7 @@ export async function confirmProductDraft(tenantId: string, input: { draftId: st
   let indexedAt: Date | null = new Date();
 
   try {
-    await ragService.indexProduct(tenantId, product.id);
+    await ragService.reindexProduct(tenantId, product.id);
   } catch (error) {
     indexStatus = "pending";
     indexedAt = null;

@@ -280,6 +280,43 @@ export const users = pgTable(
       ),
     })
   );
+
+  export const productKnowledge = pgTable(
+    "product_knowledge",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      tenantId: uuid("tenant_id")
+        .notNull()
+        .references(() => tenants.id, { onDelete: "cascade" }),
+      productId: uuid("product_id")
+        .notNull()
+        .references(() => products.id, { onDelete: "cascade" }),
+      overviewKm: text("overview_km"),
+      overviewEn: text("overview_en"),
+      usageKm: text("usage_km"),
+      usageEn: text("usage_en"),
+      suitabilityKm: text("suitability_km"),
+      suitabilityEn: text("suitability_en"),
+      keySpecsKm: text("key_specs_km"),
+      keySpecsEn: text("key_specs_en"),
+      faqsKm: jsonb("faqs_km"),
+      faqsEn: jsonb("faqs_en"),
+      qaHistory: jsonb("qa_history"),
+      readinessStatus: text("readiness_status").notNull().default("draft"),
+      missingFields: jsonb("missing_fields"),
+      createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+      updatedAt: timestamp("updated_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    },
+    (t) => ({
+      tenantIdx: index("product_knowledge_tenant_id_idx").on(t.tenantId),
+      productUnique: uniqueIndex("product_knowledge_product_id_unique").on(t.productId),
+      readinessIdx: index("product_knowledge_readiness_idx").on(t.readinessStatus),
+    })
+  );
   
   export const productDrafts = pgTable(
     "product_drafts",
@@ -525,6 +562,10 @@ export const authAccountsRelations = relations(authAccounts, ({ one }) => ({
   export const productsRelations = relations(products, ({ one, many }) => ({
     tenant: one(tenants, { fields: [products.tenantId], references: [tenants.id] }),
     variants: many(productVariants),
+    knowledge: one(productKnowledge, {
+      fields: [products.id],
+      references: [productKnowledge.productId],
+    }),
   }));
   
   export const productVariantsRelations = relations(productVariants, ({ one }) => ({
@@ -534,6 +575,17 @@ export const authAccountsRelations = relations(authAccounts, ({ one }) => ({
     }),
     product: one(products, {
       fields: [productVariants.productId],
+      references: [products.id],
+    }),
+  }));
+
+  export const productKnowledgeRelations = relations(productKnowledge, ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [productKnowledge.tenantId],
+      references: [tenants.id],
+    }),
+    product: one(products, {
+      fields: [productKnowledge.productId],
       references: [products.id],
     }),
   }));
@@ -620,6 +672,9 @@ export type NewUser = typeof users.$inferInsert;
   
   export type ProductVariant = typeof productVariants.$inferSelect;
   export type NewProductVariant = typeof productVariants.$inferInsert;
+  
+  export type ProductKnowledge = typeof productKnowledge.$inferSelect;
+  export type NewProductKnowledge = typeof productKnowledge.$inferInsert;
   
   export type ProductDraft = typeof productDrafts.$inferSelect;
   export type NewProductDraft = typeof productDrafts.$inferInsert;
