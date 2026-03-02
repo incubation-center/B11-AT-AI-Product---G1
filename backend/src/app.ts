@@ -9,6 +9,7 @@ import { productRoutes } from "./routes/product.routes";
 import { ragRoutes } from "./routes/rag.routes";
 import { rootRoutes } from "./routes/root.routes";
 import { tenantRoutes } from "./routes/tenant.routes";
+import { telegramRoutes } from "./routes/telegram.routes";
 import { env } from "./env";
 
 const app = new Hono();
@@ -61,6 +62,7 @@ app.route("/", authRoutes);
 app.route("/", meRoutes);
 app.route("/", assistantRoutes);
 app.route("/", tenantRoutes);
+app.route("/", telegramRoutes);
 app.route("/", productRoutes);
 app.route("/", orderRoutes);
 app.route("/", ragRoutes);

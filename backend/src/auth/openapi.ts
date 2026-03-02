@@ -15,6 +15,7 @@ export const authOpenApiSpec = {
     { name: "Auth", description: "Better Auth endpoints" },
     { name: "Profile", description: "Authenticated profile endpoint" },
     { name: "Tenant", description: "Store tenant management endpoints" },
+    { name: "Telegram", description: "Telegram bot linking and webhook endpoints" },
     { name: "Product", description: "Product and variant management endpoints" },
     { name: "AI Product", description: "AI-assisted product draft endpoints" },
     { name: "Assistant", description: "Buyer assistant endpoints" },
@@ -161,6 +162,102 @@ export const authOpenApiSpec = {
           google_map_url: { type: "string" },
           logo_url: { type: "string" },
           banner_url: { type: "string" },
+        },
+      },
+      TelegramTenantSummary: {
+        type: "object",
+        required: ["id", "shopName", "subdomain"],
+        properties: {
+          id: { type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440000" },
+          shopName: { type: "string", example: "My Beauty Store" },
+          subdomain: { type: "string", example: "my-beauty-store" },
+        },
+      },
+      TelegramActiveCode: {
+        type: "object",
+        required: ["code", "expiresAt"],
+        properties: {
+          code: { type: "string", example: "ST8K4M2QP" },
+          expiresAt: { type: "string", format: "date-time", example: "2026-03-02T09:20:00.000Z" },
+        },
+      },
+      TelegramLinkStatusResponse: {
+        type: "object",
+        required: ["hasTenant", "tenant", "linked", "telegramUserId", "activeCode"],
+        properties: {
+          hasTenant: { type: "boolean", example: true },
+          tenant: {
+            oneOf: [
+              { $ref: "#/components/schemas/TelegramTenantSummary" },
+              { type: "null" },
+            ],
+          },
+          linked: { type: "boolean", example: true },
+          telegramUserId: {
+            oneOf: [
+              { type: "integer", example: 123456789 },
+              { type: "null" },
+            ],
+          },
+          activeCode: {
+            oneOf: [
+              { $ref: "#/components/schemas/TelegramActiveCode" },
+              { type: "null" },
+            ],
+          },
+        },
+      },
+      TelegramLinkCodeResponse: {
+        type: "object",
+        required: ["message", "code", "expiresAt", "alreadyLinked", "tenant"],
+        properties: {
+          message: { type: "string", example: "Telegram link code generated" },
+          code: { type: "string", example: "ST8K4M2QP" },
+          expiresAt: { type: "string", format: "date-time", example: "2026-03-02T09:20:00.000Z" },
+          alreadyLinked: { type: "boolean", example: false },
+          tenant: { $ref: "#/components/schemas/TelegramTenantSummary" },
+        },
+      },
+      TelegramWebhookHeader: {
+        type: "string",
+        example: "9GVb4KRMLjoi6cmkJPQdzIpNwY0AOunhCSWxUgXt8ql7Z5f3",
+        description: "Value of TELEGRAM_WEBHOOK_SECRET sent by Telegram as x-telegram-bot-api-secret-token.",
+      },
+      TelegramWebhookMessage: {
+        type: "object",
+        required: ["message_id", "chat"],
+        properties: {
+          message_id: { type: "integer", example: 42 },
+          text: { type: "string", example: "/connect ST8K4M2QP" },
+          from: {
+            type: "object",
+            properties: {
+              id: { type: "integer", example: 123456789 },
+            },
+          },
+          chat: {
+            type: "object",
+            required: ["id", "type"],
+            properties: {
+              id: { type: "integer", example: 123456789 },
+              type: { type: "string", example: "private" },
+            },
+          },
+        },
+      },
+      TelegramWebhookBody: {
+        type: "object",
+        required: ["update_id"],
+        properties: {
+          update_id: { type: "integer", example: 10000 },
+          message: { $ref: "#/components/schemas/TelegramWebhookMessage" },
+        },
+      },
+      TelegramWebhookOkResponse: {
+        type: "object",
+        required: ["ok"],
+        properties: {
+          ok: { type: "boolean", example: true },
         },
       },
       Product: {
@@ -593,6 +690,138 @@ export const authOpenApiSpec = {
         responses: {
           "200": { description: "Tenant deactivated" },
           "404": { description: "Tenant not found" },
+        },
+      },
+    },
+    "/telegram/link-status": {
+      get: {
+        tags: ["Telegram"],
+        summary: "Get Telegram link status for the current owner/store",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Telegram link status",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/TelegramLinkStatusResponse" },
+              },
+            },
+          },
+          "400": {
+            description: "Unable to load Telegram link status",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/telegram/link-code": {
+      post: {
+        tags: ["Telegram"],
+        summary: "Generate a one-time Telegram connect code for the current owner/store",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Telegram link code generated",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/TelegramLinkCodeResponse" },
+              },
+            },
+          },
+          "400": {
+            description: "Unable to generate Telegram link code",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Tenant not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/telegram/webhook": {
+      post: {
+        tags: ["Telegram"],
+        summary: "Telegram bot webhook receiver",
+        description:
+          "Public endpoint called by Telegram. If TELEGRAM_WEBHOOK_SECRET is configured, Telegram must send it in the x-telegram-bot-api-secret-token header.",
+        parameters: [
+          {
+            name: "x-telegram-bot-api-secret-token",
+            in: "header",
+            required: false,
+            schema: { $ref: "#/components/schemas/TelegramWebhookHeader" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/TelegramWebhookBody" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Webhook processed",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/TelegramWebhookOkResponse" },
+              },
+            },
+          },
+          "400": {
+            description: "Invalid Telegram update",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "403": {
+            description: "Forbidden due to invalid webhook secret",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "500": {
+            description: "Webhook handler failed",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/TelegramWebhookOkResponse" },
+              },
+            },
+          },
         },
       },
     },

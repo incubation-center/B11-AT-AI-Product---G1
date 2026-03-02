@@ -2,6 +2,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import { orderItems, productVariants, products } from "../db/schema";
 import { env } from "../env";
+import { sendTelegramMessageToTenant } from "./telegram-link.service";
 
 type TxClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type InventoryChange = "decrease" | "increase";
@@ -24,7 +25,7 @@ function formatVariantLabel(size: string | null, color: string | null): string |
 
 async function sendLowStockTelegramNotification(tenantId: string, items: LowStockItem[]): Promise<void> {
   if (items.length === 0) return;
-  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  if (!env.TELEGRAM_BOT_TOKEN) return;
 
   const lines = items.slice(0, 20).map((item) => {
     const label = item.level === "variant" ? `${item.productName} (${item.variantLabel ?? "variant"})` : item.productName;
@@ -34,14 +35,7 @@ async function sendLowStockTelegramNotification(tenantId: string, items: LowStoc
   const text = [`Low stock alert`, `Tenant: ${tenantId}`, ...lines].join("\n");
 
   try {
-    await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: env.TELEGRAM_CHAT_ID,
-        text,
-      }),
-    });
+    await sendTelegramMessageToTenant(tenantId, text);
   } catch (error) {
     console.error("[inventory] low-stock telegram notification failed", { tenantId, error });
   }

@@ -380,6 +380,7 @@ export async function startProductDraft(
     stock_qty?: unknown;
     low_stock_threshold?: unknown;
     variants?: unknown;
+    image_urls?: unknown;
   }
 ) {
   const lang = normalizeLang(input.lang);
@@ -434,6 +435,9 @@ export async function startProductDraft(
       stock_qty: asInteger(input.stock_qty, 0),
       low_stock_threshold: asInteger(input.low_stock_threshold, 5),
       variants: Array.isArray(input.variants) ? input.variants : [],
+      image_urls: Array.isArray(input.image_urls)
+        ? input.image_urls.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        : [],
     };
   }
 
@@ -623,7 +627,13 @@ export async function confirmProductDraft(tenantId: string, input: { draftId: st
     description: composeProductDescription(finalPayload),
     basePriceUsd: asNumericString(initial.base_price_usd, "0"),
     basePriceKhr: asNumericString(initial.base_price_khr, "0"),
-    hasVariants: variants.length > 0,
+    trackInventory: typeof initial.track_inventory === "boolean" ? initial.track_inventory : true,
+    stockQty: asInteger(initial.stock_qty, 0),
+    lowStockThreshold: asInteger(initial.low_stock_threshold, 5),
+    hasVariants: typeof initial.has_variants === "boolean" ? initial.has_variants : variants.length > 0,
+    imageUrls: Array.isArray(initial.image_urls)
+      ? initial.image_urls.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+      : [],
   });
 
   if (!product) return { error: "Unable to create product" as const };

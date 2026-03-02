@@ -2,6 +2,7 @@ import { and, desc, eq, gte, ilike, lte } from "drizzle-orm";
 import { db } from "../db";
 import { orderItems, orders, payments, productVariants, products } from "../db/schema";
 import { applyOrderInventoryChange, notifyLowStockIfNeeded } from "./inventory.service";
+import { sendTelegramMessageToTenant } from "./telegram-link.service";
 
 type CheckoutItemInput = {
   product_id: string;
@@ -209,6 +210,19 @@ export async function createCheckoutOrder(tenantId: string, input: CheckoutInput
         });
 
         return order;
+      });
+
+      void sendTelegramMessageToTenant(
+        tenantId,
+        [
+          "New order received",
+          `Order: ${result.orderNo}`,
+          `Customer: ${input.customer_name.trim()}`,
+          `Total: ${total} ${input.currency}`,
+          `Payment: ${input.payment_method}`,
+        ].join("\n")
+      ).catch((error) => {
+        console.error("[telegram] order notification failed", { tenantId, error });
       });
 
       return result;

@@ -30,6 +30,7 @@ const envSchema = z.object({
   PINECONE_VECTOR_DIM: z.coerce.number().int().positive().default(256),
   PINECONE_NAMESPACE_PREFIX: z.string().default("tenant"),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
   TELEGRAM_CHAT_ID: z.string().optional(),
 
   STORE_URL_PROTOCOL: z.enum(["http", "https"]).default("http"),

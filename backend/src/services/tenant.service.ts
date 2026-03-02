@@ -281,3 +281,9 @@ export async function getStoreBySubdomain(subdomain: string) {
     },
   });
 }
+
+export async function getTenantById(tenantId: string) {
+  return db.query.tenants.findFirst({
+    where: eq(tenants.id, tenantId),
+  });
+}

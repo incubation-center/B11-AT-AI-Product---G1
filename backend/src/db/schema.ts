@@ -509,6 +509,56 @@ export const users = pgTable(
       ),
     })
   );
+
+  export const telegramLinkTokens = pgTable(
+    "telegram_link_tokens",
+    {
+      id: uuid("id").primaryKey().defaultRandom(),
+      tenantId: uuid("tenant_id")
+        .notNull()
+        .references(() => tenants.id, { onDelete: "cascade" }),
+      ownerUserId: uuid("owner_user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+      code: text("code").notNull(),
+      expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+      usedAt: timestamp("used_at", { withTimezone: true }),
+      createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    },
+    (t) => ({
+      codeUnique: uniqueIndex("telegram_link_tokens_code_unique").on(t.code),
+      tenantIdx: index("telegram_link_tokens_tenant_id_idx").on(t.tenantId),
+      ownerUserIdx: index("telegram_link_tokens_owner_user_id_idx").on(t.ownerUserId),
+      expiresAtIdx: index("telegram_link_tokens_expires_at_idx").on(t.expiresAt),
+    })
+  );
+
+  export const telegramProductDraftSessions = pgTable(
+    "telegram_product_draft_sessions",
+    {
+      telegramUserId: bigint("telegram_user_id", { mode: "number" }).primaryKey(),
+      tenantId: uuid("tenant_id")
+        .notNull()
+        .references(() => tenants.id, { onDelete: "cascade" }),
+      draftId: uuid("draft_id").references(() => productDrafts.id, { onDelete: "set null" }),
+      stage: text("stage").notNull(),
+      lang: text("lang").notNull().default("km"),
+      seedInput: jsonb("seed_input").notNull().default({}),
+      createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+      updatedAt: timestamp("updated_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    },
+    (t) => ({
+      tenantIdx: index("telegram_product_draft_sessions_tenant_id_idx").on(t.tenantId),
+      draftIdx: index("telegram_product_draft_sessions_draft_id_idx").on(t.draftId),
+      stageIdx: index("telegram_product_draft_sessions_stage_idx").on(t.stage),
+    })
+  );
   
   // --------------------
   // Relations (optional but helpful)
@@ -645,6 +695,28 @@ export const authAccountsRelations = relations(authAccounts, ({ one }) => ({
       references: [tenants.id],
     }),
   }));
+
+  export const telegramLinkTokensRelations = relations(telegramLinkTokens, ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [telegramLinkTokens.tenantId],
+      references: [tenants.id],
+    }),
+    owner: one(users, {
+      fields: [telegramLinkTokens.ownerUserId],
+      references: [users.id],
+    }),
+  }));
+
+  export const telegramProductDraftSessionsRelations = relations(telegramProductDraftSessions, ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [telegramProductDraftSessions.tenantId],
+      references: [tenants.id],
+    }),
+    draft: one(productDrafts, {
+      fields: [telegramProductDraftSessions.draftId],
+      references: [productDrafts.id],
+    }),
+  }));
   
 // --------------------
 // Types (handy exports)
@@ -696,3 +768,9 @@ export type NewUser = typeof users.$inferInsert;
   
   export type TelegramLink = typeof telegramLinks.$inferSelect;
   export type NewTelegramLink = typeof telegramLinks.$inferInsert;
+
+  export type TelegramLinkToken = typeof telegramLinkTokens.$inferSelect;
+  export type NewTelegramLinkToken = typeof telegramLinkTokens.$inferInsert;
+
+  export type TelegramProductDraftSession = typeof telegramProductDraftSessions.$inferSelect;
+  export type NewTelegramProductDraftSession = typeof telegramProductDraftSessions.$inferInsert;

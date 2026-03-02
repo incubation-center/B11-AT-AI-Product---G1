@@ -87,6 +87,14 @@ Common endpoints used by frontend:
 | GET | `/store/by-subdomain/:subdomain` | Public storefront profile lookup | Public |
 | GET | `/store/by-host` | Public storefront profile lookup by host subdomain | Public |
 
+### Telegram owner console endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| GET | `/telegram/link-status` | Get Telegram link status for current owner/store | `Authorization: Bearer <token>` |
+| POST | `/telegram/link-code` | Generate one-time Telegram connect code | `Authorization: Bearer <token>` |
+| POST | `/telegram/webhook` | Telegram bot webhook receiver | Public from Telegram |
+
 ### Product + Variant endpoints
 
 #### Protected owner endpoints
@@ -329,10 +337,29 @@ PINECONE_API_KEY=...
 PINECONE_INDEX=...
 PINECONE_VECTOR_DIM=256
 PINECONE_NAMESPACE_PREFIX=tenant
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_WEBHOOK_SECRET=...
 STORE_URL_PROTOCOL=http
 STORE_BASE_DOMAIN=lvh.me
 STORE_URL_PORT=3000
 ```
+
+Telegram owner flow:
+
+1. Owner signs in and creates a store.
+2. Owner calls `POST /telegram/link-code`.
+3. Owner sends `/connect <code>` to the Telegram bot.
+4. Telegram webhook receives that message at `POST /telegram/webhook`.
+5. Backend links the Telegram user to the owner tenant and enables `/store`, `/inventory`, `/orders`, and `/order <id>` in Telegram.
+
+Telegram bot commands:
+
+- `/connect <code>` links the Telegram account to the owner store.
+- `/addproduct` starts the same AI product draft flow used by the backend API.
+- Reply in chat to answer each AI follow-up question.
+- `/confirm` creates the product once the draft is ready.
+- `/cancel` discards the current Telegram product draft.
+- `/store`, `/inventory`, `/orders`, and `/order <id>` remain available for read-only store access.
 
 ### AI draft + OpenAI env vars
 

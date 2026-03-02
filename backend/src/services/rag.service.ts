@@ -241,7 +241,7 @@ export const ragService = {
     if (shouldSkip()) return;
     const indexAny = getIndex(tenantId) as any;
     if (typeof indexAny.deleteMany === "function") {
-      await indexAny.deleteMany([productVectorId(tenantId, productId)]);
+      await indexAny.deleteMany({ ids: [productVectorId(tenantId, productId)] });
     }
   },
 
@@ -249,7 +249,11 @@ export const ragService = {
     if (shouldSkip()) return;
     const indexAny = getIndex(tenantId) as any;
     if (typeof indexAny.deleteMany === "function") {
-      await indexAny.deleteMany({ relationNode: `product:${productId}` });
+      await indexAny.deleteMany({
+        filter: {
+          relationNode: { $eq: `product:${productId}` },
+        },
+      });
     }
     await this.indexProduct(tenantId, productId);
   },

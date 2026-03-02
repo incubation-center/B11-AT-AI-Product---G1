@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1771651522202,
-      "tag": "0000_odd_jubilee",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1771652239323,
-      "tag": "0001_useful_bloodstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1771654600000,
-      "tag": "0002_rename_auth_user_table",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1772154600000,
-      "tag": "0003_product_draft_index_tracking",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1772250000000,
-      "tag": "0004_product_knowledge",
+      "when": 1772442533668,
+      "tag": "0000_mysterious_reaper",
       "breakpoints": true
     }
   ]
