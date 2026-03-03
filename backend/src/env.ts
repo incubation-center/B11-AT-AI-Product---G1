@@ -32,6 +32,8 @@ const envSchema = z.object({
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
   TELEGRAM_CHAT_ID: z.string().optional(),
+  TELEGRAM_MINI_APP_URL: z.string().url().optional(),
+  TELEGRAM_MINI_APP_SESSION_TTL_MINUTES: z.coerce.number().int().positive().default(480),
 
   STORE_URL_PROTOCOL: z.enum(["http", "https"]).default("http"),
   STORE_BASE_DOMAIN: z.string().default("lvh.me"),

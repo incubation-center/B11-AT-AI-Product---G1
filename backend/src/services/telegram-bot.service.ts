@@ -1,6 +1,8 @@
 import { downloadTelegramFileAsImage, sendTelegramMessage } from "../lib/telegram";
+import { env } from "../env";
 import { listLowStockItems } from "./inventory.service";
 import { getOwnerOrderById, listOwnerOrders } from "./order.service";
+import { listProducts } from "./product.service";
 import { getTenantById } from "./tenant.service";
 import { consumeTelegramLinkCode, getTenantLinkByTelegramUser } from "./telegram-link.service";
 import {
@@ -12,6 +14,9 @@ import {
   handleTelegramSkip,
   startTelegramProductDraft,
 } from "./telegram-product-draft.service";
+
+type TelegramBotResponseOptions = Parameters<typeof sendTelegramMessage>[2];
+type TelegramBotResponse = { text: string; options?: TelegramBotResponseOptions };
 
 type TelegramPhotoSize = {
   file_id: string;
@@ -55,18 +60,65 @@ function normalizeCommand(text: string) {
 
 function formatHelp() {
   return [
-    "Store owner bot commands:",
-    "/connect <code> - link this Telegram account to your store",
+    "<b>CoolHat owner console</b>",
+    "",
+    "Link and launch:",
+    "/connect &lt;code&gt; - link this Telegram account to your store",
+    "/dashboard - open the management dashboard",
+    "",
+    "Quick store tools:",
+    "/store - show store summary",
+    "/products - show recent products",
+    "/inventory - show low stock items",
+    "/orders - show recent orders",
+    "/order &lt;id&gt; - show a single order",
+    "",
+    "Product draft flow:",
     "/addproduct - start AI product creation",
     "/skip - skip an optional field in Telegram product draft",
     "/confirm - confirm the current Telegram product draft",
     "/cancel - cancel the current Telegram product draft",
-    "/store - show store summary",
-    "/inventory - show low stock items",
-    "/orders - show recent orders",
-    "/order <id> - show a single order",
+    "",
     "/help - show this help",
   ].join("\n");
+}
+
+function getTelegramMiniAppUrl(screen?: "dashboard" | "store" | "products" | "orders") {
+  const base = env.TELEGRAM_MINI_APP_URL ?? `${env.PUBLIC_URL.replace(/\/$/, "")}/telegram`;
+  if (!screen) {
+    return base;
+  }
+  const separator = base.includes("?") ? "&" : "?";
+  return `${base}${separator}screen=${screen}`;
+}
+
+function buildDashboardMessage(
+  title: string,
+  lines: string[],
+  screen: "dashboard" | "store" | "products" | "orders"
+): TelegramBotResponse {
+  return {
+    text: [`<b>${title}</b>`, "", ...lines].join("\n"),
+    options: {
+      parseMode: "HTML" as const,
+      replyMarkup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Open Dashboard",
+              web_app: { url: getTelegramMiniAppUrl(screen) },
+            },
+          ],
+          [
+            {
+              text: "Open in Browser",
+              url: getTelegramMiniAppUrl(screen),
+            },
+          ],
+        ],
+      },
+    },
+  };
 }
 
 function formatStore(store: {
@@ -76,54 +128,99 @@ function formatStore(store: {
   isActive: boolean;
   description?: string | null;
 }) {
-  return [
-    `Store: ${store.shopName}`,
-    `Subdomain: ${store.subdomain}`,
-    `Type: ${store.shopType}`,
-    `Active: ${store.isActive ? "yes" : "no"}`,
-    store.description ? `Description: ${store.description}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  return buildDashboardMessage(
+    "Store summary",
+    [
+      `Store: ${store.shopName}`,
+      `Subdomain: ${store.subdomain}`,
+      `Type: ${store.shopType}`,
+      `Active: ${store.isActive ? "yes" : "no"}`,
+      ...(store.description ? [`Description: ${store.description}`] : []),
+    ],
+    "store"
+  );
 }
 
 function formatLowStock(items: Awaited<ReturnType<typeof listLowStockItems>>) {
   if (items.length === 0) {
-    return "Inventory is healthy. No low stock items right now.";
+    return buildDashboardMessage(
+      "Low stock",
+      ["Inventory is healthy. No low stock items right now."],
+      "products"
+    );
   }
 
-  return [
-    "Low stock items:",
-    ...items.slice(0, 15).map((item) => {
-      const label = item.level === "variant" ? `${item.productName} (${item.variantLabel ?? "variant"})` : item.productName;
-      return `- ${label}: ${item.stockQty} left (threshold ${item.lowStockThreshold})`;
-    }),
-  ].join("\n");
+  return buildDashboardMessage(
+    "Low stock",
+    [
+      ...items.slice(0, 15).map((item) => {
+        const label = item.level === "variant" ? `${item.productName} (${item.variantLabel ?? "variant"})` : item.productName;
+        return `- ${label}: ${item.stockQty} left (threshold ${item.lowStockThreshold})`;
+      }),
+    ],
+    "products"
+  );
 }
 
 function formatOrders(orders: Awaited<ReturnType<typeof listOwnerOrders>>) {
   if (orders.length === 0) {
-    return "No orders yet.";
+    return buildDashboardMessage("Orders", ["No orders yet."], "orders");
   }
 
-  return [
-    "Recent orders:",
-    ...orders.slice(0, 8).map((order) => `- ${order.orderNo} | ${order.status} | ${order.paymentStatus} | ${order.total} ${order.currency}`),
-  ].join("\n");
+  return buildDashboardMessage(
+    "Recent orders",
+    orders.slice(0, 8).map((order) => `- ${order.orderNo} | ${order.status} | ${order.paymentStatus} | ${order.total} ${order.currency}`),
+    "orders"
+  );
 }
 
 function formatOrderDetail(order: NonNullable<Awaited<ReturnType<typeof getOwnerOrderById>>>) {
-  return [
-    `Order: ${order.orderNo}`,
-    `Customer: ${order.customerName}`,
-    `Phone: ${order.customerPhone ?? "-"}`,
-    `Status: ${order.status}`,
-    `Payment: ${order.paymentStatus} via ${order.paymentMethod}`,
-    `Total: ${order.total} ${order.currency}`,
-    `Address: ${order.addressText}`,
-    "Items:",
-    ...order.items.map((item) => `- ${item.productNameSnapshot} x${item.qty}`),
-  ].join("\n");
+  return buildDashboardMessage(
+    `Order ${order.orderNo}`,
+    [
+      `Customer: ${order.customerName}`,
+      `Phone: ${order.customerPhone ?? "-"}`,
+      `Status: ${order.status}`,
+      `Payment: ${order.paymentStatus} via ${order.paymentMethod}`,
+      `Total: ${order.total} ${order.currency}`,
+      `Address: ${order.addressText}`,
+      "Items:",
+      ...order.items.map((item) => `- ${item.productNameSnapshot} x${item.qty}`),
+    ],
+    "orders"
+  );
+}
+
+function formatProducts(products: Awaited<ReturnType<typeof listProducts>>) {
+  if (products.data.length === 0) {
+    return buildDashboardMessage("Products", ["No products yet. Use the dashboard to create one."], "products");
+  }
+
+  return buildDashboardMessage(
+    "Recent products",
+    products.data
+      .slice(0, 8)
+      .map((product) => `- ${product.name} | ${product.basePriceUsd} USD | stock ${product.stockQty} | ${product.isActive ? "active" : "inactive"}`),
+    "products"
+  );
+}
+
+function formatDashboardLaunch(linkedTenantId: string | null) {
+  if (!linkedTenantId) {
+    return {
+      text: "This Telegram account is not linked yet. Use /connect <code> first.",
+      options: undefined,
+    };
+  }
+
+  return buildDashboardMessage(
+    "Dashboard",
+    [
+      "Your Telegram account is linked.",
+      "Open the Mini App to manage store settings, products, orders, and uploads.",
+    ],
+    "dashboard"
+  );
 }
 
 async function resolveTenantId(telegramUserId: number) {
@@ -135,107 +232,128 @@ async function resolveTenantId(telegramUserId: number) {
   return { tenantId: link.tenantId, message: null };
 }
 
-async function handleConnect(telegramUserId: number, args: string[]) {
+async function handleConnect(telegramUserId: number, args: string[]): Promise<TelegramBotResponse> {
   const code = args[0]?.trim();
   if (!code) {
-    return "Usage: /connect <code>";
+    return { text: "Usage: /connect <code>", options: undefined };
   }
 
   const result = await consumeTelegramLinkCode(telegramUserId, code);
   if (!result.ok) {
-    return result.reason;
+    return { text: result.reason, options: undefined };
   }
 
-  return "Telegram linked successfully. You can now use /store, /inventory, and /orders.";
+  return buildDashboardMessage(
+    "Telegram linked successfully",
+    [
+      "You can now manage your store directly from Telegram.",
+      "Use the dashboard for store settings, products, and orders.",
+    ],
+    "dashboard"
+  );
 }
 
-async function handleStore(telegramUserId: number) {
+async function handleStore(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
   const store = await getTenantById(linked.tenantId);
   if (!store) {
-    return "Store not found.";
+    return { text: "Store not found.", options: undefined };
   }
 
   return formatStore(store);
 }
 
-async function handleInventory(telegramUserId: number) {
+async function handleInventory(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
   const items = await listLowStockItems(linked.tenantId);
   return formatLowStock(items);
 }
 
-async function handleOrders(telegramUserId: number) {
+async function handleOrders(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
   const orders = await listOwnerOrders(linked.tenantId, {});
   return formatOrders(orders);
 }
 
-async function handleOrder(telegramUserId: number, args: string[]) {
+async function handleOrder(telegramUserId: number, args: string[]): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
   const orderId = args[0]?.trim();
   if (!orderId) {
-    return "Usage: /order <id>";
+    return { text: "Usage: /order <id>", options: undefined };
   }
 
   const order = await getOwnerOrderById(linked.tenantId, orderId);
   if (!order) {
-    return "Order not found.";
+    return { text: "Order not found.", options: undefined };
   }
 
   return formatOrderDetail(order);
 }
 
-async function handleAddProduct(telegramUserId: number) {
+async function handleProducts(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
-  return startTelegramProductDraft(linked.tenantId, telegramUserId);
+  const products = await listProducts(linked.tenantId, {
+    page: 1,
+    pageSize: 8,
+    includeInactive: true,
+  });
+  return formatProducts(products);
 }
 
-async function handleConfirm(telegramUserId: number) {
+async function handleAddProduct(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
-  return confirmTelegramProductDraft(linked.tenantId, telegramUserId);
+  return { text: await startTelegramProductDraft(linked.tenantId, telegramUserId), options: undefined };
 }
 
-async function handleCancel(telegramUserId: number) {
+async function handleConfirm(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
-  return cancelTelegramProductDraft(linked.tenantId, telegramUserId);
+  return { text: await confirmTelegramProductDraft(linked.tenantId, telegramUserId), options: undefined };
 }
 
-async function handleSkip(telegramUserId: number) {
+async function handleCancel(telegramUserId: number): Promise<TelegramBotResponse> {
   const linked = await resolveTenantId(telegramUserId);
   if (!linked.tenantId) {
-    return linked.message!;
+    return { text: linked.message!, options: undefined };
   }
 
-  return handleTelegramSkip(linked.tenantId, telegramUserId);
+  return { text: await cancelTelegramProductDraft(linked.tenantId, telegramUserId), options: undefined };
+}
+
+async function handleSkip(telegramUserId: number): Promise<TelegramBotResponse> {
+  const linked = await resolveTenantId(telegramUserId);
+  if (!linked.tenantId) {
+    return { text: linked.message!, options: undefined };
+  }
+
+  return { text: await handleTelegramSkip(linked.tenantId, telegramUserId), options: undefined };
 }
 
 function pickTelegramImageFile(message: TelegramMessage) {
@@ -295,63 +413,82 @@ export async function handleTelegramWebhook(update: TelegramUpdate): Promise<voi
 
   const { command, args } = normalizeCommand(text);
 
-  let responseText: string;
+  let response: TelegramBotResponse;
   switch (command) {
     case "/start":
     case "/help":
-      responseText = formatHelp();
+      response = {
+        text: formatHelp(),
+        options: {
+          parseMode: "HTML",
+          replyMarkup: {
+            inline_keyboard: [[{ text: "Open Dashboard", web_app: { url: getTelegramMiniAppUrl("dashboard") } }]],
+          },
+        },
+      };
       break;
     case "/connect":
-      responseText = await handleConnect(telegramUserId, args);
+      response = await handleConnect(telegramUserId, args);
+      break;
+    case "/dashboard":
+      response = formatDashboardLaunch((await resolveTenantId(telegramUserId)).tenantId);
+      break;
+    case "/products":
+      response = await handleProducts(telegramUserId);
       break;
     case "/addproduct":
-      responseText = await handleAddProduct(telegramUserId);
+      response = await handleAddProduct(telegramUserId);
       break;
     case "/confirm":
-      responseText = await handleConfirm(telegramUserId);
+      response = await handleConfirm(telegramUserId);
       break;
     case "/cancel":
-      responseText = await handleCancel(telegramUserId);
+      response = await handleCancel(telegramUserId);
       break;
     case "/skip":
-      responseText = await handleSkip(telegramUserId);
+      response = await handleSkip(telegramUserId);
       break;
     case "/store":
-      responseText = await handleStore(telegramUserId);
+      response = await handleStore(telegramUserId);
       break;
     case "/inventory":
-      responseText = await handleInventory(telegramUserId);
+      response = await handleInventory(telegramUserId);
       break;
     case "/orders":
-      responseText = await handleOrders(telegramUserId);
+      response = await handleOrders(telegramUserId);
       break;
     case "/order":
-      responseText = await handleOrder(telegramUserId, args);
+      response = await handleOrder(telegramUserId, args);
       break;
     default:
       if (!command.startsWith("/")) {
         const linked = await resolveTenantId(telegramUserId);
         if (!linked.tenantId) {
-          responseText = linked.message!;
+          response = { text: linked.message!, options: undefined };
           break;
         }
 
         const draftReply = await handleTelegramProductDraftReply(linked.tenantId, telegramUserId, text);
         if (draftReply) {
-          responseText = draftReply;
+          response = { text: draftReply, options: undefined };
           break;
         }
 
         const draftStatus = await getTelegramProductDraftStatus(linked.tenantId, telegramUserId);
         if (draftStatus) {
-          responseText = draftStatus;
+          response = { text: draftStatus, options: undefined };
           break;
         }
       }
 
-      responseText = `Unknown command.\n\n${formatHelp()}`;
+      response = {
+        text: `Unknown command.\n\n${formatHelp()}`,
+        options: {
+          parseMode: "HTML",
+        },
+      };
       break;
   }
 
-  await sendTelegramMessage(chatId, responseText);
+  await sendTelegramMessage(chatId, response.text, response.options);
 }

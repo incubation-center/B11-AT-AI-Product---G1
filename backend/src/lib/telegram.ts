@@ -1,6 +1,24 @@
 import { env } from "../env";
 
-export async function sendTelegramMessage(chatId: number | string, text: string): Promise<void> {
+type TelegramInlineKeyboardButton = {
+  text: string;
+  url?: string;
+  web_app?: { url: string };
+};
+
+type TelegramSendMessageOptions = {
+  parseMode?: "HTML" | "MarkdownV2";
+  replyMarkup?: {
+    inline_keyboard: TelegramInlineKeyboardButton[][];
+  };
+  disableWebPagePreview?: boolean;
+};
+
+export async function sendTelegramMessage(
+  chatId: number | string,
+  text: string,
+  options?: TelegramSendMessageOptions
+): Promise<void> {
   if (!env.TELEGRAM_BOT_TOKEN) {
     return;
   }
@@ -13,6 +31,9 @@ export async function sendTelegramMessage(chatId: number | string, text: string)
     body: JSON.stringify({
       chat_id: chatId,
       text,
+      parse_mode: options?.parseMode,
+      reply_markup: options?.replyMarkup,
+      disable_web_page_preview: options?.disableWebPagePreview ?? true,
     }),
   });
 

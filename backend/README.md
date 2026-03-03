@@ -94,6 +94,24 @@ Common endpoints used by frontend:
 | GET | `/telegram/link-status` | Get Telegram link status for current owner/store | `Authorization: Bearer <token>` |
 | POST | `/telegram/link-code` | Generate one-time Telegram connect code | `Authorization: Bearer <token>` |
 | POST | `/telegram/webhook` | Telegram bot webhook receiver | Public from Telegram |
+| POST | `/telegram/miniapp/session` | Verify Telegram WebApp `initData` and issue a Mini App bearer token | Public from Telegram Mini App |
+| GET | `/telegram/miniapp/bootstrap` | Load Telegram Mini App dashboard data | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/tenant` | Load linked store for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/tenant` | Update linked store from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/tenant/assets` | Upload `logo`/`banner` from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/products` | List products for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/products` | Create product from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/products/:id` | Get one product for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/products/:id` | Update product from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/products/:id/deactivate` | Deactivate product from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/products/:id/stock` | Update product stock from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/products/:id/images` | Upload product image from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/orders` | List orders for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/orders/:id` | Get one order for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/orders/:id/status` | Update order status from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/orders/:id/payment` | Update order payment from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/orders/:id/cancel` | Cancel order from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/inventory/low-stock` | Load low stock items for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
 
 ### Product + Variant endpoints
 
@@ -339,27 +357,119 @@ PINECONE_VECTOR_DIM=256
 PINECONE_NAMESPACE_PREFIX=tenant
 TELEGRAM_BOT_TOKEN=...
 TELEGRAM_WEBHOOK_SECRET=...
+TELEGRAM_MINI_APP_URL=https://your-frontend-domain/telegram
+TELEGRAM_MINI_APP_SESSION_TTL_MINUTES=480
+BETTER_AUTH_URL=https://your-backend-domain
+PUBLIC_URL=https://your-frontend-domain
+CORS_ORIGINS=https://your-frontend-domain
 STORE_URL_PROTOCOL=http
 STORE_BASE_DOMAIN=lvh.me
 STORE_URL_PORT=3000
 ```
 
-Telegram owner flow:
+## Telegram implementation guide
+
+### Why Telegram Mini App has its own route layer
+
+The Telegram Mini App does not call the normal owner routes directly because authentication is different.
+
+Normal owner routes such as `/products`, `/orders`, and `/me/tenant` expect:
+- Better Auth session or owner bearer token
+- normal browser/web login flow
+
+Telegram Mini App routes expect:
+- Telegram `WebApp.initData`
+- a Mini App bearer token created by `POST /telegram/miniapp/session`
+- tenant resolution from `telegram_user_id -> tenant_id`
+
+The core business logic is still shared:
+- product, order, tenant, and inventory services are reused
+- only the route/auth boundary is separate
+
+### Telegram architecture
+
+There are two Telegram-facing layers:
+
+1. Bot chat layer
+- `/connect <code>`
+- `/dashboard`
+- `/store`, `/products`, `/inventory`, `/orders`, `/order <id>`
+- `/addproduct` AI draft flow
+- alerts and launch buttons
+
+2. Telegram Mini App layer
+- frontend route: `/telegram`
+- store management
+- product CRUD and image upload
+- order management
+
+### Backend and frontend connection flow
+
+Web app flow:
+- frontend signs in with Better Auth
+- frontend calls protected owner APIs with normal bearer/session auth
+
+Telegram Mini App flow:
+1. User links Telegram account with `/connect <code>`
+2. Backend stores `telegram_user_id -> tenant_id`
+3. Bot sends `Open Dashboard` using Telegram `web_app`
+4. Telegram opens the frontend Mini App URL
+5. Frontend reads `window.Telegram.WebApp.initData`
+6. Frontend calls `POST /telegram/miniapp/session`
+7. Backend verifies Telegram signature using `TELEGRAM_BOT_TOKEN`
+8. Backend resolves linked tenant from `telegram_links`
+9. Backend issues a short-lived Mini App bearer token
+10. Frontend uses that token on `/telegram/miniapp/*`
+
+### Telegram owner flow
 
 1. Owner signs in and creates a store.
 2. Owner calls `POST /telegram/link-code`.
 3. Owner sends `/connect <code>` to the Telegram bot.
 4. Telegram webhook receives that message at `POST /telegram/webhook`.
-5. Backend links the Telegram user to the owner tenant and enables `/store`, `/inventory`, `/orders`, and `/order <id>` in Telegram.
+5. Backend links the Telegram user to the owner tenant.
+6. Bot can now respond with dashboard launch buttons.
+7. User taps `Open Dashboard`.
+8. Telegram Mini App authenticates through `/telegram/miniapp/session`.
+9. Frontend loads `/telegram/miniapp/bootstrap`.
+10. Frontend then manages store/products/orders through Mini App endpoints.
 
 Telegram bot commands:
 
 - `/connect <code>` links the Telegram account to the owner store.
+- `/dashboard` opens the Telegram Mini App.
+- `/products` shows a product summary and dashboard launch action.
 - `/addproduct` starts the same AI product draft flow used by the backend API.
 - Reply in chat to answer each AI follow-up question.
 - `/confirm` creates the product once the draft is ready.
 - `/cancel` discards the current Telegram product draft.
 - `/store`, `/inventory`, `/orders`, and `/order <id>` remain available for read-only store access.
+
+### Frontend env for Telegram Mini App
+
+In `frontend/.env`:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend-domain
+```
+
+Do not leave this as `http://localhost:8080` when testing from Telegram on a phone. Inside Telegram, `localhost` points to the device/webview, not your development machine.
+
+### Common Telegram Mini App failures
+
+If Telegram Mini App shows `Failed to fetch`:
+- `NEXT_PUBLIC_API_URL` is likely still pointing to `localhost`
+- backend is not publicly reachable
+- frontend cannot reach backend over HTTPS
+
+If Telegram Mini App shows `initData is required`:
+- page was opened outside Telegram `web_app`
+- or Telegram script/init timing was not ready yet
+- use the `Open Dashboard` button from the Telegram bot
+
+If Telegram Mini App shows `Open this from Telegram or paste initData below for testing`:
+- page was opened in a normal browser
+- Telegram did not inject `initData`
 
 ### AI draft + OpenAI env vars
 
