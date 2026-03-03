@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { productDrafts, telegramProductDraftSessions } from "../db/schema";
+import { uploadTelegramDraftImageToCloudinary } from "../lib/cloudinary";
 import {
   answerProductDraft,
   confirmProductDraft,
@@ -35,6 +36,8 @@ type SeedInput = {
   has_variants?: boolean;
   image_urls?: string[];
 };
+
+const MAX_TELEGRAM_DRAFT_IMAGES = 3;
 
 function detectLangFromText(text: string): DraftLanguage {
   return /[\u1780-\u17FF]/.test(text) ? "km" : "en";
@@ -79,6 +82,10 @@ function parseImageUrls(value: string): string[] | null {
     }
   }
 
+  if (urls.length > MAX_TELEGRAM_DRAFT_IMAGES) {
+    return null;
+  }
+
   return urls;
 }
 
@@ -107,7 +114,7 @@ function formatSeedPrompt(stage: SessionStage): string {
     case "awaiting_has_variants":
       return "Does this product have variants? Send yes or no.";
     case "awaiting_image_urls":
-      return "Send image URL(s), separated by commas if there are multiple. Send /skip for none.";
+      return "Send up to 3 image URL(s), separated by commas, or upload an image here in Telegram. Send /skip for none.";
     case "answering":
       return "Reply with the answer to the current product question. Use /cancel to stop.";
     case "ready":
@@ -359,7 +366,7 @@ export async function handleTelegramProductDraftReply(tenantId: string, telegram
     case "awaiting_image_urls": {
       const urls = parseImageUrls(answer);
       if (urls === null) {
-        return "Each image URL must be a valid URL. Send comma-separated URLs or /skip.";
+        return "Send up to 3 valid image URLs, comma-separated, or upload an image here in Telegram. Use /skip for none.";
       }
       seedInput.image_urls = urls;
       return beginAiDraftFromSeed(tenantId, telegramUserId, lang, seedInput);
@@ -399,6 +406,49 @@ export async function handleTelegramProductDraftReply(tenantId: string, telegram
     case "ready":
       return "Draft is already ready. Send /confirm to create the product or /cancel to discard it.";
   }
+}
+
+export async function handleTelegramProductDraftImage(tenantId: string, telegramUserId: number, file: File) {
+  const session = await db.query.telegramProductDraftSessions.findFirst({
+    where: eq(telegramProductDraftSessions.telegramUserId, telegramUserId),
+  });
+
+  if (!session || session.tenantId !== tenantId) {
+    return null;
+  }
+
+  if ((session.stage as SessionStage) !== "awaiting_image_urls") {
+    return "This image was received, but the draft is not on the image step yet.";
+  }
+
+  const lang = session.lang as DraftLanguage;
+  const seedInput = { ...((session.seedInput ?? {}) as SeedInput) };
+  const existingUrls = Array.isArray(seedInput.image_urls) ? seedInput.image_urls : [];
+
+  if (existingUrls.length >= MAX_TELEGRAM_DRAFT_IMAGES) {
+    return `Maximum ${MAX_TELEGRAM_DRAFT_IMAGES} images allowed. Send /confirm to continue or /skip to continue without more images.`;
+  }
+
+  const upload = await uploadTelegramDraftImageToCloudinary({
+    file,
+    tenantId,
+    telegramUserId,
+  });
+
+  seedInput.image_urls = [...existingUrls, upload.publicUrl];
+  await saveSession({
+    telegramUserId,
+    tenantId,
+    draftId: session.draftId,
+    stage: "awaiting_image_urls",
+    lang,
+    seedInput,
+  });
+
+  return [
+    `Image uploaded (${seedInput.image_urls.length}/${MAX_TELEGRAM_DRAFT_IMAGES}).`,
+    "Send another image, send image URL(s), or use /skip to continue.",
+  ].join("\n");
 }
 
 export async function confirmTelegramProductDraft(tenantId: string, telegramUserId: number) {

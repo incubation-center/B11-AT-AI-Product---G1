@@ -1,4 +1,4 @@
-import { sendTelegramMessage } from "../lib/telegram";
+import { downloadTelegramFileAsImage, sendTelegramMessage } from "../lib/telegram";
 import { listLowStockItems } from "./inventory.service";
 import { getOwnerOrderById, listOwnerOrders } from "./order.service";
 import { getTenantById } from "./tenant.service";
@@ -7,14 +7,34 @@ import {
   cancelTelegramProductDraft,
   confirmTelegramProductDraft,
   getTelegramProductDraftStatus,
+  handleTelegramProductDraftImage,
   handleTelegramProductDraftReply,
   handleTelegramSkip,
   startTelegramProductDraft,
 } from "./telegram-product-draft.service";
 
+type TelegramPhotoSize = {
+  file_id: string;
+  file_unique_id: string;
+  width: number;
+  height: number;
+  file_size?: number;
+};
+
+type TelegramDocument = {
+  file_id: string;
+  file_unique_id: string;
+  file_name?: string;
+  mime_type?: string;
+  file_size?: number;
+};
+
 type TelegramMessage = {
   message_id: number;
   text?: string;
+  caption?: string;
+  photo?: TelegramPhotoSize[];
+  document?: TelegramDocument;
   from?: { id: number };
   chat: { id: number; type: string };
 };
@@ -218,15 +238,62 @@ async function handleSkip(telegramUserId: number) {
   return handleTelegramSkip(linked.tenantId, telegramUserId);
 }
 
+function pickTelegramImageFile(message: TelegramMessage) {
+  const photo = Array.isArray(message.photo) ? message.photo[message.photo.length - 1] : null;
+  if (photo?.file_id) {
+    return {
+      fileId: photo.file_id,
+      fileName: `telegram-photo-${photo.file_unique_id}.jpg`,
+      mimeType: "image/jpeg",
+    };
+  }
+
+  const document = message.document;
+  if (document?.file_id && document.mime_type?.startsWith("image/")) {
+    return {
+      fileId: document.file_id,
+      fileName: document.file_name,
+      mimeType: document.mime_type,
+    };
+  }
+
+  return null;
+}
+
 export async function handleTelegramWebhook(update: TelegramUpdate): Promise<void> {
   const message = update.message;
-  if (!message?.text || !message.from?.id) {
+  if (!message?.from?.id) {
     return;
   }
 
-  const { command, args } = normalizeCommand(message.text);
   const telegramUserId = message.from.id;
   const chatId = message.chat.id;
+  const text = message.text?.trim();
+  const imageFile = pickTelegramImageFile(message);
+
+  if (imageFile) {
+    const linked = await resolveTenantId(telegramUserId);
+    const responseText = !linked.tenantId
+      ? linked.message!
+      : await (async () => {
+          try {
+            const file = await downloadTelegramFileAsImage(imageFile);
+            const draftReply = await handleTelegramProductDraftImage(linked.tenantId!, telegramUserId, file);
+            return draftReply ?? "Image received. Start with /addproduct to attach it to a product draft.";
+          } catch (error) {
+            return error instanceof Error ? error.message : "Unable to process image upload.";
+          }
+        })();
+
+    await sendTelegramMessage(chatId, responseText);
+    return;
+  }
+
+  if (!text) {
+    return;
+  }
+
+  const { command, args } = normalizeCommand(text);
 
   let responseText: string;
   switch (command) {
@@ -269,7 +336,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate): Promise<voi
           break;
         }
 
-        const draftReply = await handleTelegramProductDraftReply(linked.tenantId, telegramUserId, message.text);
+        const draftReply = await handleTelegramProductDraftReply(linked.tenantId, telegramUserId, text);
         if (draftReply) {
           responseText = draftReply;
           break;
