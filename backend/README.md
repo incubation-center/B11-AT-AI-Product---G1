@@ -87,6 +87,87 @@ Common endpoints used by frontend:
 | GET | `/store/by-subdomain/:subdomain` | Public storefront profile lookup | Public |
 | GET | `/store/by-host` | Public storefront profile lookup by host subdomain | Public |
 
+### Telegram owner console endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| GET | `/telegram/link-status` | Get Telegram link status for current owner/store | `Authorization: Bearer <token>` |
+| POST | `/telegram/link-code` | Generate one-time Telegram connect code | `Authorization: Bearer <token>` |
+| POST | `/telegram/webhook` | Telegram bot webhook receiver | Public from Telegram |
+| POST | `/telegram/miniapp/session` | Verify Telegram WebApp `initData` and issue a Mini App bearer token | Public from Telegram Mini App |
+| GET | `/telegram/miniapp/bootstrap` | Load Telegram Mini App dashboard data | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/tenant` | Load linked store for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/tenant` | Update linked store from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/tenant/assets` | Upload `logo`/`banner` from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/products` | List products for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/products` | Create product from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/products/:id` | Get one product for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/products/:id` | Update product from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/products/:id/deactivate` | Deactivate product from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/products/:id/stock` | Update product stock from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/products/:id/images` | Upload product image from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/orders` | List orders for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/orders/:id` | Get one order for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/orders/:id/status` | Update order status from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| PATCH | `/telegram/miniapp/orders/:id/payment` | Update order payment from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| POST | `/telegram/miniapp/orders/:id/cancel` | Cancel order from Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+| GET | `/telegram/miniapp/inventory/low-stock` | Load low stock items for Telegram Mini App | `Authorization: Bearer <miniapp-token>` |
+
+### Product + Variant endpoints
+
+#### Protected owner endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/products` | Create product | `Authorization: Bearer <token>` |
+| GET | `/products` | List owner products with search + pagination (`q`, `page`, `page_size`, `include_inactive`) | `Authorization: Bearer <token>` |
+| GET | `/products/:id` | Get owner product detail (with variants) | `Authorization: Bearer <token>` |
+| PATCH | `/products/:id` | Update product | `Authorization: Bearer <token>` |
+| PATCH | `/products/:id/deactivate` | Soft delete product (`is_active=false`) | `Authorization: Bearer <token>` |
+| PATCH | `/products/:id/stock` | Update product stock | `Authorization: Bearer <token>` |
+| GET | `/inventory/low-stock` | List low-stock products/variants (threshold-based) | `Authorization: Bearer <token>` |
+| POST | `/products/:id/variants` | Create variant under a product | `Authorization: Bearer <token>` |
+| PATCH | `/variants/:id` | Update variant | `Authorization: Bearer <token>` |
+| PATCH | `/variants/:id/stock` | Update variant stock | `Authorization: Bearer <token>` |
+| PATCH | `/variants/:id/deactivate` | Soft delete variant (`is_active=false`) | `Authorization: Bearer <token>` |
+| POST | `/products/:id/images` | Upload product image to Cloudinary and append to `image_urls[]` (max 3 images/product) | `Authorization: Bearer <token>` |
+
+### Manual RAG indexing endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/rag/index/tenant` | Re-index tenant profile + all tenant products into Pinecone | `Authorization: Bearer <token>` |
+| POST | `/rag/index/product/:id` | Delete old vectors then re-index one product (+ variants) into Pinecone | `Authorization: Bearer <token>` |
+| DELETE | `/rag/index/product/:id` | Delete one product vector from Pinecone | `Authorization: Bearer <token>` |
+
+#### Public buyer endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| GET | `/store/by-subdomain/:subdomain/products` | Public list of active products for a store | Public |
+| GET | `/store/by-subdomain/:subdomain/products/:id` | Public active product detail (active variants only) | Public |
+
+### AI Product Draft endpoints (one question at a time)
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/products/ai/start` | Start AI draft and get first question (`lang` default `km`) | `Authorization: Bearer <token>` |
+| POST | `/products/ai/answer` | Submit one answer and receive exactly one next question | `Authorization: Bearer <token>` |
+| POST | `/products/ai/confirm` | Confirm draft -> create product + variants, then trigger indexing | `Authorization: Bearer <token>` |
+| GET | `/products/ai/drafts` | List active drafts for resume | `Authorization: Bearer <token>` |
+| GET | `/products/ai/drafts/:id` | Get one draft for resume | `Authorization: Bearer <token>` |
+
+AI follow-up questions are capped at 5 maximum per draft. The assistant prioritizes high-impact product-knowledge questions, adapts questions by product domain (for example electronics vs beauty), and then prepares the best final draft for confirmation.
+`/products/ai/start` supports `product_id` so AI can load full product + variants context from DB.
+
+`POST /products` and `PATCH /products/:id` now auto-start AI analysis in background.
+
+### Buyer assistant endpoint
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| POST | `/assistant/ask` | Buyer asks shop assistant (RAG + live Supabase facts). Provide `subdomain` in body or use subdomain host. | Public |
+
 If the token is missing/invalid, response is:
 
 ```json
@@ -274,10 +355,144 @@ PINECONE_API_KEY=...
 PINECONE_INDEX=...
 PINECONE_VECTOR_DIM=256
 PINECONE_NAMESPACE_PREFIX=tenant
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_WEBHOOK_SECRET=...
+TELEGRAM_MINI_APP_URL=https://your-frontend-domain/telegram
+TELEGRAM_MINI_APP_SESSION_TTL_MINUTES=480
+BETTER_AUTH_URL=https://your-backend-domain
+PUBLIC_URL=https://your-frontend-domain
+CORS_ORIGINS=https://your-frontend-domain
 STORE_URL_PROTOCOL=http
 STORE_BASE_DOMAIN=lvh.me
 STORE_URL_PORT=3000
 ```
+
+## Telegram implementation guide
+
+### Why Telegram Mini App has its own route layer
+
+The Telegram Mini App does not call the normal owner routes directly because authentication is different.
+
+Normal owner routes such as `/products`, `/orders`, and `/me/tenant` expect:
+- Better Auth session or owner bearer token
+- normal browser/web login flow
+
+Telegram Mini App routes expect:
+- Telegram `WebApp.initData`
+- a Mini App bearer token created by `POST /telegram/miniapp/session`
+- tenant resolution from `telegram_user_id -> tenant_id`
+
+The core business logic is still shared:
+- product, order, tenant, and inventory services are reused
+- only the route/auth boundary is separate
+
+### Telegram architecture
+
+There are two Telegram-facing layers:
+
+1. Bot chat layer
+- `/connect <code>`
+- `/dashboard`
+- `/store`, `/products`, `/inventory`, `/orders`, `/order <id>`
+- `/addproduct` AI draft flow
+- alerts and launch buttons
+
+2. Telegram Mini App layer
+- frontend route: `/telegram`
+- store management
+- product CRUD and image upload
+- order management
+
+### Backend and frontend connection flow
+
+Web app flow:
+- frontend signs in with Better Auth
+- frontend calls protected owner APIs with normal bearer/session auth
+
+Telegram Mini App flow:
+1. User links Telegram account with `/connect <code>`
+2. Backend stores `telegram_user_id -> tenant_id`
+3. Bot sends `Open Dashboard` using Telegram `web_app`
+4. Telegram opens the frontend Mini App URL
+5. Frontend reads `window.Telegram.WebApp.initData`
+6. Frontend calls `POST /telegram/miniapp/session`
+7. Backend verifies Telegram signature using `TELEGRAM_BOT_TOKEN`
+8. Backend resolves linked tenant from `telegram_links`
+9. Backend issues a short-lived Mini App bearer token
+10. Frontend uses that token on `/telegram/miniapp/*`
+
+### Telegram owner flow
+
+1. Owner signs in and creates a store.
+2. Owner calls `POST /telegram/link-code`.
+3. Owner sends `/connect <code>` to the Telegram bot.
+4. Telegram webhook receives that message at `POST /telegram/webhook`.
+5. Backend links the Telegram user to the owner tenant.
+6. Bot can now respond with dashboard launch buttons.
+7. User taps `Open Dashboard`.
+8. Telegram Mini App authenticates through `/telegram/miniapp/session`.
+9. Frontend loads `/telegram/miniapp/bootstrap`.
+10. Frontend then manages store/products/orders through Mini App endpoints.
+
+Telegram bot commands:
+
+- `/connect <code>` links the Telegram account to the owner store.
+- `/dashboard` opens the Telegram Mini App.
+- `/products` shows a product summary and dashboard launch action.
+- `/addproduct` starts the same AI product draft flow used by the backend API.
+- Reply in chat to answer each AI follow-up question.
+- `/confirm` creates the product once the draft is ready.
+- `/cancel` discards the current Telegram product draft.
+- `/store`, `/inventory`, `/orders`, and `/order <id>` remain available for read-only store access.
+
+### Frontend env for Telegram Mini App
+
+In `frontend/.env`:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend-domain
+```
+
+Do not leave this as `http://localhost:8080` when testing from Telegram on a phone. Inside Telegram, `localhost` points to the device/webview, not your development machine.
+
+### Common Telegram Mini App failures
+
+If Telegram Mini App shows `Failed to fetch`:
+- `NEXT_PUBLIC_API_URL` is likely still pointing to `localhost`
+- backend is not publicly reachable
+- frontend cannot reach backend over HTTPS
+
+If Telegram Mini App shows `initData is required`:
+- page was opened outside Telegram `web_app`
+- or Telegram script/init timing was not ready yet
+- use the `Open Dashboard` button from the Telegram bot
+
+If Telegram Mini App shows `Open this from Telegram or paste initData below for testing`:
+- page was opened in a normal browser
+- Telegram did not inject `initData`
+
+### AI draft + OpenAI env vars
+
+```env
+OPEN_AI_API=...
+OPEN_AI_MODEL=gpt-4o-mini
+```
+
+### Product draft indexing migration
+
+New fields were added to `product_drafts`:
+
+- `index_status` (`pending` | `indexed`)
+- `index_error`
+- `index_attempts`
+- `indexed_at`
+
+Migration file:
+
+- `backend/supabase/migrations/0003_product_draft_index_tracking.sql`
+- `backend/supabase/migrations/0004_product_knowledge.sql`
+
+Apply migrations with your existing flow before using AI draft confirm in production.
 
 ### Local subdomain testing
 
@@ -298,13 +513,24 @@ Tenant create/update automatically triggers:
 Current implementation:
 
 - Uses Pinecone namespace per tenant (`<prefix>-<tenantId>`).
-- Indexes one tenant profile vector + product vectors for that tenant.
+- Indexes one tenant profile vector + product vectors + variant vectors for that tenant.
 - Stores graph-like relation metadata for filtering/traversal:
   - `relationTenantNode` (e.g. `tenant:<tenantId>`)
   - `relationNode` (e.g. `product:<productId>`)
-  - `entityType` (`tenant_profile` or `product`)
+  - `entityType` (`tenant_profile`, `product`, `product_variant`)
 
 If Pinecone env vars are missing, indexing is skipped (tenant API still succeeds).
+
+## Product indexing from AI draft confirm
+
+`POST /products/ai/confirm` now:
+
+1. Creates product + variants in Postgres.
+2. Triggers Pinecone indexing for that product.
+3. If indexing fails, product creation still succeeds and draft is marked as pending retry:
+   - `index_status = pending`
+   - `index_error = <reason>`
+   - `index_attempts` incremented
 
 ## Production subdomain setup (`eavheang.me`)
 

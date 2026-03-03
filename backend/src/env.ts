@@ -22,12 +22,18 @@ const envSchema = z.object({
   SUPABASE_STORAGE_BUCKET: z.string().default("store-assets"),
 
   CLOUDINARY_URL: z.string().optional(),
-  GEMINI_API_KEY: z.string().min(1).optional(),
+  OPEN_AI_API: z.string().min(1).optional(),
+  OPEN_AI_MODEL: z.string().min(1).default("gpt-4o-mini"),
 
   PINECONE_API_KEY: z.string().optional(),
   PINECONE_INDEX: z.string().optional(),
   PINECONE_VECTOR_DIM: z.coerce.number().int().positive().default(256),
   PINECONE_NAMESPACE_PREFIX: z.string().default("tenant"),
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
+  TELEGRAM_CHAT_ID: z.string().optional(),
+  TELEGRAM_MINI_APP_URL: z.string().url().optional(),
+  TELEGRAM_MINI_APP_SESSION_TTL_MINUTES: z.coerce.number().int().positive().default(480),
 
   STORE_URL_PROTOCOL: z.enum(["http", "https"]).default("http"),
   STORE_BASE_DOMAIN: z.string().default("lvh.me"),

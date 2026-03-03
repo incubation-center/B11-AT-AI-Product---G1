@@ -1,10 +1,15 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { assistantRoutes } from "./routes/assistant.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { docsRoutes } from "./routes/docs.routes";
 import { meRoutes } from "./routes/me.routes";
+import { orderRoutes } from "./routes/order.routes";
+import { productRoutes } from "./routes/product.routes";
+import { ragRoutes } from "./routes/rag.routes";
 import { rootRoutes } from "./routes/root.routes";
 import { tenantRoutes } from "./routes/tenant.routes";
+import { telegramRoutes } from "./routes/telegram.routes";
 import { env } from "./env";
 
 const app = new Hono();
@@ -55,6 +60,11 @@ app.route("/", rootRoutes);
 app.route("/", docsRoutes);
 app.route("/", authRoutes);
 app.route("/", meRoutes);
+app.route("/", assistantRoutes);
 app.route("/", tenantRoutes);
+app.route("/", telegramRoutes);
+app.route("/", productRoutes);
+app.route("/", orderRoutes);
+app.route("/", ragRoutes);
 
 export default app;

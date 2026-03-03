@@ -58,10 +58,10 @@ function signCloudinaryParams(params: Record<string, string | number>, apiSecret
     .digest("hex");
 }
 
-export async function uploadStoreAssetToCloudinary(input: {
-  type: AssetType;
+async function uploadImageToCloudinary(input: {
   file: File;
-  ownerUserId: string;
+  folder: string;
+  publicId: string;
 }): Promise<CloudinaryUploadResult> {
   const { apiKey, apiSecret, cloudName } = parseCloudinaryUrl();
 
@@ -70,14 +70,11 @@ export async function uploadStoreAssetToCloudinary(input: {
     throw new Error("Unsupported image type. Use jpeg, png, webp, gif, svg, or avif.");
   }
 
-  const safeOwnerId = sanitizePathPart(input.ownerUserId);
   const timestamp = Math.floor(Date.now() / 1000);
-  const folder = `tenants/${safeOwnerId}/${input.type}`;
-  const publicId = `${input.type}-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const signature = signCloudinaryParams(
     {
-      folder,
-      public_id: publicId,
+      folder: input.folder,
+      public_id: input.publicId,
       timestamp,
     },
     apiSecret
@@ -87,8 +84,8 @@ export async function uploadStoreAssetToCloudinary(input: {
   body.set("file", input.file);
   body.set("api_key", apiKey);
   body.set("timestamp", String(timestamp));
-  body.set("folder", folder);
-  body.set("public_id", publicId);
+  body.set("folder", input.folder);
+  body.set("public_id", input.publicId);
   body.set("signature", signature);
 
   const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -122,4 +119,52 @@ export async function uploadStoreAssetToCloudinary(input: {
     format: typeof data?.format === "string" ? data.format : "",
     bytes: typeof data?.bytes === "number" ? data.bytes : 0,
   };
+}
+
+export async function uploadStoreAssetToCloudinary(input: {
+  type: AssetType;
+  file: File;
+  ownerUserId: string;
+}): Promise<CloudinaryUploadResult> {
+  const safeOwnerId = sanitizePathPart(input.ownerUserId);
+  const folder = `tenants/${safeOwnerId}/${input.type}`;
+  const publicId = `${input.type}-${Date.now()}-${randomUUID().slice(0, 8)}`;
+  return uploadImageToCloudinary({
+    file: input.file,
+    folder,
+    publicId,
+  });
+}
+
+export async function uploadProductImageToCloudinary(input: {
+  file: File;
+  tenantId: string;
+  productId: string;
+}): Promise<CloudinaryUploadResult> {
+  const safeTenantId = sanitizePathPart(input.tenantId);
+  const safeProductId = sanitizePathPart(input.productId);
+  const folder = `tenants/${safeTenantId}/products/${safeProductId}`;
+  const publicId = `product-${Date.now()}-${randomUUID().slice(0, 8)}`;
+  return uploadImageToCloudinary({
+    file: input.file,
+    folder,
+    publicId,
+  });
+}
+
+export async function uploadTelegramDraftImageToCloudinary(input: {
+  file: File;
+  tenantId: string;
+  telegramUserId: number;
+}): Promise<CloudinaryUploadResult> {
+  const safeTenantId = sanitizePathPart(input.tenantId);
+  const safeTelegramUserId = sanitizePathPart(String(input.telegramUserId));
+  const folder = `tenants/${safeTenantId}/products/telegram-drafts/${safeTelegramUserId}`;
+  const publicId = `telegram-product-${Date.now()}-${randomUUID().slice(0, 8)}`;
+
+  return uploadImageToCloudinary({
+    file: input.file,
+    folder,
+    publicId,
+  });
 }
