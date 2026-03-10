@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 
+import { SectionIntro } from "@/components/ui/section-intro";
+
 export function HowItWorks() {
   return (
     <motion.section
@@ -14,15 +16,13 @@ export function HowItWorks() {
     >
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid gap-8 md:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#ffbd59]">
-              How it works
-            </p>
-            <h2 className="mt-2 text-balance text-2xl font-semibold leading-tight md:text-3xl">
-              From product idea to AI‑assisted storefront in three steps.
-            </h2>
-          </div>
-          <ol className="space-y-4 text-sm ">
+          <SectionIntro
+            eyebrow="How it works"
+            title="From product idea to AI-assisted storefront in three steps."
+            eyebrowClassName="text-[#ffbd59]"
+            titleClassName="text-[#002e6b]"
+          />
+          <ol className="space-y-4 text-sm">
             <li>
               <span className="font-semibold text-[#ffbd59]">1. </span>
               Describe your shop, products, and target customers. Coolhat turns
@@ -44,4 +44,3 @@ export function HowItWorks() {
     </motion.section>
   );
 }
-

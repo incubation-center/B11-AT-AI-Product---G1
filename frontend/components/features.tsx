@@ -4,6 +4,8 @@ import { Card, CardBody } from "@heroui/react";
 import { BotMessageSquare, LineChart, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 
+import { SectionIntro } from "@/components/ui/section-intro";
+
 const items = [
   {
     icon: BotMessageSquare,
@@ -33,21 +35,16 @@ export function Features() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="mx-auto max-w-6xl px-4">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#c61c2f]">
-            Why Coolhat
-          </p>
-          <h2 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[#002e6b] md:text-3xl">
-            One assistant for your customers and your team.
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-[#002e6b]">
-            Coolhat combines an AI product expert, storefront builder, and Telegram
-            Mini App into one simple flow, so small shops can sell online with the
-            same experience as bigger brands.
-          </p>
-        </div>
+        <SectionIntro
+          eyebrow="Why Coolhat"
+          title="One assistant for your customers and your team."
+          description="Coolhat combines an AI product expert, storefront builder, and Telegram Mini App into one simple flow, so small shops can sell online with the same experience as bigger brands."
+          className="max-w-2xl"
+          eyebrowClassName="text-[#c61c2f]"
+          descriptionClassName="text-[#002e6b]"
+        />
 
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
           {items.map((item) => (
             <Card
               key={item.title}
