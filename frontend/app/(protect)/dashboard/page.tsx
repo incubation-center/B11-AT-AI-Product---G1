@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { CTAButton } from "@/components/ui/cta-button";
 import { getServerSession } from "@/lib/auth-server";
 
 export default async function DashboardPage() {
@@ -54,19 +53,18 @@ export default async function DashboardPage() {
               belong under <code>app/(public)</code>.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <CTAButton as={Link} href="/" size="sm" className="text-xs">
+              <Link
+                href="/"
+                className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#c61c2f] px-4 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-red-200/70 transition hover:bg-[#a71726]"
+              >
                 Back to landing page
-              </CTAButton>
-              <CTAButton
-                as={Link}
+              </Link>
+              <Link
                 href="/telegram"
-                size="sm"
-                tone="secondary"
-                variant="bordered"
-                className="text-xs"
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#002e6b]/20 bg-white px-4 text-xs font-semibold uppercase tracking-wide text-[#002e6b] transition hover:bg-[#002e6b]/5"
               >
                 Open Telegram mini app
-              </CTAButton>
+              </Link>
             </div>
             <div className="mt-6">
               <SignOutButton />

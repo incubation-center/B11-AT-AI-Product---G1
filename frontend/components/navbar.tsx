@@ -58,7 +58,7 @@ export function Navbar() {
           </CTAButton>
           <CTAButton
             as={Link}
-            href="#get-started"
+            href="/sign-in"
             size="sm"
             className="text-xs shadow-lg shadow-red-200/60"
           >
