@@ -195,6 +195,7 @@ export const users = pgTable(
       googleMapUrl: text("google_map_url"),
       logoUrl: text("logo_url"),
       bannerUrl: text("banner_url"),
+      storefrontTemplate: text("storefront_template"),
       subdomain: text("subdomain").notNull(),
       isActive: boolean("is_active").notNull().default(true),
       createdAt: timestamp("created_at", { withTimezone: true })

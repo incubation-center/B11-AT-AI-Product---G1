@@ -158,6 +158,7 @@ export async function createMyTenant(authUser: SessionUser, input: CreateTenantI
       googleMapUrl: cleanText(input.googleMapUrl),
       logoUrl: normalizeStoreAssetRef(input.logoUrl),
       bannerUrl: normalizeStoreAssetRef(input.bannerUrl),
+      storefrontTemplate: cleanText(input.storefrontTemplate),
       subdomain: baseSubdomain,
       isActive: true,
     })
@@ -213,6 +214,9 @@ export async function updateMyTenant(authUser: SessionUser, input: UpdateTenantI
   if (input.googleMapUrl !== undefined) patch.googleMapUrl = cleanText(input.googleMapUrl);
   if (input.logoUrl !== undefined) patch.logoUrl = normalizeStoreAssetRef(input.logoUrl);
   if (input.bannerUrl !== undefined) patch.bannerUrl = normalizeStoreAssetRef(input.bannerUrl);
+  if (input.storefrontTemplate !== undefined) {
+    patch.storefrontTemplate = cleanText(input.storefrontTemplate);
+  }
   if (typeof input.isActive === "boolean") patch.isActive = input.isActive;
 
   const updated = await db
@@ -274,6 +278,7 @@ export async function getStoreBySubdomain(subdomain: string) {
       googleMapUrl: true,
       logoUrl: true,
       bannerUrl: true,
+      storefrontTemplate: true,
       subdomain: true,
       isActive: true,
       createdAt: true,
