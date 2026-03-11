@@ -1,11 +1,12 @@
 "use client";
 
-import { Button, Card, CardBody } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import { ArrowRight, MessageCircleMore, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import { CTAButton } from "@/components/ui/cta-button";
 
 const description =
   "Coolhat is an AI-powered webstore front builder for SMEs. It gives every shop a virtual assistant that already knows all your products, helps customers find the right items, and connects orders straight into Telegram so owners can manage everything from their phone.";
@@ -41,27 +42,26 @@ export function Hero() {
             {description}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <Button
+            <CTAButton
               as={Link}
               href="#pricing"
               size="lg"
-              radius="full"
-              className="bg-[#c61c2f] px-7 text-sm font-semibold uppercase tracking-wide text-white shadow-xl shadow-red-200/60 hover:bg-[#a71726]"
+              className="px-7 text-sm shadow-xl shadow-red-200/60"
               endContent={<ArrowRight size={16} />}
             >
               Start 14-day free trial
-            </Button>
-            <Button
+            </CTAButton>
+            <CTAButton
               as={Link}
               href="#how-it-works"
               size="lg"
-              radius="full"
+              tone="secondary"
               variant="bordered"
-              className="border-[#002e6b]/20 bg-white px-6 text-xs font-medium uppercase tracking-wide text-[#002e6b] hover:bg-[#002e6b]/5"
+              className="px-6 text-xs font-medium"
               endContent={<MessageCircleMore size={16} />}
             >
               See how Coolhat works
-            </Button>
+            </CTAButton>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-xs text-[#002e6b]">
             <span className="rounded-full border border-emerald-500/30 bg-emerald-500/5 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-emerald-700">
@@ -107,9 +107,9 @@ export function Hero() {
                       for sensitive skin and in your budget.
                     </p>
                     <ul className="list-inside list-disc text-[11px] text-slate-700">
-                      <li>Gentle Rice Cleanser – $14.50</li>
-                      <li>Calming Toner Mist – $11.90</li>
-                      <li>Soothing Night Cream – $19.80</li>
+                      <li>Gentle Rice Cleanser - $14.50</li>
+                      <li>Calming Toner Mist - $11.90</li>
+                      <li>Soothing Night Cream - $19.80</li>
                     </ul>
                     <p className="text-[11px] text-emerald-700">
                       Reply with the product number and I&apos;ll create a checkout
@@ -121,7 +121,7 @@ export function Hero() {
 
               <p className="text-[11px] text-slate-500">
                 Powered by your real product catalog, checkout flow, and Telegram
-                Mini App — not a generic chatbot.
+                Mini App - not a generic chatbot.
               </p>
             </CardBody>
           </Card>
@@ -130,4 +130,3 @@ export function Hero() {
     </motion.section>
   );
 }
-

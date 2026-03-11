@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button, Navbar as HeroNavbar } from "@heroui/react";
+
+import { CTAButton } from "@/components/ui/cta-button";
 
 export function Navbar() {
   return (
@@ -30,10 +31,7 @@ export function Navbar() {
         </div>
 
         <nav className="hidden items-center gap-8 text-sm text-[#002e6b] md:flex">
-          <Link
-            href="#why"
-            className="transition-colors hover:text-[#c61c2f]"
-          >
+          <Link href="#why" className="transition-colors hover:text-[#c61c2f]">
             Why Coolhat
           </Link>
           <Link
@@ -42,36 +40,32 @@ export function Navbar() {
           >
             How it works
           </Link>
-          <Link
-            href="#pricing"
-            className="transition-colors hover:text-[#c61c2f]"
-          >
+          <Link href="#pricing" className="transition-colors hover:text-[#c61c2f]">
             Pricing
           </Link>
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button
+          <CTAButton
             as={Link}
             href="#pricing"
-            radius="full"
             size="sm"
-            className="hidden border border-[#002e6b]/30 bg-transparent text-xs font-medium uppercase tracking-wide text-[#002e6b] hover:bg-[#002e6b]/5 md:inline-flex"
+            tone="secondary"
+            variant="bordered"
+            className="hidden border-[#002e6b]/30 bg-transparent text-xs font-medium md:inline-flex"
           >
             View plans
-          </Button>
-          <Button
+          </CTAButton>
+          <CTAButton
             as={Link}
-            href="#get-started"
-            radius="full"
+            href="/sign-in"
             size="sm"
-            className="bg-[#c61c2f] text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-red-200/60 hover:bg-[#a71726]"
+            className="text-xs shadow-lg shadow-red-200/60"
           >
-            Start free trial
-          </Button>
+            Sign in
+          </CTAButton>
         </div>
       </div>
     </header>
   );
 }
-

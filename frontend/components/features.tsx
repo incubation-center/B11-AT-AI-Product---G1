@@ -1,24 +1,32 @@
-"use client";
+﻿"use client";
 
-import { Card, CardBody } from "@heroui/react";
-import { BotMessageSquare, LineChart, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
+
+import { SectionIntro } from "@/components/ui/section-intro";
+import { LinkCard } from "@/components/ui/link-card";
 
 const items = [
   {
-    icon: BotMessageSquare,
     title: "AI that knows your products",
-    body: "Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing.",
+    description:
+      "Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing.",
+    imageUrl:
+      "/chatbot.svg",
+    href: "#why",
   },
   {
-    icon: Smartphone,
     title: "Built for Telegram first",
-    body: "SME owners live in Telegram. Coolhat sends orders, updates, and customer chats straight to your phone so you don’t need to learn a new dashboard.",
+    description:
+      "SME owners live in Telegram. Coolhat sends orders, updates, and customer chats straight to your phone so you don't need to learn a new dashboard.",
+    imageUrl: "/telegram.svg",
+    href: "#why",
   },
   {
-    icon: LineChart,
     title: "From idea to storefront in days",
-    body: "Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team.",
+    description:
+      "Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team.",
+    imageUrl: "/shops.svg",
+    href: "#why",
   },
 ];
 
@@ -33,42 +41,27 @@ export function Features() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="mx-auto max-w-6xl px-4">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#c61c2f]">
-            Why Coolhat
-          </p>
-          <h2 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[#002e6b] md:text-3xl">
-            One assistant for your customers and your team.
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-[#002e6b]">
-            Coolhat combines an AI product expert, storefront builder, and Telegram
-            Mini App into one simple flow, so small shops can sell online with the
-            same experience as bigger brands.
-          </p>
-        </div>
+        <SectionIntro
+          eyebrow="Why Coolhat"
+          title="One assistant for your customers and your team."
+          description="Coolhat combines an AI product expert, storefront builder, and Telegram Mini App into one simple flow, so small shops can sell online with the same experience as bigger brands."
+          className="max-w-2xl"
+          eyebrowClassName="text-[#c61c2f]"
+          descriptionClassName="text-[#002e6b]"
+        />
 
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
           {items.map((item) => (
-            <Card
+            <LinkCard
               key={item.title}
-              className="border border-slate-200 bg-white shadow-xl shadow-slate-200/80"
-            >
-              <CardBody className="space-y-3 p-5">
-                <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#c61c2f]/10 text-[#c61c2f]">
-                  <item.icon size={18} />
-                </div>
-                <h3 className="text-sm font-semibold text-[#002e6b]">
-                  {item.title}
-                </h3>
-                <p className="text-xs leading-relaxed text-slate-700">
-                  {item.body}
-                </p>
-              </CardBody>
-            </Card>
+              title={item.title}
+              description={item.description}
+              imageUrl={item.imageUrl}
+              href={item.href}
+            />
           ))}
         </div>
       </div>
     </motion.section>
   );
 }
-
