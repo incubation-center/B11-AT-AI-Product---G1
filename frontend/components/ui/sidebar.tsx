@@ -159,13 +159,24 @@ export const MobileSidebar = ({
 
 export const SidebarLink = ({
   link,
+  active = false,
   className,
   ...props
-}: LinkProps & {
+}: Omit<LinkProps, "href"> & {
   link: SidebarLinkItem;
+  active?: boolean;
   className?: string;
 }) => {
   const { open, animate } = useSidebar();
+  const icon =
+    React.isValidElement<{ className?: string }>(link.icon)
+      ? React.cloneElement(link.icon, {
+          className: cn(
+            link.icon.props.className,
+            active ? "text-white" : "text-slate-700"
+          ),
+        })
+      : link.icon;
 
   return (
     <Link
@@ -176,16 +187,20 @@ export const SidebarLink = ({
       )}
       {...props}
     >
-      {link.icon}
+      {icon}
       <motion.span
         animate={{
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="inline-block whitespace-pre text-sm font-medium text-slate-700 transition duration-150 group-hover/sidebar:translate-x-1 !m-0 !p-0"
+        className={cn(
+          "inline-block whitespace-pre text-sm font-medium transition duration-150 group-hover/sidebar:translate-x-1 !m-0 !p-0",
+          active ? "text-white" : "text-slate-700"
+        )}
       >
         {link.label}
       </motion.span>
     </Link>
   );
 };
+

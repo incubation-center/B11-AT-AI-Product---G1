@@ -43,7 +43,4 @@ export function SignUpForm() {
   );
 }
 
-// LEGACY JSX removed — kept below for reference only
-function _legacy_unused_email_input() {
-  return null;
-}
+

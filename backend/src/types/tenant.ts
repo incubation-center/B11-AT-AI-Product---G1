@@ -9,6 +9,14 @@ export const SHOP_TYPES = [
 
 export type ShopType = (typeof SHOP_TYPES)[number];
 
+export const STOREFRONT_TEMPLATES = [
+  "boutique-editorial",
+  "market-grid",
+  "catalog-flow",
+] as const;
+
+export type StorefrontTemplate = (typeof STOREFRONT_TEMPLATES)[number];
+
 export type CreateTenantInput = {
   shopName: string;
   shopType: ShopType;
@@ -17,6 +25,7 @@ export type CreateTenantInput = {
   googleMapUrl?: string | null;
   logoUrl?: string | null;
   bannerUrl?: string | null;
+  storefrontTemplate?: StorefrontTemplate | null;
 };
 
 export type UpdateTenantInput = Partial<CreateTenantInput> & {

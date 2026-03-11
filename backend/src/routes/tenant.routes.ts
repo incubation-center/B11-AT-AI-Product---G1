@@ -13,9 +13,10 @@ import {
   getStoreBySubdomain,
   updateMyTenant,
 } from "../services/tenant.service";
-import { SHOP_TYPES } from "../types/tenant";
-import type { ShopType } from "../types/tenant";
+import { SHOP_TYPES, STOREFRONT_TEMPLATES } from "../types/tenant";
+import type { ShopType, StorefrontTemplate } from "../types/tenant";
 const shopTypeSet = new Set<ShopType>(SHOP_TYPES);
+const storefrontTemplateSet = new Set<StorefrontTemplate>(STOREFRONT_TEMPLATES);
 
 async function getSessionUser(c: Context) {
   const session = await auth.api.getSession({
@@ -48,10 +49,19 @@ tenantRoutes.post("/tenants", requireBearer, async (c) => {
   const body = await c.req.json().catch(() => null);
   const shopName = typeof body?.shop_name === "string" ? body.shop_name.trim() : "";
   const shopType = typeof body?.shop_type === "string" ? body.shop_type : "";
+  const storefrontTemplate = body?.storefront_template;
 
   if (!shopName) return c.json({ message: "shop_name is required" }, 400);
   if (!shopTypeSet.has(shopType as ShopType)) {
     return c.json({ message: "shop_type is invalid" }, 400);
+  }
+  if (
+    storefrontTemplate !== undefined &&
+    storefrontTemplate !== null &&
+    (typeof storefrontTemplate !== "string" ||
+      !storefrontTemplateSet.has(storefrontTemplate as StorefrontTemplate))
+  ) {
+    return c.json({ message: "storefront_template is invalid" }, 400);
   }
 
   const { tenant, conflict } = await createMyTenant(sessionUser, {
@@ -62,6 +72,7 @@ tenantRoutes.post("/tenants", requireBearer, async (c) => {
     googleMapUrl: body?.google_map_url ?? null,
     logoUrl: body?.logo_url ?? null,
     bannerUrl: body?.banner_url ?? null,
+    storefrontTemplate: (storefrontTemplate ?? null) as StorefrontTemplate | null,
   });
 
   if (conflict) {
@@ -77,8 +88,17 @@ tenantRoutes.patch("/me/tenant", requireBearer, async (c) => {
 
   const body = await c.req.json().catch(() => null);
   const shopType = body?.shop_type;
+  const storefrontTemplate = body?.storefront_template;
   if (shopType !== undefined && (typeof shopType !== "string" || !shopTypeSet.has(shopType as ShopType))) {
     return c.json({ message: "shop_type is invalid" }, 400);
+  }
+  if (
+    storefrontTemplate !== undefined &&
+    storefrontTemplate !== null &&
+    (typeof storefrontTemplate !== "string" ||
+      !storefrontTemplateSet.has(storefrontTemplate as StorefrontTemplate))
+  ) {
+    return c.json({ message: "storefront_template is invalid" }, 400);
   }
 
   const { tenant, conflict } = await updateMyTenant(sessionUser, {
@@ -89,6 +109,7 @@ tenantRoutes.patch("/me/tenant", requireBearer, async (c) => {
     googleMapUrl: body?.google_map_url,
     logoUrl: body?.logo_url,
     bannerUrl: body?.banner_url,
+    storefrontTemplate,
     isActive: body?.is_active,
   });
 
@@ -111,8 +132,17 @@ tenantRoutes.patch("/tenants/:id", requireBearer, async (c) => {
 
   const body = await c.req.json().catch(() => null);
   const shopType = body?.shop_type;
+  const storefrontTemplate = body?.storefront_template;
   if (shopType !== undefined && (typeof shopType !== "string" || !shopTypeSet.has(shopType as ShopType))) {
     return c.json({ message: "shop_type is invalid" }, 400);
+  }
+  if (
+    storefrontTemplate !== undefined &&
+    storefrontTemplate !== null &&
+    (typeof storefrontTemplate !== "string" ||
+      !storefrontTemplateSet.has(storefrontTemplate as StorefrontTemplate))
+  ) {
+    return c.json({ message: "storefront_template is invalid" }, 400);
   }
 
   const { tenant, conflict } = await updateMyTenant(sessionUser, {
@@ -123,6 +153,7 @@ tenantRoutes.patch("/tenants/:id", requireBearer, async (c) => {
     googleMapUrl: body?.google_map_url,
     logoUrl: body?.logo_url,
     bannerUrl: body?.banner_url,
+    storefrontTemplate,
     isActive: body?.is_active,
   });
 

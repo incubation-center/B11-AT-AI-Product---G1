@@ -186,6 +186,7 @@ export default function TelegramMiniAppClient() {
     return () => {
       document.body.removeChild(script);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-constructed-context-values */
 "use client";
 
 import { HeroUIProvider } from "@heroui/react";

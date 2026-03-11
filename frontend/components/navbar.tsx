@@ -62,7 +62,7 @@ export function Navbar() {
             size="sm"
             className="text-xs shadow-lg shadow-red-200/60"
           >
-            Start free trial
+            Sign in
           </CTAButton>
         </div>
       </div>
