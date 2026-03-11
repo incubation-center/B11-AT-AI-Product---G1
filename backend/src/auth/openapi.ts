@@ -1,6 +1,5 @@
 import { env } from "../env";
 
-const serverUrl = env.BETTER_AUTH_URL;
 const publicUrl = env.PUBLIC_URL;
 
 export const authOpenApiSpec = {
@@ -10,7 +9,7 @@ export const authOpenApiSpec = {
     version: "1.0.0",
     description: "Authentication endpoints powered by Better Auth and Resend.",
   },
-  servers: [{ url: serverUrl }],
+  servers: [{ url: "/" }],
   tags: [
     { name: "Auth", description: "Better Auth endpoints" },
     { name: "Profile", description: "Authenticated profile endpoint" },
