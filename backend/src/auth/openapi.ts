@@ -20,6 +20,7 @@ export const authOpenApiSpec = {
     { name: "Assistant", description: "Buyer assistant endpoints" },
     { name: "Order & Checkout", description: "Checkout and order management endpoints" },
     { name: "RAG", description: "Manual RAG indexing management endpoints" },
+    { name: "Analytics", description: "Shop analytics and summary endpoints" },
   ],
   components: {
     securitySchemes: {
@@ -131,6 +132,16 @@ export const authOpenApiSpec = {
         type: "object",
         properties: {
           message: { type: "string", example: "Unauthorized" },
+        },
+      },
+      AnalyticsSummaryResponse: {
+        type: "object",
+        required: ["totalRevenue", "totalOrders", "avgOrderValue", "totalProducts"],
+        properties: {
+          totalRevenue: { type: "number", example: 2500.50 },
+          totalOrders: { type: "integer", example: 25 },
+          avgOrderValue: { type: "number", example: 100.02 },
+          totalProducts: { type: "integer", example: 42 },
         },
       },
       TenantResponse: {
@@ -1507,6 +1518,64 @@ export const authOpenApiSpec = {
           "400": { description: "Invalid transition" },
           "401": { description: "Unauthorized" },
           "404": { description: "Order or tenant not found" },
+        },
+      },
+    },
+    "/analytics/summary": {
+      get: {
+        tags: ["Analytics"],
+        summary: "Get analytics summary for the current tenant",
+        description: "Returns total revenue, total orders, average order value, and total products. Supports optional filtering by month and year.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "month",
+            in: "query",
+            required: false,
+            schema: { type: "integer", minimum: 1, maximum: 12 },
+            description: "Month (1-12) for filtering analytics data",
+          },
+          {
+            name: "year",
+            in: "query",
+            required: false,
+            schema: { type: "integer", example: 2026 },
+            description: "Year for filtering analytics data",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Analytics summary data",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AnalyticsSummaryResponse" },
+              },
+            },
+          },
+          "400": {
+            description: "Invalid month or year",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Tenant not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
         },
       },
     },

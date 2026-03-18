@@ -117,14 +117,14 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
       </div>
 
       {isOpen ? (
-        <div className="fixed bottom-20 right-5 z-50 h-[min(72vh,640px)] w-[min(calc(100vw-2rem),390px)] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.18)]">
-          <div className="border-b border-slate-200 bg-[#002e6b] px-5 py-4 text-white">
+        <div className="fixed bottom-20 right-5 z-50 flex h-[min(72vh,640px)] w-[min(calc(100vw-2rem),390px)] flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.18)]">
+          <div className="shrink-0 border-b border-slate-200 bg-[#002e6b] px-5 py-4 text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Store Assistant</p>
             <h2 className="mt-1 text-lg font-semibold">{store.shopName}</h2>
             <p className="mt-1 text-sm text-white/75">Ask about products, pricing, stock, and variants.</p>
           </div>
 
-          <div ref={scrollRef} className="flex h-[calc(100%-154px)] flex-col gap-3 overflow-y-auto bg-slate-50 px-4 py-4">
+          <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-slate-50 px-4 py-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -145,7 +145,7 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
             ) : null}
           </div>
 
-          <div className="border-t border-slate-200 bg-white px-4 py-4">
+          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3">
             {error ? <p className="mb-2 text-sm text-rose-600">{error}</p> : null}
             <div className="flex items-end gap-2 rounded-3xl border border-slate-200 bg-slate-50 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
               <textarea
