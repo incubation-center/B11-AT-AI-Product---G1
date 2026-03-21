@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("light", "font-sans", geist.variable)} data-theme="light">
+    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body className={`${fraunces.variable} ${manrope.variable} bg-white font-[family:var(--font-dashboard-sans)] antialiased`}>
         <Providers>{children}</Providers>
       </body>

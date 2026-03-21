@@ -1,54 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
-
 import { CTAButton } from "@/components/ui/cta-button";
-import {
-  generateTelegramLinkCode,
-  getTelegramLinkStatus,
-  type TelegramLinkStatus,
-} from "@/lib/auth";
+import { useTelegramLinkStatus, useGenerateTelegramCode } from "@/hooks/use-telegram-queries";
 
 export function TelegramLinkPanel({
   initialStatus,
 }: {
-  initialStatus: TelegramLinkStatus | null;
+  initialStatus?: any;
 }) {
-  const [status, setStatus] = useState(initialStatus);
-  const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const { data: status, isLoading: statusLoading, error: statusError, refetch } = useTelegramLinkStatus();
+  const generateCodeMutation = useGenerateTelegramCode();
+
+  const error = statusError || generateCodeMutation.error;
+  const isPending = statusLoading || generateCodeMutation.isPending;
 
   function refreshStatus() {
-    startTransition(async () => {
-      try {
-        const next = await getTelegramLinkStatus();
-        setStatus(next);
-      } catch (refreshError) {
-        setError(
-          refreshError instanceof Error
-            ? refreshError.message
-            : "Unable to refresh Telegram status"
-        );
-      }
-    });
+    refetch();
   }
 
   function generateCode() {
-    setError("");
-
-    startTransition(async () => {
-      try {
-        await generateTelegramLinkCode();
-        const next = await getTelegramLinkStatus();
-        setStatus(next);
-      } catch (submitError) {
-        setError(
-          submitError instanceof Error
-            ? submitError.message
-            : "Unable to generate code"
-        );
-      }
-    });
+    generateCodeMutation.mutate(undefined);
   }
 
   return (
@@ -85,7 +56,7 @@ export function TelegramLinkPanel({
 
         {error ? (
           <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {error}
+            {error instanceof Error ? error.message : String(error)}
           </div>
         ) : null}
       </section>

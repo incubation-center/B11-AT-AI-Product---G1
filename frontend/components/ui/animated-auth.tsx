@@ -105,6 +105,16 @@ function calculateCharacterPosition(mouse: { x: number; y: number }, intensity =
   };
 }
 
+function useIsMounted() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  return isMounted;
+}
+
 function useMousePosition() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
@@ -208,15 +218,30 @@ function Pupil({
   forceLookX,
   forceLookY,
 }: PupilProps) {
+  const isMounted = useIsMounted();
   const mouse = useMousePosition();
   const position = useMemo(
     () => calculateEyePosition(mouse, maxDistance, forceLookX, forceLookY),
     [mouse, maxDistance, forceLookX, forceLookY],
   );
 
+  if (!isMounted) {
+    return (
+      <div
+        className="rounded-full"
+        style={{
+          width: size,
+          height: size,
+          backgroundColor: pupilColor,
+        }}
+      />
+    );
+  }
+
   return (
     <div
       className="rounded-full"
+      suppressHydrationWarning
       style={{
         width: size,
         height: size,
@@ -238,6 +263,7 @@ function EyeBall({
   forceLookX,
   forceLookY,
 }: EyeBallProps) {
+  const isMounted = useIsMounted();
   const mouse = useMousePosition();
   const position = useMemo(
     () => calculateEyePosition(mouse, maxDistance, forceLookX, forceLookY),
@@ -247,6 +273,7 @@ function EyeBall({
   return (
     <div
       className="flex items-center justify-center rounded-full transition-all duration-150"
+      suppressHydrationWarning
       style={{
         width: size,
         height: isBlinking ? 2 : size,
@@ -254,15 +281,26 @@ function EyeBall({
         overflow: "hidden",
       }}
     >
-      {!isBlinking && (
+      {!isBlinking && isMounted && (
         <div
           className="rounded-full"
+          suppressHydrationWarning
           style={{
             width: pupilSize,
             height: pupilSize,
             backgroundColor: pupilColor,
             transform: `translate(${position.x}px,${position.y}px)`,
             transition: "transform 0.1s ease-out",
+          }}
+        />
+      )}
+      {!isBlinking && !isMounted && (
+        <div
+          className="rounded-full"
+          style={{
+            width: pupilSize,
+            height: pupilSize,
+            backgroundColor: pupilColor,
           }}
         />
       )}
@@ -277,6 +315,7 @@ function CharactersScene({
   password,
   showPassword,
 }: CharactersSceneProps) {
+  const isMounted = useIsMounted();
   const mouse = useMousePosition();
   const isPurpleBlinking = useBlinking();
   const isBlackBlinking = useBlinking();
@@ -291,10 +330,11 @@ function CharactersScene({
     [mouse],
   );
 
-  const purple = positions.purple;
-  const black = positions.black;
-  const yellow = positions.yellow;
-  const orange = positions.orange;
+  // Use stable positions during SSR to avoid hydration mismatch
+  const purple = isMounted ? positions.purple : { faceX: 0, faceY: 0, bodySkew: 0 };
+  const black = isMounted ? positions.black : { faceX: 0, faceY: 0, bodySkew: 0 };
+  const yellow = isMounted ? positions.yellow : { faceX: 0, faceY: 0, bodySkew: 0 };
+  const orange = isMounted ? positions.orange : { faceX: 0, faceY: 0, bodySkew: 0 };
   const hiding = password.length > 0 && !showPassword;
   const peeking = password.length > 0 && showPassword;
 
@@ -302,6 +342,7 @@ function CharactersScene({
     <div className="relative" style={{ width: 550, height: 400 }}>
       <div
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
+        suppressHydrationWarning
         style={{
           left: 70,
           width: 180,
@@ -319,6 +360,7 @@ function CharactersScene({
       >
         <div
           className="absolute flex gap-8 transition-all duration-700 ease-in-out"
+          suppressHydrationWarning
           style={{
             left: peeking ? 20 : isLookingAtEachOther ? 55 : 45 + purple.faceX,
             top: peeking ? 35 : isLookingAtEachOther ? 65 : 40 + purple.faceY,
@@ -345,6 +387,7 @@ function CharactersScene({
 
       <div
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
+        suppressHydrationWarning
         style={{
           left: 240,
           width: 120,
@@ -364,6 +407,7 @@ function CharactersScene({
       >
         <div
           className="absolute flex gap-6 transition-all duration-700 ease-in-out"
+          suppressHydrationWarning
           style={{
             left: peeking ? 10 : isLookingAtEachOther ? 32 : 26 + black.faceX,
             top: peeking ? 28 : isLookingAtEachOther ? 12 : 32 + black.faceY,
@@ -390,6 +434,7 @@ function CharactersScene({
 
       <div
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
+        suppressHydrationWarning
         style={{
           left: 0,
           width: 240,
@@ -403,6 +448,7 @@ function CharactersScene({
       >
         <div
           className="absolute flex gap-8 transition-all duration-200 ease-out"
+          suppressHydrationWarning
           style={{
             left: peeking ? 50 : 82 + orange.faceX,
             top: peeking ? 85 : 90 + orange.faceY,
@@ -415,6 +461,7 @@ function CharactersScene({
 
       <div
         className="absolute bottom-0 transition-all duration-700 ease-in-out"
+        suppressHydrationWarning
         style={{
           left: 310,
           width: 140,
@@ -428,6 +475,7 @@ function CharactersScene({
       >
         <div
           className="absolute flex gap-6 transition-all duration-200 ease-out"
+          suppressHydrationWarning
           style={{
             left: peeking ? 20 : 52 + yellow.faceX,
             top: peeking ? 35 : 40 + yellow.faceY,
@@ -438,6 +486,7 @@ function CharactersScene({
         </div>
         <div
           className="absolute h-[4px] w-20 rounded-full bg-[#2D2D2D] transition-all duration-200 ease-out"
+          suppressHydrationWarning
           style={{
             left: peeking ? 10 : 40 + yellow.faceX,
             top: peeking ? 88 : 88 + yellow.faceY,

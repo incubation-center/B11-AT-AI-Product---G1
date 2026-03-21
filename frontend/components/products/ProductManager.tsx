@@ -1,41 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  listProducts,
-  deactivateProduct,
-  type Product,
-} from "@/lib/products";
+import { useState } from "react";
+import type { Product } from "@/lib/products";
+import { useProducts, useDeactivateProduct } from "@/hooks/use-products-queries";
 import { ProductList } from "./ProductList";
 import { ProductFormDialog } from "./ProductFormDialog";
 
 export default function ProductManager() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const res = await listProducts({ page_size: 50 });
-      if (res && res.data) {
-        setProducts(res.data);
-      }
-    } catch (err: unknown) {
-      const error = err as Error;
-      setError(error.message || "Failed to load products");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // Queries
+  const { data, isLoading, error } = useProducts({ page_size: 50 });
+  const deactivateMutation = useDeactivateProduct();
 
   const handleCreateNew = () => {
     setEditingProduct(null);
@@ -50,15 +28,14 @@ export default function ProductManager() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to deactivate this product?")) return;
     try {
-      await deactivateProduct(id);
-      fetchProducts();
+      await deactivateMutation.mutateAsync(id);
     } catch (err: unknown) {
       const error = err as Error;
       alert("Failed to delete product: " + error.message);
     }
   };
 
-  if (loading && products.length === 0) {
+  if (isLoading && !data?.data) {
     return <div className="p-4 text-sm text-[var(--dashboard-muted)]">Loading products...</div>;
   }
 
@@ -75,11 +52,15 @@ export default function ProductManager() {
         </button>
       </div>
 
-      {error && <div className="text-sm text-red-500">{error}</div>}
+      {error && (
+        <div className="text-sm text-red-500">
+          {error instanceof Error ? error.message : "Failed to load products"}
+        </div>
+      )}
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         <ProductList
-          products={products}
+          products={data?.data || []}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
@@ -90,7 +71,7 @@ export default function ProductManager() {
           isOpen={isDialogOpen}
           onOpenChange={setIsDialogOpen}
           product={editingProduct}
-          onSaved={fetchProducts}
+          onSaved={() => setIsDialogOpen(false)}
         />
       )}
     </div>
