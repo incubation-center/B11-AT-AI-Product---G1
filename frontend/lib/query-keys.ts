@@ -17,4 +17,14 @@ export const queryKeys = {
     [...queryKeys.metrics, 'dashboard', dateRange ?? 'weekly'] as const,
   inventory: ['inventory'] as const,
   lowStockItems: () => [...queryKeys.inventory, 'low-stock'] as const,
+  profile: {
+    base: ['profile'] as const,
+    me: () => [...queryKeys.profile.base, 'me'] as const,
+  },
+  tenants: {
+    base: ['tenants'] as const,
+    status: () => [...queryKeys.tenants.base, 'status'] as const,
+  },
 };
+
+export const QUERY_KEYS = queryKeys;

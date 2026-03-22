@@ -24,17 +24,14 @@ export default function TelegramPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto py-4">
+    <div className="flex flex-col gap-8 py-4">
       {/* Header section */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary rounded-xl shadow-lg shadow-primary/20">
-            <Send className="text-white w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Telegram Manager</h1>
-            <p className="text-default-500 font-medium">Connect your store to the Telegram ecosystem</p>
-          </div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1>Telegram Manager</h1>
+          <p className="text-default-500 mt-1">
+            Connect your store to the Telegram ecosystem
+          </p>
         </div>
       </div>
 

@@ -16,8 +16,10 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Pagination,
 } from '@heroui/react';
 import { Edit, MoreVertical } from 'lucide-react';
+import React from 'react';
 import type { Product } from '@/lib/products';
 
 interface ProductListProps {
@@ -27,6 +29,9 @@ interface ProductListProps {
   onRestore: (id: string) => void;
   onSync: (id: string) => void;
   isLoading?: boolean;
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function ProductList({
@@ -36,6 +41,9 @@ export function ProductList({
   onRestore,
   onSync,
   isLoading,
+  page = 1,
+  totalPages = 1,
+  onPageChange,
 }: ProductListProps) {
   const columns = [
     { key: 'product', label: 'Product' },
@@ -194,8 +202,30 @@ export function ProductList({
     );
   }
 
+  const bottomContent = React.useMemo(() => {
+    if (totalPages <= 1 && products.length === 0) return null;
+    
+    return (
+      <div className="py-2 px-2 flex justify-end items-center">
+        <Pagination
+          showControls
+          showShadow
+          color="primary"
+          variant="flat"
+          page={page}
+          total={totalPages}
+          onChange={onPageChange}
+        />
+      </div>
+    );
+  }, [page, totalPages, onPageChange, products.length]);
+
   return (
-    <Table aria-label="Products table">
+    <Table 
+      aria-label="Products table"
+      bottomContent={bottomContent}
+      bottomContentPlacement="outside"
+    >
       <TableHeader columns={columns}>
         {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
       </TableHeader>

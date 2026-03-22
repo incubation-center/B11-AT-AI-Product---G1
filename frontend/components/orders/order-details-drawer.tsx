@@ -15,13 +15,13 @@ import {
   Select,
   SelectItem,
 } from '@heroui/react';
-import { MapPin, Phone, User, Calendar, CreditCard, ShoppingBag, AlertCircle, SlidersHorizontal } from 'lucide-react';
+import { MapPin, Phone, User, Calendar, ShoppingBag, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import type { Order, OrderStatus, PaymentStatus, OrderItem } from '@/types/orders';
 import { OrderStatusChip, PaymentStatusChip } from './order-status-chip';
 import { useUpdateOrderStatus, useUpdateOrderPayment } from '@/hooks/use-orders-queries';
 
 interface OrderDetailsDrawerProps {
-  order: (Order & { items: OrderItem[]; payments: any[] }) | null;
+  order: Order | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -175,11 +175,16 @@ export const OrderDetailsDrawer = ({ order, isOpen, onClose }: OrderDetailsDrawe
                                   <p className="text-sm font-medium leading-tight">
                                     {item.product_name_snapshot}
                                   </p>
-                                  {item.variant_snapshot && (
+                                  {item.variant_snapshot && typeof item.variant_snapshot === 'object' && (Object.keys(item.variant_snapshot).length > 0) ? (
                                     <p className="text-xs text-default-400">
-                                      {typeof item.variant_snapshot === 'object' && 'size' in item.variant_snapshot ? (item.variant_snapshot.size as React.ReactNode) : ''} {typeof item.variant_snapshot === 'object' && 'color' in item.variant_snapshot ? (item.variant_snapshot.color as React.ReactNode) : ''}
+                                      {Object.entries(item.variant_snapshot as Record<string, string>).map(([key, value]) => (
+                                        <span key={key} className="mr-2">
+                                          <span className="capitalize text-default-300">{key}:</span> {value}
+                                        </span>
+                                      ))}
                                     </p>
-                                  )}
+                                  ) : null}
+
                                   <p className="text-xs text-default-400 mt-1">
                                     {item.qty} x ${item.price_snapshot}
                                   </p>

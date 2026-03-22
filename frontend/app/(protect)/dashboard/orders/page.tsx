@@ -45,7 +45,7 @@ export default function OrdersPage() {
 
 
       <OrderDetailsDrawer 
-        order={(orderDetail as any) || null} 
+        order={orderDetail || null} 
         isOpen={isDrawerOpen} 
         onClose={() => setIsDrawerOpen(false)} 
       />

@@ -5,10 +5,13 @@ import { protectedFetch } from './auth';
 export type ProductVariant = {
   id: string;
   product_id: string;
-  variant_name: string;
+  variant_name: string | null;
+  size: string | null;
+  color: string | null;
   price_override_usd: string | null;
   price_override_khr: string | null;
   stock_qty: number;
+  low_stock_threshold: number;
   is_active: boolean;
   image_url?: string | null;
   sku?: string | null;
@@ -53,17 +56,19 @@ export type UpdateProductPayload = Partial<CreateProductPayload> & {
 };
 
 export type CreateVariantPayload = {
-  variant_name: string;
-  price_override_usd?: string | number;
-  price_override_khr?: string | number;
+  variant_name?: string;
+  size?: string;
+  color?: string;
+  price_override_usd?: string | number | null;
+  price_override_khr?: string | number | null;
   stock_qty?: number;
+  low_stock_threshold?: number;
   sku?: string;
   image_url?: string;
-};
-
-export type UpdateVariantPayload = Partial<CreateVariantPayload> & {
   is_active?: boolean;
 };
+
+export type UpdateVariantPayload = Partial<CreateVariantPayload>;
 
 export type LowStockItem = {
   type: 'product' | 'variant';

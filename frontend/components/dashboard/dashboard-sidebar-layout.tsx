@@ -35,9 +35,14 @@ const links = [
     icon: <Send className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
   {
+    label: 'Inventory',
+    href: '/dashboard/inventory',
+    icon: <Waypoints className="h-5 w-5 flex-shrink-0 text-slate-700" />,
+  },
+  {
     label: 'Telegram',
     href: '/dashboard/telegram',
-    icon: <Waypoints className="h-5 w-5 flex-shrink-0 text-slate-700" />,
+    icon: <Bot className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
   {
     label: 'Settings',

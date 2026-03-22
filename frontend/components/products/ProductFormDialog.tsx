@@ -21,13 +21,16 @@ import {
   confirmProductDraft,
   updateProduct,
   uploadProductImage,
+  createVariant,
+  updateVariant,
+  deactivateVariant,
 } from '@/lib/products';
 import { ProductFormGeneralStep } from './product-form-general-step';
 import { ProductFormInventoryStep } from './product-form-inventory-step';
 import { ProductFormMediaStep } from './product-form-media-step';
 import { ProductFormVariantsStep } from './product-form-variants-step';
 import { ProductFormAiStep } from './product-form-ai-step';
-import type { ProductDraft, AiDraftResponse, AiConfirmResponse } from '@/types';
+import type { ProductVariant, ProductDraft, AiDraftResponse, AiConfirmResponse } from '@/types';
 import { AlertCircle } from 'lucide-react';
 
 interface ProductFormDialogProps {
@@ -63,6 +66,7 @@ export function ProductFormDialog({
   const [hasVariants, setHasVariants] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [variants, setVariants] = useState<Partial<ProductVariant>[]>([]);
 
   // UI State
   const [activeTab, setActiveTab] = useState(TABS.GENERAL);
@@ -96,6 +100,7 @@ export function ProductFormDialog({
     setHasVariants(false);
     setIsActive(true);
     setImageFiles([]);
+    setVariants([]);
     setActiveTab(TABS.GENERAL);
     setDraft(null);
     setAiQuestion(null);
@@ -113,6 +118,7 @@ export function ProductFormDialog({
     setTrackInventory(prod.track_inventory ?? true);
     setHasVariants(prod.has_variants ?? false);
     setIsActive(prod.is_active ?? true);
+    setVariants(prod.variants || []);
   };
 
   const isGeneralValid =
@@ -214,6 +220,11 @@ export function ProductFormDialog({
       if (uploadError) {
         window.alert(`Saved product, but image failed: ${uploadError}`);
       }
+
+      // Sync variants for new product
+      if (hasVariants && variants.length > 0) {
+        await syncVariants(res.product.id);
+      }
     } catch (err: unknown) {
       const e = err as Error;
       setError(e.message || 'Failed to confirm');
@@ -249,11 +260,52 @@ export function ProductFormDialog({
       if (uploadError) {
         window.alert(`Saved product, but image failed: ${uploadError}`);
       }
+
+      // Sync variants
+      if (hasVariants) {
+        await syncVariants(product.id);
+      }
     } catch (err: unknown) {
       const e = err as Error;
       setError(e.message || 'Failed to save');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncVariants = async (productId: string) => {
+    try {
+      const existingVariants = product?.variants || [];
+      const currentVariants = variants;
+
+      // Handle additions and updates
+      for (const v of currentVariants) {
+        const payload = {
+          size: v.size ?? undefined,
+          color: v.color ?? undefined,
+          price_override_usd: v.price_override_usd ?? undefined,
+          price_override_khr: v.price_override_khr ?? undefined,
+          stock_qty: v.stock_qty,
+          is_active: true,
+        };
+
+        if (v.id) {
+          await updateVariant(v.id, payload);
+        } else {
+          await createVariant(productId, payload);
+        }
+      }
+
+      // Handle deactivations
+      const currentIds = new Set(currentVariants.map((v) => v.id).filter(Boolean));
+      for (const ev of existingVariants) {
+        if (!currentIds.has(ev.id)) {
+          await deactivateVariant(ev.id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to sync variants:', err);
+      // We don't block the UI here but maybe show a note
     }
   };
 
@@ -364,6 +416,8 @@ export function ProductFormDialog({
                       <ProductFormVariantsStep
                         hasVariants={hasVariants}
                         onHasVariantsChange={setHasVariants}
+                        variants={variants}
+                        onVariantsChange={setVariants}
                         isLoading={loading}
                       />
                     </Tab>

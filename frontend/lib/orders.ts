@@ -27,10 +27,7 @@ type BackendLowStockResponse = {
 export const ordersApi = {
   getAll: () => protectedFetch<{ orders: Order[] }>('/orders'),
 
-  getById: (id: string) =>
-    protectedFetch<Order & { items: unknown[]; payments: unknown[] }>(
-      `/orders/${id}`,
-    ),
+  getById: (id: string) => protectedFetch<Order>(`/orders/${id}`),
 
   updateStatus: (id: string, status: string) =>
     protectedFetch<Order>(`/orders/${id}/status`, {
