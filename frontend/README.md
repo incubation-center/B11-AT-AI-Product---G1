@@ -35,11 +35,13 @@ NEXT_PUBLIC_API_URL=https://your-backend-domain
 The frontend currently has two main surfaces:
 
 1. Normal web app
+
 - route: `/`
 - uses Better Auth-based web login/session flow
 - talks to standard owner endpoints such as `/products`, `/orders`, `/me/tenant`
 
 2. Telegram Mini App
+
 - route: `/telegram`
 - opened from the Telegram bot using Telegram `web_app`
 - authenticates with Telegram `initData`, not Better Auth browser login
@@ -52,6 +54,7 @@ The frontend currently has two main surfaces:
 1. User signs in with Better Auth
 2. Frontend uses session/bearer auth
 3. Frontend calls normal owner routes:
+
 - `/me`
 - `/me/tenant`
 - `/products`
@@ -71,12 +74,14 @@ POST /telegram/miniapp/session
 
 6. Backend verifies Telegram signature and returns a Mini App bearer token
 7. Frontend uses that token for:
+
 - `/telegram/miniapp/bootstrap`
 - `/telegram/miniapp/tenant`
 - `/telegram/miniapp/products`
 - `/telegram/miniapp/orders`
 
 Important:
+
 - the Mini App does not use the normal Better Auth login flow
 - the Mini App does not directly call the normal `/products` route group
 - backend services are shared, but the auth/route entry is different
@@ -101,6 +106,7 @@ Current sections:
 Usually means the Mini App frontend cannot reach the backend.
 
 Check:
+
 - `NEXT_PUBLIC_API_URL` is public HTTPS, not `localhost`
 - backend is reachable from the internet
 - backend CORS allows the frontend domain
@@ -110,6 +116,7 @@ Check:
 Usually means frontend reached backend, but Telegram `initData` was empty.
 
 Check:
+
 - you opened from Telegram bot `Open Dashboard`, not a normal browser URL
 - you are testing from Telegram mobile app
 - the Telegram WebApp script had time to initialize
@@ -153,6 +160,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
 Telegram Mini App development on a phone:
+
 - frontend must be available on public HTTPS
 - backend must be available on public HTTPS
 - Telegram bot must point to the public frontend Mini App URL

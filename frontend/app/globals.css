@@ -1,5 +1,5 @@
 @config "../tailwind.config.ts";
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @layer base {
   :root {
@@ -54,11 +54,21 @@
     @apply bg-background font-sans text-foreground antialiased;
   }
 
-  h1 { @apply text-4xl font-bold tracking-tight; }
-  h2 { @apply text-3xl font-bold tracking-tight; }
-  h3 { @apply text-2xl font-semibold; }
-  h4 { @apply text-lg font-semibold; }
-  p { @apply text-base leading-relaxed; }
+  h1 {
+    @apply text-4xl font-bold tracking-tight;
+  }
+  h2 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  h3 {
+    @apply text-2xl font-semibold;
+  }
+  h4 {
+    @apply text-lg font-semibold;
+  }
+  p {
+    @apply text-base leading-relaxed;
+  }
 
   a:not([class]) {
     @apply text-primary underline-offset-2 hover:underline transition-colors duration-150;

@@ -104,7 +104,19 @@ productRoutes.get("/inventory/low-stock", requireBearer, async (c) => {
   const tenantId = resolved.tenantId!;
 
   const items = await listLowStockItems(tenantId);
-  return c.json({ items, total: items.length });
+  return c.json({
+    items: items.map((item) => ({
+      level: item.level,
+      tenant_id: item.tenantId,
+      product_id: item.productId,
+      product_name: item.productName,
+      variant_id: item.variantId,
+      variant_label: item.variantLabel,
+      stock_qty: item.stockQty,
+      low_stock_threshold: item.lowStockThreshold,
+    })),
+    total: items.length,
+  });
 });
 
 productRoutes.post("/products/ai/start", requireBearer, async (c) => {

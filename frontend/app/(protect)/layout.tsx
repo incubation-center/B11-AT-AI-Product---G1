@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { requireServerSession } from "@/lib/auth-server";
+import { requireServerSession } from '@/lib/auth-server';
 
 export default async function ProtectedLayout({
   children,

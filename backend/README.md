@@ -35,6 +35,52 @@ Then call endpoints with:
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 ```
 
+## Backend Architecture & Services
+
+The backend is organized into logical service layers (`src/services/`) that handle business logic, separated from routes:
+
+| Service | Responsibility |
+|---|---|
+| **assistant.service.ts** | RAG-powered buyer assistant for storefront product Q&A |
+| **inventory.service.ts** | Low-stock tracking and inventory management |
+| **order.service.ts** | Order creation, status/payment updates, cancellation for both buyers and owners |
+| **product.service.ts** | Product CRUD, variants, stock management, and public storefront listing |
+| **product-draft.service.ts** | AI-powered product draft creation with multi-turn Q&A flow |
+| **profile.service.ts** | User profile management and account operations |
+| **rag.service.ts** | Pinecone vector indexing and semantic search operations |
+| **telegram-bot.service.ts** | Telegram bot webhook handling and command processing |
+| **telegram-link.service.ts** | Linking Telegram accounts to owner stores and link code generation |
+| **telegram-miniapp.service.ts** | Telegram Mini App session validation and store/product/order operations from Mini App |
+| **telegram-product-draft.service.ts** | AI product draft flow within Telegram bot chat |
+| **tenant.service.ts** | Store/tenant creation, updates, public lookup, subdomain management |
+
+### Authentication & Middleware
+
+- **require-bearer.ts**: Middleware that validates `Authorization: Bearer <token>` header for protected endpoints
+- **resolve-tenant-from-host.ts**: Middleware that resolves tenant ID from request subdomain/host for public storefront endpoints
+- **Better Auth**: Handled via `/api/auth/*` routes; manages user sessions, email verification, password resets
+
+### Routes Organization
+
+Routes are thin wrappers (`src/routes/`) that:
+- Parse and validate request inputs
+- Call appropriate services
+- Format and return responses
+- Enforce auth requirements at the route level
+
+| Route File | Purpose |
+|---|---|
+| **assistant.routes.ts** | `/assistant/ask` - buyer AI assistant |
+| **auth.routes.ts** | `/api/auth/*` - Better Auth proxy |
+| **docs.routes.ts** | `/docs`, `/openapi.json` - API documentation |
+| **me.routes.ts** | `/me/*` - owner profile operations |
+| **order.routes.ts** | `/checkout`, `/orders/*` - order management |
+| **product.routes.ts** | `/products/*`, `/variants/*`, `/inventory/*` - product & inventory |
+| **rag.routes.ts** | `/rag/index/*` - manual RAG indexing |
+| **root.routes.ts** | `/` - health check |
+| **telegram.routes.ts** | `/telegram/*` - Telegram bot & Mini App |
+| **tenant.routes.ts** | `/tenants/*`, `/store/*` - store management |
+
 ## All available endpoints
 
 ### Public endpoints
@@ -131,7 +177,17 @@ Common endpoints used by frontend:
 | PATCH | `/variants/:id/stock` | Update variant stock | `Authorization: Bearer <token>` |
 | PATCH | `/variants/:id/deactivate` | Soft delete variant (`is_active=false`) | `Authorization: Bearer <token>` |
 | POST | `/products/:id/images` | Upload product image to Cloudinary and append to `image_urls[]` (max 3 images/product) | `Authorization: Bearer <token>` |
+### Order Management endpoints
 
+#### Protected owner endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| GET | `/orders` | List owner orders with filtering by `status`, `from` (date), `to` (date) | `Authorization: Bearer <token>` |
+| GET | `/orders/:id` | Get one order detail | `Authorization: Bearer <token>` |
+| PATCH | `/orders/:id/status` | Update order status (`pending`, `confirmed`, `delivering`, `completed`, `cancelled`) | `Authorization: Bearer <token>` |
+| PATCH | `/orders/:id/payment` | Update order payment status (`unpaid`, `paid`, `refunded`) with optional method and reference | `Authorization: Bearer <token>` |
+| POST | `/orders/:id/cancel` | Cancel an order | `Authorization: Bearer <token>` |
 ### Manual RAG indexing endpoints
 
 | Method | Endpoint | Description | Auth |
@@ -146,6 +202,7 @@ Common endpoints used by frontend:
 |---|---|---|---|
 | GET | `/store/by-subdomain/:subdomain/products` | Public list of active products for a store | Public |
 | GET | `/store/by-subdomain/:subdomain/products/:id` | Public active product detail (active variants only) | Public |
+| POST | `/checkout` | Create order from storefront (buyer checkout). Requires `customer_name`, `address_text`, `payment_method` (`cod` or `aba_transfer`), `currency` (`USD` or `KHR`), `items[]` (product_id, variant_id, qty). Returns order with ID. | Public |
 
 ### AI Product Draft endpoints (one question at a time)
 

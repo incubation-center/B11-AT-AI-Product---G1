@@ -1,32 +1,31 @@
-﻿"use client";
+﻿'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
-import { SectionIntro } from "@/components/ui/section-intro";
-import { LinkCard } from "@/components/ui/link-card";
+import { SectionIntro } from '@/components/ui/section-intro';
+import { LinkCard } from '@/components/ui/link-card';
 
 const items = [
   {
-    title: "AI that knows your products",
+    title: 'AI that knows your products',
     description:
-      "Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing.",
-    imageUrl:
-      "/chatbot.svg",
-    href: "#why",
+      'Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing.',
+    imageUrl: '/chatbot.svg',
+    href: '#why',
   },
   {
-    title: "Built for Telegram first",
+    title: 'Built for Telegram first',
     description:
       "SME owners live in Telegram. Coolhat sends orders, updates, and customer chats straight to your phone so you don't need to learn a new dashboard.",
-    imageUrl: "/telegram.svg",
-    href: "#why",
+    imageUrl: '/telegram.svg',
+    href: '#why',
   },
   {
-    title: "From idea to storefront in days",
+    title: 'From idea to storefront in days',
     description:
-      "Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team.",
-    imageUrl: "/shops.svg",
-    href: "#why",
+      'Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team.',
+    imageUrl: '/shops.svg',
+    href: '#why',
   },
 ];
 
@@ -38,7 +37,7 @@ export function Features() {
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <div className="mx-auto max-w-6xl px-4">
         <SectionIntro

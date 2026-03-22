@@ -1,6 +1,6 @@
 // Feature component — Dashboard domain
 
-"use client";
+'use client';
 
 import {
   Table,
@@ -11,21 +11,27 @@ import {
   TableCell,
   Chip,
   Spinner,
-} from "@heroui/react";
-import type { Order } from "@/types/orders";
+} from '@heroui/react';
+import type { Order } from '@/types/orders';
 
-const statusColorMap: Record<string, "success" | "warning" | "danger" | "default"> = {
-  pending: "warning",
-  confirmed: "default",
-  delivering: "default",
-  completed: "success",
-  cancelled: "danger",
+const statusColorMap: Record<
+  string,
+  'success' | 'warning' | 'danger' | 'default'
+> = {
+  pending: 'warning',
+  confirmed: 'default',
+  delivering: 'default',
+  completed: 'success',
+  cancelled: 'danger',
 };
 
-const paymentStatusColorMap: Record<string, "success" | "warning" | "danger" | "default"> = {
-  unpaid: "danger",
-  paid: "success",
-  refunded: "default",
+const paymentStatusColorMap: Record<
+  string,
+  'success' | 'warning' | 'danger' | 'default'
+> = {
+  unpaid: 'danger',
+  paid: 'success',
+  refunded: 'default',
 };
 
 interface RecentOrdersTableProps {
@@ -50,7 +56,7 @@ export function RecentOrdersTable({
         <TableColumn>Date</TableColumn>
       </TableHeader>
       <TableBody
-        emptyContent={isLoading ? "Loading..." : "No orders found"}
+        emptyContent={isLoading ? 'Loading...' : 'No orders found'}
         isLoading={isLoading}
         loadingContent={<Spinner color="primary" />}
       >
@@ -60,21 +66,25 @@ export function RecentOrdersTable({
             onClick={() => onOrderClick(order)}
             className="hover:bg-content2 cursor-pointer transition-colors"
           >
-            <TableCell className="font-mono text-small font-semibold">{order.order_no}</TableCell>
+            <TableCell className="font-mono text-small font-semibold">
+              {order.order_no}
+            </TableCell>
             <TableCell>
               <div className="flex flex-col">
                 <p className="font-semibold">{order.customer_name}</p>
-                <p className="text-small text-default-500">{order.customer_phone || "N/A"}</p>
+                <p className="text-small text-default-500">
+                  {order.customer_phone || 'N/A'}
+                </p>
               </div>
             </TableCell>
             <TableCell className="font-semibold">
-              {order.currency === "USD" 
+              {order.currency === 'USD'
                 ? `$${parseFloat(order.total).toFixed(2)}`
                 : `₱${parseFloat(order.total).toLocaleString()}`}
             </TableCell>
             <TableCell>
               <Chip
-                color={statusColorMap[order.status] || "default"}
+                color={statusColorMap[order.status] || 'default'}
                 variant="flat"
                 size="sm"
                 className="capitalize"
@@ -84,7 +94,7 @@ export function RecentOrdersTable({
             </TableCell>
             <TableCell>
               <Chip
-                color={paymentStatusColorMap[order.payment_status] || "default"}
+                color={paymentStatusColorMap[order.payment_status] || 'default'}
                 variant="flat"
                 size="sm"
                 className="capitalize"

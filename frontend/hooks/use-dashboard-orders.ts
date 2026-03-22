@@ -1,8 +1,9 @@
-﻿"use client";
+﻿'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { ordersApi } from "@/lib/orders";
-import type { Order } from "@/types/orders";
+import { useQuery } from '@tanstack/react-query';
+import { ordersApi } from '@/lib/orders';
+import { queryKeys } from '@/lib/query-keys';
+import type { Order } from '@/types/orders';
 
 export interface UseDashboardOrdersReturn {
   orders: Order[];
@@ -12,26 +13,18 @@ export interface UseDashboardOrdersReturn {
 }
 
 export function useDashboardOrders(): UseDashboardOrdersReturn {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.dashboardOrders(),
+    queryFn: async () => {
       const res = await ordersApi.getAll();
-      setOrders(res?.orders ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load orders");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      return res?.orders ?? [];
+    },
+  });
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  return { orders, isLoading, error, refetch: load };
+  return {
+    orders: data ?? [],
+    isLoading,
+    error: error instanceof Error ? error.message : null,
+    refetch: () => refetch(),
+  };
 }

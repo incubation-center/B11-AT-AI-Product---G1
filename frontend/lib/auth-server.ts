@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import {
   API_URL,
@@ -7,10 +7,10 @@ import {
   type SessionResponse,
   type TelegramLinkStatus,
   type TenantStatusResponse,
-} from "@/lib/auth";
+} from '@/lib/auth';
 
 function toCookieHeader(entries: Array<{ name: string; value: string }>) {
-  return entries.map(({ name, value }) => `${name}=${value}`).join("; ");
+  return entries.map(({ name, value }) => `${name}=${value}`).join('; ');
 }
 
 async function getCookieStore() {
@@ -31,11 +31,11 @@ export async function getServerSession() {
 
   try {
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
-      method: "GET",
+      method: 'GET',
       headers: {
         cookie: cookieHeader,
       },
-      cache: "no-store",
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -45,14 +45,14 @@ export async function getServerSession() {
     const data = (await response.json()) as SessionResponse;
     return data?.user ? data : null;
   } catch (error) {
-    console.error("[getServerSession] Fetch error:", error);
+    console.error('[getServerSession] Fetch error:', error);
     return null;
   }
 }
 
 async function getServerBearerToken() {
   const cookieStore = await getCookieStore();
-  return cookieStore.get(AUTH_TOKEN_COOKIE)?.value ?? "";
+  return cookieStore.get(AUTH_TOKEN_COOKIE)?.value ?? '';
 }
 
 async function getProtectedServerData<T>(path: string) {
@@ -62,16 +62,16 @@ async function getProtectedServerData<T>(path: string) {
   ]);
   const headers = new Headers();
   if (cookieHeader) {
-    headers.set("cookie", cookieHeader);
+    headers.set('cookie', cookieHeader);
   }
   if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   try {
     const response = await fetch(`${API_URL}${path}`, {
       headers,
-      cache: "no-store",
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -86,24 +86,24 @@ async function getProtectedServerData<T>(path: string) {
 }
 
 export async function getServerTenantStatus() {
-  return getProtectedServerData<TenantStatusResponse>("/me/tenant");
+  return getProtectedServerData<TenantStatusResponse>('/me/tenant');
 }
 
 export async function getServerTelegramLinkStatus() {
-  return getProtectedServerData<TelegramLinkStatus>("/telegram/link-status");
+  return getProtectedServerData<TelegramLinkStatus>('/telegram/link-status');
 }
 
 export async function requireServerSession() {
   const session = await getServerSession();
 
   if (!session?.user) {
-    redirect("/sign-in");
+    redirect('/sign-in');
   }
 
   return session;
 }
 
-export async function redirectIfAuthenticated(pathname = "/dashboard") {
+export async function redirectIfAuthenticated(pathname = '/dashboard') {
   const session = await getServerSession();
 
   if (session?.user) {
@@ -116,13 +116,13 @@ export async function getOwnerFlowState() {
   const tenantStatus = await getServerTenantStatus();
 
   if (!tenantStatus) {
-    throw new Error("Unable to load tenant status.");
+    throw new Error('Unable to load tenant status.');
   }
 
   return {
     session,
     tenantStatus,
-    selectedTemplate: tenantStatus?.tenant?.storefrontTemplate ?? "",
+    selectedTemplate: tenantStatus?.tenant?.storefrontTemplate ?? '',
   };
 }
 
@@ -130,11 +130,11 @@ export async function requireDashboardReady() {
   const state = await getOwnerFlowState();
 
   if (!state.tenantStatus.hasTenant) {
-    redirect("/onboarding/store");
+    redirect('/onboarding/store');
   }
 
   if (!state.selectedTemplate) {
-    redirect("/onboarding/template");
+    redirect('/onboarding/template');
   }
 
   return state;
@@ -145,10 +145,10 @@ export async function requireStoreOnboarding() {
 
   if (state.tenantStatus.hasTenant) {
     if (state.selectedTemplate) {
-      redirect("/dashboard");
+      redirect('/dashboard');
     }
 
-    redirect("/onboarding/template");
+    redirect('/onboarding/template');
   }
 
   return state;
@@ -158,11 +158,11 @@ export async function requireTemplateOnboarding() {
   const state = await getOwnerFlowState();
 
   if (!state.tenantStatus.hasTenant) {
-    redirect("/onboarding/store");
+    redirect('/onboarding/store');
   }
 
   if (state.selectedTemplate) {
-    redirect("/dashboard");
+    redirect('/dashboard');
   }
 
   return state;

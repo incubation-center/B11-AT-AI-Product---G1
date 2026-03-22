@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { deactivateProduct, listProducts } from "@/lib/products";
-import { queryKeys } from "@/lib/query-keys";
+import { deactivateProduct, listProducts } from '@/lib/products';
+import { queryKeys } from '@/lib/query-keys';
 
 type ProductListParams = {
   q?: string;

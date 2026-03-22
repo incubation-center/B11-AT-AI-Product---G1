@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { ReactNode } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import {
   Bot,
   LayoutDashboard,
@@ -11,46 +11,42 @@ import {
   Send,
   Settings,
   Waypoints,
-} from "lucide-react";
-import { useState } from "react";
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { SignOutButton } from "@/components/auth/sign-out-button";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+import { SignOutButton } from '@/components/auth/sign-out-button';
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 const links = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
+    label: 'Dashboard',
+    href: '/dashboard',
     icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
   {
-    label: "Products",
-    href: "/dashboard/products",
+    label: 'Products',
+    href: '/dashboard/products',
     icon: <Package className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
   {
-    label: "Orders",
-    href: "/dashboard/orders",
+    label: 'Orders',
+    href: '/dashboard/orders',
     icon: <Send className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
   {
-    label: "Telegram",
-    href: "/dashboard/telegram",
+    label: 'Telegram',
+    href: '/dashboard/telegram',
     icon: <Waypoints className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
   {
-    label: "Settings",
-    href: "/dashboard/settings",
+    label: 'Settings',
+    href: '/dashboard/settings',
     icon: <Settings className="h-5 w-5 flex-shrink-0 text-slate-700" />,
   },
 ];
 
-export function DashboardSidebarLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function DashboardSidebarLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -68,7 +64,7 @@ export function DashboardSidebarLayout({
                   active={pathname === link.href}
                   className={cn(
                     pathname === link.href &&
-                      "bg-[#002e6b] text-white hover:bg-[#002e6b]"
+                      'bg-[#002e6b] text-white hover:bg-[#002e6b]',
                   )}
                 />
               ))}

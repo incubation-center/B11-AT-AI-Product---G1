@@ -1,6 +1,6 @@
 // Feature component — Dashboard domain
 
-"use client";
+'use client';
 
 import {
   Modal,
@@ -17,21 +17,27 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/react";
-import type { Order } from "@/types/orders";
+} from '@heroui/react';
+import type { Order } from '@/types/orders';
 
-const statusColorMap: Record<string, "success" | "warning" | "danger" | "default"> = {
-  pending: "warning",
-  confirmed: "default",
-  delivering: "default",
-  completed: "success",
-  cancelled: "danger",
+const statusColorMap: Record<
+  string,
+  'success' | 'warning' | 'danger' | 'default'
+> = {
+  pending: 'warning',
+  confirmed: 'default',
+  delivering: 'default',
+  completed: 'success',
+  cancelled: 'danger',
 };
 
-const paymentStatusColorMap: Record<string, "success" | "warning" | "danger" | "default"> = {
-  unpaid: "danger",
-  paid: "success",
-  refunded: "default",
+const paymentStatusColorMap: Record<
+  string,
+  'success' | 'warning' | 'danger' | 'default'
+> = {
+  unpaid: 'danger',
+  paid: 'success',
+  refunded: 'default',
 };
 
 interface OrderDetailModalProps {
@@ -47,9 +53,10 @@ export function OrderDetailModal({
 }: OrderDetailModalProps) {
   if (!order) return null;
 
-  const totalAmount = order.currency === "USD" 
-    ? `$${parseFloat(order.total).toFixed(2)}`
-    : `₱${parseFloat(order.total).toLocaleString()}`;
+  const totalAmount =
+    order.currency === 'USD'
+      ? `$${parseFloat(order.total).toFixed(2)}`
+      : `₱${parseFloat(order.total).toLocaleString()}`;
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
@@ -66,7 +73,7 @@ export function OrderDetailModal({
                 <div>
                   <p className="text-small text-default-500">Order Status</p>
                   <Chip
-                    color={statusColorMap[order.status] || "default"}
+                    color={statusColorMap[order.status] || 'default'}
                     variant="flat"
                     className="capitalize mt-1"
                   >
@@ -76,7 +83,9 @@ export function OrderDetailModal({
                 <div>
                   <p className="text-small text-default-500">Payment Status</p>
                   <Chip
-                    color={paymentStatusColorMap[order.payment_status] || "default"}
+                    color={
+                      paymentStatusColorMap[order.payment_status] || 'default'
+                    }
                     variant="flat"
                     className="capitalize mt-1"
                   >
@@ -93,7 +102,9 @@ export function OrderDetailModal({
                 </div>
                 <div>
                   <p className="text-small text-default-500">Phone</p>
-                  <p className="font-semibold">{order.customer_phone || "N/A"}</p>
+                  <p className="font-semibold">
+                    {order.customer_phone || 'N/A'}
+                  </p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-small text-default-500">Address</p>
@@ -106,7 +117,9 @@ export function OrderDetailModal({
                 <>
                   <Divider />
                   <div>
-                    <p className="text-small font-semibold text-default-700 mb-3">Items</p>
+                    <p className="text-small font-semibold text-default-700 mb-3">
+                      Items
+                    </p>
                     <Table hideHeader aria-label="Order items">
                       <TableHeader>
                         <TableColumn>Product</TableColumn>
@@ -118,16 +131,24 @@ export function OrderDetailModal({
                           <TableRow key={item.id}>
                             <TableCell>
                               <div className="flex flex-col">
-                                <p className="font-semibold">{item.product_name_snapshot}</p>
+                                <p className="font-semibold">
+                                  {item.product_name_snapshot}
+                                </p>
                                 {item.variant_snapshot && (
                                   <p className="text-small text-default-500">
-                                    {JSON.stringify(item.variant_snapshot).slice(0, 50)}
+                                    {JSON.stringify(
+                                      item.variant_snapshot,
+                                    ).slice(0, 50)}
                                   </p>
                                 )}
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">{item.qty}</TableCell>
-                            <TableCell className="text-right">{item.price_snapshot}</TableCell>
+                            <TableCell className="text-right">
+                              {item.qty}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {item.price_snapshot}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -140,8 +161,12 @@ export function OrderDetailModal({
               <Divider />
               <div className="flex justify-end">
                 <div className="text-right">
-                  <p className="text-small text-default-500">Total Amount ({order.currency})</p>
-                  <p className="text-xl font-bold text-primary">{totalAmount}</p>
+                  <p className="text-small text-default-500">
+                    Total Amount ({order.currency})
+                  </p>
+                  <p className="text-xl font-bold text-primary">
+                    {totalAmount}
+                  </p>
                 </div>
               </div>
 

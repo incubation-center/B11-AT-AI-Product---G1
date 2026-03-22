@@ -1,20 +1,26 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { ChangeEvent, FormEvent, useEffect, useState, useTransition } from "react";
-import { motion } from "framer-motion";
-import { Globe, Sparkles, Store } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react';
+import { motion } from 'framer-motion';
+import { Globe, Sparkles, Store } from 'lucide-react';
 
-import { CTAButton } from "@/components/ui/cta-button";
-import { API_URL, createTenant } from "@/lib/auth";
+import { CTAButton } from '@/components/ui/cta-button';
+import { API_URL, createTenant } from '@/lib/auth';
 
 const shopTypes = [
-  { value: "beauty_cosmetics", label: "Beauty & Cosmetics" },
-  { value: "fashion", label: "Fashion" },
-  { value: "food_beverage", label: "Food & Beverage" },
-  { value: "electronic", label: "Electronics" },
-  { value: "services", label: "Services" },
-  { value: "others", label: "Others" },
+  { value: 'beauty_cosmetics', label: 'Beauty & Cosmetics' },
+  { value: 'fashion', label: 'Fashion' },
+  { value: 'food_beverage', label: 'Food & Beverage' },
+  { value: 'electronic', label: 'Electronics' },
+  { value: 'services', label: 'Services' },
+  { value: 'others', label: 'Others' },
 ];
 
 type SubdomainPreview = {
@@ -25,14 +31,14 @@ type SubdomainPreview = {
 
 export function StoreSetupForm() {
   const router = useRouter();
-  const [shopName, setShopName] = useState("");
-  const [shopType, setShopType] = useState("beauty_cosmetics");
-  const [description, setDescription] = useState("");
-  const [addressText, setAddressText] = useState("");
-  const [googleMapUrl, setGoogleMapUrl] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
-  const [bannerUrl, setBannerUrl] = useState("");
-  const [error, setError] = useState("");
+  const [shopName, setShopName] = useState('');
+  const [shopType, setShopType] = useState('beauty_cosmetics');
+  const [description, setDescription] = useState('');
+  const [addressText, setAddressText] = useState('');
+  const [googleMapUrl, setGoogleMapUrl] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [bannerUrl, setBannerUrl] = useState('');
+  const [error, setError] = useState('');
   const [subdomain, setSubdomain] = useState<SubdomainPreview>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -48,9 +54,9 @@ export function StoreSetupForm() {
       try {
         const response = await fetch(
           `${API_URL}/tenants/subdomain-available?shop_name=${encodeURIComponent(
-            nextShopName
+            nextShopName,
           )}`,
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
         const data = (await response.json()) as SubdomainPreview;
         setSubdomain(data);
@@ -67,7 +73,7 @@ export function StoreSetupForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
+    setError('');
 
     startTransition(async () => {
       try {
@@ -80,13 +86,13 @@ export function StoreSetupForm() {
           logo_url: logoUrl,
           banner_url: bannerUrl,
         });
-        router.push("/onboarding/template");
+        router.push('/onboarding/template');
         router.refresh();
       } catch (submitError) {
         setError(
           submitError instanceof Error
             ? submitError.message
-            : "Unable to create store"
+            : 'Unable to create store',
         );
       }
     });
@@ -179,14 +185,14 @@ export function StoreSetupForm() {
                 Generated subdomain
               </p>
               <p className="mt-2 text-lg font-semibold text-[#002e6b]">
-                {subdomain?.generatedSubdomain ?? "waiting-for-shop-name"}
+                {subdomain?.generatedSubdomain ?? 'waiting-for-shop-name'}
               </p>
               <p className="mt-2 text-sm text-slate-600">
                 {subdomain
                   ? subdomain.available
-                    ? "Available. The backend can create this store URL."
-                    : `Already taken. Suggestions: ${subdomain.suggestions.join(", ")}`
-                  : "Type your shop name to preview the storefront URL."}
+                    ? 'Available. The backend can create this store URL.'
+                    : `Already taken. Suggestions: ${subdomain.suggestions.join(', ')}`
+                  : 'Type your shop name to preview the storefront URL.'}
               </p>
             </div>
 
@@ -266,7 +272,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-2 block text-sm font-medium text-slate-700">
+        {label}
+      </span>
       {children}
     </label>
   );

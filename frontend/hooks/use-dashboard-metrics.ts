@@ -1,10 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { inventoryApi, ordersApi } from "@/lib/orders";
-import type { DashboardMetrics } from "@/types/orders";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { inventoryApi, ordersApi } from '@/lib/orders';
+import { queryKeys } from '@/lib/query-keys';
+import type { DashboardMetrics } from '@/types/orders';
 
-export type DateRangeFilter = "daily" | "weekly" | "monthly";
+export type DateRangeFilter = 'daily' | 'weekly' | 'monthly';
 
 export interface UseDashboardMetricsReturn {
   metrics: DashboardMetrics | null;
@@ -16,15 +18,11 @@ export interface UseDashboardMetricsReturn {
 }
 
 export function useDashboardMetrics(): UseDashboardMetricsReturn {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [dateRange, setDateRange] = useState<DateRangeFilter>("weekly");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRangeFilter>('weekly');
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.dashboardMetrics(dateRange),
+    queryFn: async () => {
       const [ordersResult, lowStockResult] = await Promise.all([
         ordersApi.getAll(),
         inventoryApi.getLowStockItems(),
@@ -33,10 +31,10 @@ export function useDashboardMetrics(): UseDashboardMetricsReturn {
       const now = new Date();
       const filteredOrders = (ordersResult?.orders ?? []).filter((order) => {
         const createdAt = new Date(order.created_at);
-        if (dateRange === "daily") {
+        if (dateRange === 'daily') {
           return now.getTime() - createdAt.getTime() <= 24 * 60 * 60 * 1000;
         }
-        if (dateRange === "weekly") {
+        if (dateRange === 'weekly') {
           return now.getTime() - createdAt.getTime() <= 7 * 24 * 60 * 60 * 1000;
         }
         return now.getTime() - createdAt.getTime() <= 30 * 24 * 60 * 60 * 1000;
@@ -44,31 +42,30 @@ export function useDashboardMetrics(): UseDashboardMetricsReturn {
 
       const totals = filteredOrders.reduce(
         (acc, order) => {
-          const amount = Number.parseFloat(order.total || "0");
+          const amount = Number.parseFloat(order.total || '0');
           if (Number.isFinite(amount)) {
-            if (order.currency === "USD") acc.usd += amount;
-            if (order.currency === "KHR") acc.khr += amount;
+            if (order.currency === 'USD') acc.usd += amount;
+            if (order.currency === 'KHR') acc.khr += amount;
           }
           return acc;
         },
-        { usd: 0, khr: 0 }
+        { usd: 0, khr: 0 },
       );
 
-      setMetrics({
+      return {
         totalRevenue: totals,
         orderCount: filteredOrders.length,
         lowStockCount: lowStockResult.total ?? lowStockResult.items.length,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load metrics");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [dateRange]);
+      };
+    },
+  });
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  return { metrics, dateRange, setDateRange, isLoading, error, refetch: load };
+  return {
+    metrics: data ?? null,
+    dateRange,
+    setDateRange,
+    isLoading,
+    error: error instanceof Error ? error.message : null,
+    refetch: () => refetch(),
+  };
 }

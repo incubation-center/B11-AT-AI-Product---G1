@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
 
-import { AnimatedSignUp } from "@/components/ui/animated-auth";
-import { signUpWithEmail } from "@/lib/auth";
+import { AnimatedSignUp } from '@/components/ui/animated-auth';
+import { signUpWithEmail } from '@/lib/auth';
 
 export function SignUpForm() {
   const router = useRouter();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(name: string, email: string, password: string) {
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
     startTransition(async () => {
       try {
         await signUpWithEmail({
@@ -24,10 +24,16 @@ export function SignUpForm() {
           callbackURL: `${window.location.origin}/dashboard`,
           rememberMe: true,
         });
-        setSuccess("Account created. Check your email verification link, then sign in.");
-        router.push("/sign-in");
+        setSuccess(
+          'Account created. Check your email verification link, then sign in.',
+        );
+        router.push('/sign-in');
       } catch (submitError) {
-        setError(submitError instanceof Error ? submitError.message : "Unable to sign up");
+        setError(
+          submitError instanceof Error
+            ? submitError.message
+            : 'Unable to sign up',
+        );
       }
     });
   }
@@ -42,5 +48,3 @@ export function SignUpForm() {
     />
   );
 }
-
-

@@ -1,13 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getTelegramLinkStatus,
   generateTelegramLinkCode,
-  type TelegramLinkStatus,
-} from "@/lib/auth";
+} from '@/lib/auth';
 
 export const telegramKeys = {
-  all: ["telegram"] as const,
-  status: () => [...telegramKeys.all, "status"] as const,
+  all: ['telegram'] as const,
+  status: () => [...telegramKeys.all, 'status'] as const,
 };
 
 export function useTelegramLinkStatus() {

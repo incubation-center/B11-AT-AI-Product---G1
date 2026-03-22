@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { BotMessageSquare, Pencil, Send } from "lucide-react";
-import type React from "react";
+import { motion } from 'framer-motion';
+import { BotMessageSquare, Pencil, Send } from 'lucide-react';
+import type React from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface StepCardProps {
   icon: React.ReactNode;
@@ -21,8 +21,8 @@ const StepCard: React.FC<StepCardProps> = ({
 }) => (
   <div
     className={cn(
-      "relative rounded-2xl border border-slate-200 bg-white p-6 text-[#002e6b] transition-all duration-300 ease-in-out",
-      "hover:scale-105 hover:shadow-xl hover:shadow-slate-200/80 hover:border-[#ffbd59]/60"
+      'relative rounded-2xl border border-slate-200 bg-white p-6 text-[#002e6b] transition-all duration-300 ease-in-out',
+      'hover:scale-105 hover:shadow-xl hover:shadow-slate-200/80 hover:border-[#ffbd59]/60',
     )}
   >
     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#002e6b]/5 text-[#c61c2f]">
@@ -46,35 +46,35 @@ const StepCard: React.FC<StepCardProps> = ({
 const stepsData = [
   {
     icon: <Pencil className="h-6 w-6" />,
-    title: "Describe your shop",
+    title: 'Describe your shop',
     description:
-      "Tell Coolhat about your products, pricing, and customers. It turns that into a ready-to-share storefront and product catalog.",
+      'Tell Coolhat about your products, pricing, and customers. It turns that into a ready-to-share storefront and product catalog.',
     benefits: [
-      "AI-generated product descriptions",
-      "Instant storefront preview",
-      "Easy edits at any time",
+      'AI-generated product descriptions',
+      'Instant storefront preview',
+      'Easy edits at any time',
     ],
   },
   {
     icon: <Send className="h-6 w-6" />,
-    title: "Connect your Telegram",
+    title: 'Connect your Telegram',
     description:
-      "Link the channel you already use every day. New orders, buyer questions, and updates land right there.",
+      'Link the channel you already use every day. New orders, buyer questions, and updates land right there.',
     benefits: [
-      "No new dashboard to learn",
-      "Real-time order notifications",
-      "Works with existing groups",
+      'No new dashboard to learn',
+      'Real-time order notifications',
+      'Works with existing groups',
     ],
   },
   {
     icon: <BotMessageSquare className="h-6 w-6" />,
-    title: "Let the AI handle it",
+    title: 'Let the AI handle it',
     description:
-      "Your AI assistant answers product questions, recommends items, and generates clean checkout links for buyers.",
+      'Your AI assistant answers product questions, recommends items, and generates clean checkout links for buyers.',
     benefits: [
-      "24/7 customer responses",
-      "Smart product recommendations",
-      "One-tap checkout links",
+      '24/7 customer responses',
+      'Smart product recommendations',
+      'One-tap checkout links',
     ],
   },
 ];
@@ -87,7 +87,7 @@ export function HowItWorks() {
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <div className="mx-auto max-w-5xl px-4">
         {/* Header */}

@@ -1,6 +1,6 @@
-﻿"use client";
+﻿'use client';
 
-import { Skeleton, Card, CardBody } from "@heroui/react";
+import { Skeleton, Card, CardBody } from '@heroui/react';
 
 export default function DashboardLoading() {
   return (

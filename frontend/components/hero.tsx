@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Card, CardBody } from "@heroui/react";
-import { ArrowRight, MessageCircleMore, Sparkles } from "lucide-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { Card, CardBody } from '@heroui/react';
+import { ArrowRight, MessageCircleMore, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
-import { CTAButton } from "@/components/ui/cta-button";
+import { AnimatedGridPattern } from '@/components/ui/animated-grid-pattern';
+import { CTAButton } from '@/components/ui/cta-button';
 
 const description =
-  "Coolhat is an AI-powered webstore front builder for SMEs. It gives every shop a virtual assistant that already knows all your products, helps customers find the right items, and connects orders straight into Telegram so owners can manage everything from their phone.";
+  'Coolhat is an AI-powered webstore front builder for SMEs. It gives every shop a virtual assistant that already knows all your products, helps customers find the right items, and connects orders straight into Telegram so owners can manage everything from their phone.';
 
 export function Hero() {
   return (
@@ -19,7 +19,7 @@ export function Hero() {
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <AnimatedGridPattern
         numSquares={40}
@@ -67,7 +67,9 @@ export function Hero() {
             <span className="rounded-full border border-emerald-500/30 bg-emerald-500/5 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-emerald-700">
               No credit card for trial
             </span>
-            <span>Live Telegram assistant · Product-aware AI · Storefront in days</span>
+            <span>
+              Live Telegram assistant · Product-aware AI · Storefront in days
+            </span>
           </div>
         </div>
 
@@ -103,8 +105,8 @@ export function Hero() {
                   </div>
                   <div className="space-y-2 rounded-2xl rounded-br-sm bg-slate-100 px-3 py-2 text-xs leading-relaxed text-[#002e6b]">
                     <p>
-                      I&apos;ve found 3 products that match: all fragrance-free, made
-                      for sensitive skin and in your budget.
+                      I&apos;ve found 3 products that match: all fragrance-free,
+                      made for sensitive skin and in your budget.
                     </p>
                     <ul className="list-inside list-disc text-[11px] text-slate-700">
                       <li>Gentle Rice Cleanser - $14.50</li>
@@ -112,16 +114,16 @@ export function Hero() {
                       <li>Soothing Night Cream - $19.80</li>
                     </ul>
                     <p className="text-[11px] text-emerald-700">
-                      Reply with the product number and I&apos;ll create a checkout
-                      link for you.
+                      Reply with the product number and I&apos;ll create a
+                      checkout link for you.
                     </p>
                   </div>
                 </div>
               </div>
 
               <p className="text-[11px] text-slate-500">
-                Powered by your real product catalog, checkout flow, and Telegram
-                Mini App - not a generic chatbot.
+                Powered by your real product catalog, checkout flow, and
+                Telegram Mini App - not a generic chatbot.
               </p>
             </CardBody>
           </Card>

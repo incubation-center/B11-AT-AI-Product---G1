@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 type AuthShellProps = {
   title: string;
@@ -27,11 +27,15 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
             </div>
             <div className="rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur">
               <div className="text-2xl font-semibold">2</div>
-              <p className="mt-2">Verify your email and start your store setup.</p>
+              <p className="mt-2">
+                Verify your email and start your store setup.
+              </p>
             </div>
             <div className="rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur">
               <div className="text-2xl font-semibold">3</div>
-              <p className="mt-2">Manage products and Telegram flows from one place.</p>
+              <p className="mt-2">
+                Manage products and Telegram flows from one place.
+              </p>
             </div>
           </div>
         </section>

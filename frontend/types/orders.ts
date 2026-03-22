@@ -1,6 +1,11 @@
-export type OrderStatus = "pending" | "confirmed" | "delivering" | "completed" | "cancelled";
-export type PaymentStatus = "unpaid" | "paid" | "refunded";
-export type PaymentMethod = "cod" | "aba_transfer";
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'delivering'
+  | 'completed'
+  | 'cancelled';
+export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
+export type PaymentMethod = 'cod' | 'aba_transfer';
 
 export interface OrderItem {
   id: string;
@@ -24,7 +29,7 @@ export interface Payment {
   method: PaymentMethod;
   amount: string;
   reference: string | null;
-  status: "confirmed" | "failed";
+  status: 'confirmed' | 'failed';
   paid_at: string | null;
   created_at: string;
 }
@@ -40,7 +45,7 @@ export interface Order {
   customer_phone: string | null;
   address_text: string;
   google_map_url: string | null;
-  currency: "USD" | "KHR";
+  currency: 'USD' | 'KHR';
   total: string;
   notes: string | null;
   created_at: string;
@@ -50,7 +55,7 @@ export interface Order {
 }
 
 export interface LowStockItem {
-  level: "product" | "variant";
+  level: 'product' | 'variant';
   tenant_id: string;
   product_id: string;
   product_name: string;

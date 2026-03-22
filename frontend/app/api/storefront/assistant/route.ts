@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 type AskAssistantBody = {
   subdomain?: string;
@@ -11,19 +11,24 @@ type AskAssistantBody = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as AskAssistantBody | null;
+  const body = (await request
+    .json()
+    .catch(() => null)) as AskAssistantBody | null;
 
   if (!body?.question?.trim()) {
-    return NextResponse.json({ message: "question is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: 'question is required' },
+      { status: 400 },
+    );
   }
 
   const response = await fetch(`${API_URL}/assistant/ask`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
-    cache: "no-store",
+    cache: 'no-store',
   });
 
   const text = await response.text();

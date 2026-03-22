@@ -1,21 +1,26 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Button, Divider } from "@heroui/react";
-import { AlertTriangle, BarChart3, ExternalLink, RefreshCw, ShoppingCart, TrendingUp } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Button, Divider } from '@heroui/react';
+import {
+  AlertTriangle,
+  BarChart3,
+  ExternalLink,
+  RefreshCw,
+  ShoppingCart,
+} from 'lucide-react';
 
-import { DateRangeFilter } from "@/components/dashboard/date-range-filter";
-import { MetricCard } from "@/components/dashboard/metric-card";
-import { RecentOrdersTable } from "@/components/dashboard/recent-orders-table";
-import { OrderDetailModal } from "@/components/dashboard/order-detail-modal";
-import { LowStockProducts } from "@/components/dashboard/low-stock-products";
-import { TelegramLinkPanel } from "@/components/dashboard/telegram-link-panel";
+import { DateRangeFilter } from '@/components/dashboard/date-range-filter';
+import { MetricCard } from '@/components/dashboard/metric-card';
+import { RecentOrdersTable } from '@/components/dashboard/recent-orders-table';
+import { OrderDetailModal } from '@/components/dashboard/order-detail-modal';
+import { LowStockProducts } from '@/components/dashboard/low-stock-products';
 
-import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
-import { useDashboardOrders } from "@/hooks/use-dashboard-orders";
-import { useLowStockItems } from "@/hooks/use-low-stock-products";
-import { getTenantStatus } from "@/lib/auth";
-import type { Order } from "@/types/orders";
+import { useDashboardMetrics } from '@/hooks/use-dashboard-metrics';
+import { useDashboardOrders } from '@/hooks/use-dashboard-orders';
+import { useLowStockItems } from '@/hooks/use-low-stock-products';
+import { getTenantStatus } from '@/lib/auth';
+import type { Order } from '@/types/orders';
 
 export default function DashboardContent() {
   const metrics = useDashboardMetrics();
@@ -33,7 +38,7 @@ export default function DashboardContent() {
           setStoreUrl(response.tenant.storeUrl);
         }
       } catch (error) {
-        console.error("Failed to fetch tenant status:", error);
+        console.error('Failed to fetch tenant status:', error);
       }
     };
 
@@ -56,8 +61,10 @@ export default function DashboardContent() {
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-default-500 mt-1">Welcome back! Here's your store overview.</p>
+          <h1>Dashboard</h1>
+          <p className="text-default-500 mt-1">
+            Welcome back! Here&apos;s your store overview.
+          </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           {storeUrl && (
@@ -99,17 +106,20 @@ export default function DashboardContent() {
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <MetricCard
             icon={<BarChart3 className="h-5 w-5 text-primary" />}
-            label={`Revenue (USD) - ${metrics.dateRange === "daily" ? "Today" : metrics.dateRange === "weekly" ? "This Week" : "This Month"}`}
-            value={`$${(metrics.metrics?.totalRevenue.usd || 0).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
+            label={`Revenue (USD) - ${metrics.dateRange === 'daily' ? 'Today' : metrics.dateRange === 'weekly' ? 'This Week' : 'This Month'}`}
+            value={`$${(metrics.metrics?.totalRevenue.usd || 0).toLocaleString(
+              'en-US',
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              },
+            )}`}
             isLoading={metrics.isLoading}
           />
 
           <MetricCard
             icon={<ShoppingCart className="h-5 w-5 text-secondary" />}
-            label={`Orders - ${metrics.dateRange === "daily" ? "Today" : metrics.dateRange === "weekly" ? "This Week" : "This Month"}`}
+            label={`Orders - ${metrics.dateRange === 'daily' ? 'Today' : metrics.dateRange === 'weekly' ? 'This Week' : 'This Month'}`}
             value={metrics.metrics?.orderCount || 0}
             isLoading={metrics.isLoading}
           />
@@ -146,8 +156,6 @@ export default function DashboardContent() {
           />
         </div>
       </div>
-
-      
 
       {/* Order Detail Modal */}
       <OrderDetailModal

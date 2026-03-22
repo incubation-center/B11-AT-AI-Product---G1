@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PricingTier {
   name: string;
@@ -17,9 +17,9 @@ interface PricingTier {
 }
 
 function CreativePricing({
-  tag = "Simple Pricing",
-  title = "Choose Your Plan",
-  description = "Start free, scale as you grow",
+  tag = 'Simple Pricing',
+  title = 'Choose Your Plan',
+  description = 'Start free, scale as you grow',
   tiers,
 }: {
   tag?: string;
@@ -44,23 +44,23 @@ function CreativePricing({
           <div
             key={tier.name}
             className={cn(
-              "relative group",
-              "transition-all duration-300",
-              index === 0 && "rotate-[-1deg]",
-              index === 1 && "rotate-[1deg]",
-              index === 2 && "rotate-[-1deg]"
+              'relative group',
+              'transition-all duration-300',
+              index === 0 && 'rotate-[-1deg]',
+              index === 1 && 'rotate-[1deg]',
+              index === 2 && 'rotate-[-1deg]',
             )}
           >
             {/* Card shadow layer */}
             <div
               className={cn(
-                "absolute inset-0 bg-white",
-                "border-2 border-zinc-900",
-                "rounded-lg shadow-[4px_4px_0px_0px] shadow-zinc-900",
-                "transition-all duration-300",
-                "group-hover:shadow-[8px_8px_0px_0px]",
-                "group-hover:translate-x-[-4px]",
-                "group-hover:translate-y-[-4px]"
+                'absolute inset-0 bg-white',
+                'border-2 border-zinc-900',
+                'rounded-lg shadow-[4px_4px_0px_0px] shadow-zinc-900',
+                'transition-all duration-300',
+                'group-hover:shadow-[8px_8px_0px_0px]',
+                'group-hover:translate-x-[-4px]',
+                'group-hover:translate-y-[-4px]',
               )}
             />
 
@@ -87,26 +87,30 @@ function CreativePricing({
               <div className="mb-6">
                 <div
                   className={cn(
-                    "w-12 h-12 rounded-full mb-4",
-                    "flex items-center justify-center",
-                    "border-2 border-zinc-900",
+                    'w-12 h-12 rounded-full mb-4',
+                    'flex items-center justify-center',
+                    'border-2 border-zinc-900',
                     tier.isFree
-                      ? "text-emerald-600"
+                      ? 'text-emerald-600'
                       : tier.popular
-                      ? "text-amber-500"
-                      : "text-[#002e6b]"
+                        ? 'text-amber-500'
+                        : 'text-[#002e6b]',
                   )}
                 >
                   {tier.icon}
                 </div>
-                <h3 className="text-2xl font-bold text-zinc-900">{tier.name}</h3>
-                <p className="text-sm text-slate-500 mt-1">{tier.description}</p>
+                <h3 className="text-2xl font-bold text-zinc-900">
+                  {tier.name}
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  {tier.description}
+                </p>
               </div>
 
               {/* Price */}
               <div className="mb-2">
                 <div className="flex items-baseline gap-1">
-                  {typeof tier.price === "number" ? (
+                  {typeof tier.price === 'number' ? (
                     <>
                       <span className="text-4xl font-bold text-zinc-900">
                         ${tier.price}
@@ -125,7 +129,9 @@ function CreativePricing({
                   </p>
                 )}
                 {tier.priceNote && (
-                  <p className="text-xs text-slate-400 mt-1">{tier.priceNote}</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {tier.priceNote}
+                  </p>
                 )}
               </div>
 
@@ -146,20 +152,20 @@ function CreativePricing({
 
               <Button
                 className={cn(
-                  "w-full h-11 font-semibold text-sm relative",
-                  "border-2 border-zinc-900",
-                  "transition-all duration-300",
-                  "shadow-[4px_4px_0px_0px] shadow-zinc-900",
-                  "hover:shadow-[6px_6px_0px_0px]",
-                  "hover:translate-x-[-2px] hover:translate-y-[-2px]",
+                  'w-full h-11 font-semibold text-sm relative',
+                  'border-2 border-zinc-900',
+                  'transition-all duration-300',
+                  'shadow-[4px_4px_0px_0px] shadow-zinc-900',
+                  'hover:shadow-[6px_6px_0px_0px]',
+                  'hover:translate-x-[-2px] hover:translate-y-[-2px]',
                   tier.isFree
-                    ? ["bg-emerald-400 text-zinc-900 hover:bg-emerald-300"]
+                    ? ['bg-emerald-400 text-zinc-900 hover:bg-emerald-300']
                     : tier.popular
-                    ? ["bg-amber-400 text-zinc-900 hover:bg-amber-300"]
-                    : ["bg-[#002e6b] text-white hover:bg-[#003d8f]"]
+                      ? ['bg-amber-400 text-zinc-900 hover:bg-amber-300']
+                      : ['bg-[#002e6b] text-white hover:bg-[#003d8f]'],
                 )}
               >
-                {tier.ctaLabel ?? "Get Started"}
+                {tier.ctaLabel ?? 'Get Started'}
               </Button>
             </div>
           </div>

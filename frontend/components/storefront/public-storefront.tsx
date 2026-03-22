@@ -1,5 +1,5 @@
-import type { StorefrontProduct, StorefrontStore } from "@/lib/storefront";
-import { StorefrontAssistant } from "@/components/storefront/storefront-assistant";
+import type { StorefrontProduct, StorefrontStore } from '@/lib/storefront';
+import { StorefrontAssistant } from '@/components/storefront/storefront-assistant';
 
 type PublicStorefrontProps = {
   store: StorefrontStore;
@@ -12,9 +12,15 @@ function ProductCard({ product }: { product: StorefrontProduct }) {
       <div className="aspect-[4/3] bg-slate-100">
         {product.imageUrls[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.imageUrls[0]} alt={product.name} className="h-full w-full object-cover" />
+          <img
+            src={product.imageUrls[0]}
+            alt={product.name}
+            className="h-full w-full object-cover"
+          />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-slate-400">No image</div>
+          <div className="flex h-full items-center justify-center text-sm text-slate-400">
+            No image
+          </div>
         )}
       </div>
       <div className="space-y-3 p-5">
@@ -22,15 +28,19 @@ function ProductCard({ product }: { product: StorefrontProduct }) {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c61c2f]">
             {product.category ?? storeDefaultCategory(product)}
           </p>
-          <h3 className="text-xl font-semibold text-slate-900">{product.name}</h3>
+          <h3 className="text-xl font-semibold text-slate-900">
+            {product.name}
+          </h3>
         </div>
         <p className="line-clamp-3 text-sm leading-6 text-slate-600">
-          {product.description ?? "This product is available in store now."}
+          {product.description ?? 'This product is available in store now.'}
         </p>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-lg font-semibold text-[#002e6b]">
-              {product.basePriceUsd ? `$${product.basePriceUsd}` : "Ask for price"}
+              {product.basePriceUsd
+                ? `$${product.basePriceUsd}`
+                : 'Ask for price'}
             </p>
             <p className="text-xs text-slate-500">Stock: {product.stockQty}</p>
           </div>
@@ -44,7 +54,7 @@ function ProductCard({ product }: { product: StorefrontProduct }) {
 }
 
 function storeDefaultCategory(product: StorefrontProduct) {
-  return product.hasVariants ? "Variants" : "Featured";
+  return product.hasVariants ? 'Variants' : 'Featured';
 }
 
 function BoutiqueEditorial({ store, products }: PublicStorefrontProps) {
@@ -63,16 +73,23 @@ function BoutiqueEditorial({ store, products }: PublicStorefrontProps) {
                 {store.shopName}
               </h1>
               <p className="max-w-2xl text-base leading-8 text-slate-600">
-                {store.description ?? "A curated storefront designed around your best products and buyer conversations."}
+                {store.description ??
+                  'A curated storefront designed around your best products and buyer conversations.'}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4 pt-10">
-            <a href="#products" className="rounded-full bg-[#002e6b] px-6 py-3 text-sm font-semibold text-white">
+            <a
+              href="#products"
+              className="rounded-full bg-[#002e6b] px-6 py-3 text-sm font-semibold text-white"
+            >
               Shop Products
             </a>
             {store.googleMapUrl ? (
-              <a href={store.googleMapUrl} className="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700">
+              <a
+                href={store.googleMapUrl}
+                className="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700"
+              >
                 Visit Store
               </a>
             ) : null}
@@ -83,17 +100,22 @@ function BoutiqueEditorial({ store, products }: PublicStorefrontProps) {
           {featured?.imageUrls[0] || store.bannerUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={featured?.imageUrls[0] ?? store.bannerUrl ?? ""}
+              src={featured?.imageUrls[0] ?? store.bannerUrl ?? ''}
               alt={featured?.name ?? store.shopName}
               className="h-full w-full object-cover"
             />
           ) : (
             <div className="flex h-full min-h-[320px] items-center justify-center bg-[radial-gradient(circle_at_top,_#0b66c2,_#002e6b_70%)] p-10 text-white">
               <div className="max-w-sm space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/70">Featured Story</p>
-                <h2 className="text-3xl font-semibold">{featured?.name ?? "Curated for your buyers"}</h2>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
+                  Featured Story
+                </p>
+                <h2 className="text-3xl font-semibold">
+                  {featured?.name ?? 'Curated for your buyers'}
+                </h2>
                 <p className="text-sm leading-7 text-white/75">
-                  {featured?.description ?? "Your selected storefront theme is live. Next step is wiring the buyer assistant directly into this store."}
+                  {featured?.description ??
+                    'Your selected storefront theme is live. Next step is wiring the buyer assistant directly into this store.'}
                 </p>
               </div>
             </div>
@@ -104,8 +126,12 @@ function BoutiqueEditorial({ store, products }: PublicStorefrontProps) {
       <section id="products" className="px-6 pb-14 lg:px-12">
         <div className="mb-8 flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">Collection</p>
-            <h2 className="mt-2 text-3xl font-semibold text-[#002e6b]">Storefront Products</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">
+              Collection
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold text-[#002e6b]">
+              Storefront Products
+            </h2>
           </div>
           <p className="text-sm text-slate-500">{products.length} products</p>
         </div>
@@ -126,20 +152,31 @@ function MarketGrid({ store, products }: PublicStorefrontProps) {
       <section className="border-b border-slate-200 bg-white px-6 py-6 lg:px-12">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">{store.shopType}</p>
-            <h1 className="text-4xl font-semibold text-[#002e6b] lg:text-5xl">{store.shopName}</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">
+              {store.shopType}
+            </p>
+            <h1 className="text-4xl font-semibold text-[#002e6b] lg:text-5xl">
+              {store.shopName}
+            </h1>
             <p className="max-w-2xl text-sm leading-7 text-slate-600">
-              {store.description ?? "Browse all active products from this shop in a fast, product-first grid."}
+              {store.description ??
+                'Browse all active products from this shop in a fast, product-first grid.'}
             </p>
           </div>
           <div className="grid min-w-[220px] grid-cols-2 gap-3">
             <div className="rounded-3xl bg-slate-100 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Products</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Products
+              </p>
               <p className="mt-2 text-3xl font-semibold">{products.length}</p>
             </div>
             <div className="rounded-3xl bg-slate-100 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Template</p>
-              <p className="mt-2 text-sm font-semibold text-slate-700">Market Grid</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Template
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-700">
+                Market Grid
+              </p>
             </div>
           </div>
         </div>
@@ -166,18 +203,27 @@ function CatalogFlow({ store, products }: PublicStorefrontProps) {
       <section className="px-6 py-12 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-[1fr_0.95fr]">
           <div className="space-y-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">{store.shopType}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">
+              {store.shopType}
+            </p>
             <h1 className="max-w-2xl text-5xl font-semibold leading-[1.02] text-[#002e6b] lg:text-6xl">
               {store.shopName}
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-slate-600">
-              {store.description ?? "A flexible catalog storefront for stores with mixed product ranges and practical buyer journeys."}
+              {store.description ??
+                'A flexible catalog storefront for stores with mixed product ranges and practical buyer journeys.'}
             </p>
             <div className="flex flex-wrap gap-3">
-              <a href="#featured" className="rounded-full bg-[#002e6b] px-5 py-3 text-sm font-semibold text-white">
+              <a
+                href="#featured"
+                className="rounded-full bg-[#002e6b] px-5 py-3 text-sm font-semibold text-white"
+              >
                 Explore Featured
               </a>
-              <a href="#catalog" className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">
+              <a
+                href="#catalog"
+                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700"
+              >
                 Full Catalog
               </a>
             </div>
@@ -185,16 +231,27 @@ function CatalogFlow({ store, products }: PublicStorefrontProps) {
 
           <div className="grid gap-4 sm:grid-cols-3">
             {featured.map((product) => (
-              <div key={product.id} className="overflow-hidden rounded-[28px] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+              <div
+                key={product.id}
+                className="overflow-hidden rounded-[28px] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
+              >
                 <div className="aspect-square bg-slate-100">
                   {product.imageUrls[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={product.imageUrls[0]} alt={product.name} className="h-full w-full object-cover" />
+                    <img
+                      src={product.imageUrls[0]}
+                      alt={product.name}
+                      className="h-full w-full object-cover"
+                    />
                   ) : null}
                 </div>
                 <div className="p-4">
                   <h2 className="text-base font-semibold">{product.name}</h2>
-                  <p className="mt-1 text-sm text-slate-500">{product.basePriceUsd ? `$${product.basePriceUsd}` : "Ask for price"}</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {product.basePriceUsd
+                      ? `$${product.basePriceUsd}`
+                      : 'Ask for price'}
+                  </p>
                 </div>
               </div>
             ))}
@@ -217,11 +274,11 @@ function CatalogFlow({ store, products }: PublicStorefrontProps) {
 export function PublicStorefront({ store, products }: PublicStorefrontProps) {
   const productList = products.filter((product) => product.isActive);
 
-  if (store.storefrontTemplate === "market-grid") {
+  if (store.storefrontTemplate === 'market-grid') {
     return <MarketGrid store={store} products={productList} />;
   }
 
-  if (store.storefrontTemplate === "catalog-flow") {
+  if (store.storefrontTemplate === 'catalog-flow') {
     return <CatalogFlow store={store} products={productList} />;
   }
 

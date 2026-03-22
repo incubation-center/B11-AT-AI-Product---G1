@@ -1,14 +1,14 @@
 // Feature component — Dashboard domain
 
-import { Card, CardBody, Spinner } from "@heroui/react";
-import React from "react";
+import { Card, CardBody, Spinner } from '@heroui/react';
+import React from 'react';
 
 interface MetricCardProps {
   icon: React.ReactNode;
   label: string;
   value: string | number;
   change?: string;
-  changeType?: "positive" | "negative" | "neutral";
+  changeType?: 'positive' | 'negative' | 'neutral';
   isLoading?: boolean;
 }
 
@@ -17,13 +17,13 @@ export function MetricCard({
   label,
   value,
   change,
-  changeType = "neutral",
+  changeType = 'neutral',
   isLoading = false,
 }: MetricCardProps) {
   const changeColorMap = {
-    positive: "text-success",
-    negative: "text-danger",
-    neutral: "text-default-500",
+    positive: 'text-success',
+    negative: 'text-danger',
+    neutral: 'text-default-500',
   };
 
   return (
@@ -34,8 +34,10 @@ export function MetricCard({
             {icon}
           </div>
           {change && (
-            <span className={`text-sm font-semibold ${changeColorMap[changeType]}`}>
-              {changeType === "negative" && "-"}
+            <span
+              className={`text-sm font-semibold ${changeColorMap[changeType]}`}
+            >
+              {changeType === 'negative' && '-'}
               {change}
             </span>
           )}
