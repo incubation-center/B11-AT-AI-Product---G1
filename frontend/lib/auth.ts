@@ -1,7 +1,7 @@
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
-export const AUTH_TOKEN_COOKIE = "coolhat_owner_token";
+export const AUTH_TOKEN_COOKIE = 'coolhat_owner_token';
 
 export type SessionUser = {
   id: string;
@@ -73,21 +73,25 @@ export type UpdateTenantPayload = Partial<CreateTenantPayload> & {
 type UnknownJson = Record<string, unknown>;
 
 function isRecord(value: unknown): value is UnknownJson {
-  return typeof value === "object" && value !== null;
+  return typeof value === 'object' && value !== null;
 }
 
-function setBrowserCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 30) {
-  if (typeof document === "undefined") {
+function setBrowserCookie(
+  name: string,
+  value: string,
+  maxAgeSeconds = 60 * 60 * 24 * 30,
+) {
+  if (typeof document === 'undefined') {
     return;
   }
 
   document.cookie = `${name}=${encodeURIComponent(
-    value
+    value,
   )}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
 }
 
 function removeBrowserCookie(name: string) {
-  if (typeof document === "undefined") {
+  if (typeof document === 'undefined') {
     return;
   }
 
@@ -95,32 +99,32 @@ function removeBrowserCookie(name: string) {
 }
 
 export function getBrowserCookie(name: string) {
-  if (typeof document === "undefined") {
-    return "";
+  if (typeof document === 'undefined') {
+    return '';
   }
 
   const key = `${name}=`;
   const found = document.cookie
-    .split("; ")
+    .split('; ')
     .find((entry) => entry.startsWith(key));
 
-  return found ? decodeURIComponent(found.slice(key.length)) : "";
+  return found ? decodeURIComponent(found.slice(key.length)) : '';
 }
 
 function extractBearerToken(payload: unknown): string {
-  if (!payload) return "";
-  if (typeof payload === "string" && payload.trim()) return payload.trim();
-  if (!isRecord(payload)) return "";
+  if (!payload) return '';
+  if (typeof payload === 'string' && payload.trim()) return payload.trim();
+  if (!isRecord(payload)) return '';
 
-  const directKeys = ["token", "bearerToken", "accessToken"];
+  const directKeys = ['token', 'bearerToken', 'accessToken'];
   for (const key of directKeys) {
     const value = payload[key];
-    if (typeof value === "string" && value.trim()) {
+    if (typeof value === 'string' && value.trim()) {
       return value.trim();
     }
   }
 
-  const nestedKeys = ["session", "data"];
+  const nestedKeys = ['session', 'data'];
   for (const key of nestedKeys) {
     const nested = payload[key];
     const token = extractBearerToken(nested);
@@ -129,18 +133,20 @@ function extractBearerToken(payload: unknown): string {
     }
   }
 
-  return "";
+  return '';
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
   const text = await response.text();
-  const data = text ? (JSON.parse(text) as T & { message?: string }) : ({} as T);
+  const data = text
+    ? (JSON.parse(text) as T & { message?: string })
+    : ({} as T);
 
   if (!response.ok) {
     const message =
-      typeof (data as { message?: string }).message === "string"
+      typeof (data as { message?: string }).message === 'string'
         ? (data as { message: string }).message
-        : "Request failed";
+        : 'Request failed';
     throw new Error(message);
   }
 
@@ -154,10 +160,10 @@ export async function signInWithEmail(input: {
   rememberMe?: boolean;
 }) {
   const response = await fetch(`${API_URL}/api/auth/sign-in/email`, {
-    method: "POST",
-    credentials: "include",
+    method: 'POST',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   });
@@ -180,10 +186,10 @@ export async function signUpWithEmail(input: {
   rememberMe?: boolean;
 }) {
   const response = await fetch(`${API_URL}/api/auth/sign-up/email`, {
-    method: "POST",
-    credentials: "include",
+    method: 'POST',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   });
@@ -194,8 +200,8 @@ export async function signUpWithEmail(input: {
 export async function signOut() {
   const token = getBrowserCookie(AUTH_TOKEN_COOKIE);
   const response = await fetch(`${API_URL}/api/auth/sign-out`, {
-    method: "POST",
-    credentials: "include",
+    method: 'POST',
+    credentials: 'include',
     headers: token
       ? {
           Authorization: `Bearer ${token}`,
@@ -212,12 +218,12 @@ export async function protectedFetch<T>(path: string, init?: RequestInit) {
   const token = getBrowserCookie(AUTH_TOKEN_COOKIE);
   const headers = new Headers(init?.headers);
   if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
-    credentials: "include",
+    credentials: 'include',
     headers,
   });
 
@@ -225,24 +231,24 @@ export async function protectedFetch<T>(path: string, init?: RequestInit) {
 }
 
 export async function getTenantStatus() {
-  return protectedFetch<TenantStatusResponse>("/me/tenant");
+  return protectedFetch<TenantStatusResponse>('/me/tenant');
 }
 
 export async function createTenant(payload: CreateTenantPayload) {
   return protectedFetch<{ message: string; tenant: TenantSummary | null }>(
-    "/tenants",
+    '/tenants',
     {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
-    }
+    },
   );
 }
 
 export async function getTelegramLinkStatus() {
-  return protectedFetch<TelegramLinkStatus>("/telegram/link-status");
+  return protectedFetch<TelegramLinkStatus>('/telegram/link-status');
 }
 
 export async function generateTelegramLinkCode() {
@@ -256,20 +262,20 @@ export async function generateTelegramLinkCode() {
       shopName: string;
       subdomain: string;
     };
-  }>("/telegram/link-code", {
-    method: "POST",
+  }>('/telegram/link-code', {
+    method: 'POST',
   });
 }
 
 export async function updateMyTenant(payload: UpdateTenantPayload) {
   return protectedFetch<{ message: string; tenant: TenantSummary | null }>(
-    "/me/tenant",
+    '/me/tenant',
     {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
-    }
+    },
   );
 }

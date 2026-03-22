@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useId, useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useId, useRef, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface AnimatedGridPatternProps {
   width?: number;
@@ -42,12 +42,15 @@ export function AnimatedGridPattern({
     ];
   }, [dimensions.width, dimensions.height, width, height]);
 
-  const generateSquares = useCallback((count: number) => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      pos: getPos() as [number, number],
-    }));
-  }, [getPos]);
+  const generateSquares = useCallback(
+    (count: number) => {
+      return Array.from({ length: count }, (_, i) => ({
+        id: i,
+        pos: getPos() as [number, number],
+      }));
+    },
+    [getPos],
+  );
 
   const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
@@ -99,7 +102,7 @@ export function AnimatedGridPattern({
       ref={containerRef}
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
+        'pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30',
         className,
       )}
       {...props}
@@ -130,7 +133,7 @@ export function AnimatedGridPattern({
               duration,
               repeat: 1,
               delay: index * 0.1,
-              repeatType: "reverse",
+              repeatType: 'reverse',
               repeatDelay,
             }}
             onAnimationComplete={() => updateSquarePosition(squareId)}
@@ -147,4 +150,3 @@ export function AnimatedGridPattern({
     </svg>
   );
 }
-

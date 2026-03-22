@@ -1,9 +1,11 @@
-import React from 'react'
-
+import React from 'react';
+import { TelegramLinkPanel } from '@/components/dashboard/telegram-link-panel';
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <TelegramLinkPanel />
+    </div>
+  );
+};
 
-export default page
+export default page;

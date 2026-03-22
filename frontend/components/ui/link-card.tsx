@@ -1,9 +1,9 @@
 // file: components/ui/link-card.tsx
-import React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
-interface LinkCardProps extends Omit<HTMLMotionProps<"a">, "title"> {
+interface LinkCardProps extends Omit<HTMLMotionProps<'a'>, 'title'> {
   title: string;
   description: string;
   imageUrl: string;
@@ -18,7 +18,7 @@ const LinkCard = React.forwardRef<HTMLAnchorElement, LinkCardProps>(
         scale: 1.03,
         y: -5,
         transition: {
-          type: "spring" as const,
+          type: 'spring' as const,
           stiffness: 300,
           damping: 15,
         },
@@ -31,10 +31,10 @@ const LinkCard = React.forwardRef<HTMLAnchorElement, LinkCardProps>(
         href={href}
         rel="noopener noreferrer"
         className={cn(
-          "group relative flex h-80 w-full flex-col justify-between overflow-hidden",
-          "rounded-2xl border border-slate-200 bg-white p-6 text-[#002e6b] shadow-xl shadow-slate-200/80",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c61c2f] focus-visible:ring-offset-2",
-          className
+          'group relative flex h-80 w-full flex-col justify-between overflow-hidden',
+          'rounded-2xl border border-slate-200 bg-white p-6 text-[#002e6b] shadow-xl shadow-slate-200/80',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c61c2f] focus-visible:ring-offset-2',
+          className,
         )}
         variants={cardVariants}
         initial="initial"
@@ -62,9 +62,9 @@ const LinkCard = React.forwardRef<HTMLAnchorElement, LinkCardProps>(
         </div>
       </motion.a>
     );
-  }
+  },
 );
 
-LinkCard.displayName = "LinkCard";
+LinkCard.displayName = 'LinkCard';
 
 export { LinkCard };

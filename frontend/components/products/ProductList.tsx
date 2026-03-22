@@ -1,74 +1,213 @@
-"use client";
+// Feature component — Product List Table
+'use client';
 
-import { type Product } from "@/lib/products";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  User,
+  Chip,
+  Tooltip,
+  Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from '@heroui/react';
+import { Edit, MoreVertical } from 'lucide-react';
+import type { Product } from '@/lib/products';
 
 interface ProductListProps {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
+  onRestore: (id: string) => void;
+  onSync: (id: string) => void;
+  isLoading?: boolean;
 }
 
-export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
+export function ProductList({
+  products,
+  onEdit,
+  onDelete,
+  onRestore,
+  onSync,
+  isLoading,
+}: ProductListProps) {
+  const columns = [
+    { key: 'product', label: 'Product' },
+    { key: 'category', label: 'Category' },
+    { key: 'pricing', label: 'Pricing' },
+    { key: 'stock', label: 'Stock' },
+    { key: 'status', label: 'Status' },
+    { key: 'actions', label: 'Actions' },
+  ];
+
+  const renderCell = (product: Product, columnKey: string | number) => {
+    const key = String(columnKey);
+    switch (key) {
+      case 'product':
+        return (
+          <User
+            avatarProps={{
+              src: product.image_urls?.[0] || undefined,
+              fallback: '📦',
+              size: 'md',
+            }}
+            description={product.description?.slice(0, 50)}
+            name={product.name}
+          />
+        );
+
+      case 'category':
+        return (
+          <p className="text-sm text-default-600">{product.category || '—'}</p>
+        );
+
+      case 'pricing':
+        return (
+          <div className="space-y-1">
+            <p className="text-sm font-medium">${product.base_price_usd}</p>
+            <p className="text-xs text-default-500">
+              {product.base_price_khr}៛
+            </p>
+          </div>
+        );
+
+      case 'stock':
+        const isLowStock =
+          product.track_inventory &&
+          product.stock_qty <= product.low_stock_threshold;
+        return (
+          <div className="space-y-1">
+            <p className="text-sm font-medium">{product.stock_qty}</p>
+            {isLowStock && (
+              <Chip
+                size="sm"
+                color="warning"
+                variant="flat"
+                className="text-xs"
+              >
+                Low Stock
+              </Chip>
+            )}
+          </div>
+        );
+
+      case 'status':
+        return product.is_active ? (
+          <Chip size="sm" variant="flat" color="success" className="capitalize">
+            Active
+          </Chip>
+        ) : (
+          <Chip size="sm" variant="flat" color="default" className="capitalize">
+            Inactive
+          </Chip>
+        );
+
+      case 'actions':
+        return (
+          <div className="relative flex items-center gap-2">
+            <Tooltip content="Edit product">
+              <button
+                onClick={() => onEdit(product)}
+                aria-label={`Edit ${product.name}`}
+                className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors"
+              >
+                <Edit size={18} />
+              </button>
+            </Tooltip>
+
+            <Dropdown>
+              <DropdownTrigger>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  aria-label={`More options for ${product.name}`}
+                >
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                onAction={(key) => {
+                  if (key === 'delete') {
+                    if (confirm('Deactivate this product?')) {
+                      onDelete(product.id);
+                    }
+                  } else if (key === 'restore') {
+                    onRestore(product.id);
+                  } else if (key === 'sync') {
+                    onSync(product.id);
+                  }
+                }}
+              >
+                <DropdownItem
+                  key="sync"
+                  description="Sync with AI Assistant indexing"
+                >
+                  Sync to AI
+                </DropdownItem>
+                {product.is_active ? (
+                  <DropdownItem
+                    key="delete"
+                    color="danger"
+                    description="Mark as inactive"
+                  >
+                    Deactivate
+                  </DropdownItem>
+                ) : (
+                  <DropdownItem
+                    key="restore"
+                    color="success"
+                    description="Mark as active"
+                  >
+                    Restore
+                  </DropdownItem>
+                )}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   if (products.length === 0) {
     return (
-      <div className="flex-1 rounded-[22px] border border-[var(--dashboard-border)] bg-white/90 p-4">
-        <h3 className="mb-4 text-base font-semibold text-[var(--dashboard-ink)]">
-          Active Products
-        </h3>
-        <p className="text-sm text-[var(--dashboard-muted)]">No products found. Create one!</p>
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="text-center">
+          <div className="text-6xl mb-4">📦</div>
+          <h3 className="text-lg font-semibold text-default-900">
+            No products yet
+          </h3>
+          <p className="text-sm text-default-500 mt-1">
+            Create your first product to get started
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 rounded-[22px] border border-[var(--dashboard-border)] bg-white/90 p-4">
-      <h3 className="mb-4 text-base font-semibold text-[var(--dashboard-ink)]">
-        Active Products
-      </h3>
-      <div className="flex flex-col gap-3">
-        {products.map((p) => (
-          <div
-            key={p.id}
-            className="flex items-center justify-between rounded-xl border border-[var(--dashboard-border)] p-3 hover:bg-gray-50/50"
-          >
-            <div className="flex items-center gap-3">
-              {p.image_urls && p.image_urls.length > 0 ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={p.image_urls[0]}
-                  alt={p.name}
-                  className="h-12 w-12 rounded-lg object-cover border border-[var(--dashboard-border)]"
-                />
-              ) : (
-                <div className="h-12 w-12 rounded-lg bg-gray-100 border border-[var(--dashboard-border)] flex items-center justify-center text-xs text-gray-400">
-                  No img
-                </div>
-              )}
-              <div className="flex flex-col">
-                <span className="font-medium text-[var(--dashboard-ink)]">{p.name}</span>
-                <span className="text-xs text-[var(--dashboard-muted)]">
-                  {p.base_price_usd ? `$${p.base_price_usd}` : "No price"} | Stock: {p.stock_qty}
-                  {p.is_active ? "" : " (Inactive)"}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => onEdit(p)}
-                className="text-sm font-medium text-[var(--dashboard-accent)] hover:underline"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => onDelete(p.id)}
-                className="text-sm font-medium text-red-500 hover:underline"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Table aria-label="Products table">
+      <TableHeader columns={columns}>
+        {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+      </TableHeader>
+      <TableBody items={products} isLoading={isLoading}>
+        {(product) => (
+          <TableRow key={product.id}>
+            {(columnKey) => (
+              <TableCell>{renderCell(product, columnKey)}</TableCell>
+            )}
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
   );
 }

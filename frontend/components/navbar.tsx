@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { CTAButton } from "@/components/ui/cta-button";
+import { CTAButton } from '@/components/ui/cta-button';
 
 export function Navbar() {
   return (
@@ -40,7 +40,10 @@ export function Navbar() {
           >
             How it works
           </Link>
-          <Link href="#pricing" className="transition-colors hover:text-[#c61c2f]">
+          <Link
+            href="#pricing"
+            className="transition-colors hover:text-[#c61c2f]"
+          >
             Pricing
           </Link>
         </nav>

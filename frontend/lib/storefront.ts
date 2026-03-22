@@ -1,4 +1,4 @@
-import { API_URL } from "@/lib/auth";
+import { API_URL } from '@/lib/auth';
 
 export type StorefrontStore = {
   id: string;
@@ -31,46 +31,54 @@ export type StorefrontProduct = {
 };
 
 function stripPort(host: string) {
-  return host.replace(/:\d+$/, "");
+  return host.replace(/:\d+$/, '');
 }
 
 export function extractStoreSubdomain(host: string) {
   const hostname = stripPort(host.trim().toLowerCase());
 
-  if (!hostname || hostname === "localhost" || hostname === "127.0.0.1") {
+  if (!hostname || hostname === 'localhost' || hostname === '127.0.0.1') {
     return null;
   }
 
-  if (hostname.endsWith(".localhost")) {
-    return hostname.slice(0, -".localhost".length) || null;
+  if (hostname.endsWith('.localhost')) {
+    return hostname.slice(0, -'.localhost'.length) || null;
   }
 
-  if (hostname.endsWith(".lvh.me")) {
-    return hostname.slice(0, -".lvh.me".length) || null;
+  if (hostname.endsWith('.lvh.me')) {
+    return hostname.slice(0, -'.lvh.me'.length) || null;
   }
 
-  if (hostname.endsWith(".127.0.0.1.nip.io")) {
-    return hostname.slice(0, -".127.0.0.1.nip.io".length) || null;
+  if (hostname.endsWith('.127.0.0.1.nip.io')) {
+    return hostname.slice(0, -'.127.0.0.1.nip.io'.length) || null;
   }
 
-  const parts = hostname.split(".");
+  const parts = hostname.split('.');
   return parts.length >= 3 ? parts[0] || null : null;
 }
 
 export async function getStorefrontBySubdomain(subdomain: string) {
-  const storeResponse = await fetch(`${API_URL}/store/by-subdomain/${subdomain}`, {
-    cache: "no-store",
-  });
+  const storeResponse = await fetch(
+    `${API_URL}/store/by-subdomain/${subdomain}`,
+    {
+      cache: 'no-store',
+    },
+  );
 
   if (!storeResponse.ok) {
     return null;
   }
 
-  const productResponse = await fetch(`${API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`, {
-    cache: "no-store",
-  });
+  const productResponse = await fetch(
+    `${API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
+    {
+      cache: 'no-store',
+    },
+  );
 
-  const storePayload = (await storeResponse.json()) as { store: StorefrontStore };
+  const storePayload = (await storeResponse.json()) as {
+    store: StorefrontStore;
+  };
   const productPayload = productResponse.ok
     ? ((await productResponse.json()) as { products: StorefrontProduct[] })
     : { products: [] };

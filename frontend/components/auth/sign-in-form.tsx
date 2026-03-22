@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
 
-import { AnimatedSignIn } from "@/components/ui/animated-auth";
-import { signInWithEmail } from "@/lib/auth";
+import { AnimatedSignIn } from '@/components/ui/animated-auth';
+import { signInWithEmail } from '@/lib/auth';
 
 export function SignInForm() {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(email: string, password: string) {
-    setError("");
+    setError('');
     startTransition(async () => {
       try {
         await signInWithEmail({
@@ -21,10 +21,14 @@ export function SignInForm() {
           callbackURL: `${window.location.origin}/dashboard`,
           rememberMe: true,
         });
-        router.push("/dashboard");
+        router.push('/dashboard');
         router.refresh();
       } catch (submitError) {
-        setError(submitError instanceof Error ? submitError.message : "Unable to sign in");
+        setError(
+          submitError instanceof Error
+            ? submitError.message
+            : 'Unable to sign in',
+        );
       }
     });
   }
