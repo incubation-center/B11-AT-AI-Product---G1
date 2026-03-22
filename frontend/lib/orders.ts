@@ -45,6 +45,11 @@ export const ordersApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payment_status }),
     }),
+
+  cancel: (id: string) =>
+    protectedFetch<Order>(`/orders/${id}/cancel`, {
+      method: 'POST',
+    }),
 };
 
 export const inventoryApi = {

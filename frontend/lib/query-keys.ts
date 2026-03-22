@@ -8,6 +8,9 @@ export const queryKeys = {
   subdomainPreview: (shopName: string) =>
     ['subdomain-preview', shopName] as const,
   orders: ['orders'] as const,
+  orderList: (params?: { status?: string; from?: string; to?: string }) =>
+    [...queryKeys.orders, 'list', params ?? {}] as const,
+  orderDetail: (id: string) => [...queryKeys.orders, 'detail', id] as const,
   dashboardOrders: () => [...queryKeys.orders, 'dashboard'] as const,
   metrics: ['metrics'] as const,
   dashboardMetrics: (dateRange?: string) =>
