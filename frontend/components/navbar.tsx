@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 
 import { CTAButton } from '@/components/ui/cta-button';
 
@@ -45,6 +46,13 @@ export function Navbar() {
             className="transition-colors hover:text-[#c61c2f]"
           >
             Pricing
+          </Link>
+          <Link
+            href="/chat"
+            className="flex items-center gap-1.5 rounded-full bg-[#002e6b]/5 px-3 py-1.5 text-xs font-medium text-[#002e6b] ring-1 ring-[#002e6b]/15 transition hover:bg-[#002e6b]/10"
+          >
+            <Sparkles size={12} className="text-[#c61c2f]" />
+            Ask Coolhat AI
           </Link>
         </nav>
 
