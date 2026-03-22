@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { analyticsRoutes } from "./routes/analytics.routes";
 import { assistantRoutes } from "./routes/assistant.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { docsRoutes } from "./routes/docs.routes";
@@ -60,6 +61,7 @@ app.route("/", rootRoutes);
 app.route("/", docsRoutes);
 app.route("/", authRoutes);
 app.route("/", meRoutes);
+app.route("/", analyticsRoutes);
 app.route("/", assistantRoutes);
 app.route("/", tenantRoutes);
 app.route("/", telegramRoutes);

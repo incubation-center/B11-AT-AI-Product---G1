@@ -40,8 +40,16 @@ type DraftFinalPayload = {
 const MAX_FOLLOW_UP_QUESTIONS = 5;
 type ProductDomain = "electronics" | "beauty" | "fashion" | "food" | "home" | "general";
 
+function parseDraftLanguage(input: unknown): DraftLanguage | null {
+  if (typeof input !== "string") return null;
+  const value = input.trim().toLowerCase();
+  if (value === "en" || value === "english") return "en";
+  if (value === "km" || value === "kh" || value === "khmer") return "km";
+  return null;
+}
+
 function normalizeLang(input: unknown): DraftLanguage {
-  return input === "en" ? "en" : "km";
+  return parseDraftLanguage(input) ?? "km";
 }
 
 function detectLangFromText(text: string): DraftLanguage {
@@ -383,7 +391,6 @@ export async function startProductDraft(
     image_urls?: unknown;
   }
 ) {
-  const lang = normalizeLang(input.lang);
   const linkedProductId = asString(input.product_id);
 
   let normalizedInitialInput: Record<string, unknown>;
@@ -440,6 +447,18 @@ export async function startProductDraft(
         : [],
     };
   }
+
+  const explicitLang = parseDraftLanguage(input.lang);
+  const detectedLang = detectLangFromText(
+    [
+      asString(normalizedInitialInput.name),
+      asString(normalizedInitialInput.description),
+      asString(normalizedInitialInput.category),
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+  const lang = explicitLang ?? detectedLang;
 
   const inserted = await db
     .insert(productDrafts)
