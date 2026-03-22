@@ -1,20 +1,96 @@
 // Feature component — Product Form Variants Step
 'use client';
 
-import { Checkbox } from '@heroui/react';
-import { AlertCircle } from 'lucide-react';
+import { 
+  Checkbox, 
+  Button, 
+  Input, 
+  Table, 
+  TableHeader, 
+  TableColumn, 
+  TableBody, 
+  TableRow, 
+  TableCell,
+  Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from '@heroui/react';
+import { AlertCircle, Plus, Trash2, Edit } from 'lucide-react';
+import { useState } from 'react';
+import type { ProductVariant } from '@/lib/products';
 
 interface ProductFormVariantsStepProps {
   hasVariants: boolean;
   onHasVariantsChange: (value: boolean) => void;
+  variants: Partial<ProductVariant>[];
+  onVariantsChange: (variants: Partial<ProductVariant>[]) => void;
   isLoading: boolean;
 }
 
 export function ProductFormVariantsStep({
   hasVariants,
   onHasVariantsChange,
+  variants,
+  onVariantsChange,
   isLoading,
 }: ProductFormVariantsStepProps) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [editingVariant, setEditingVariant] = useState<Partial<ProductVariant> | null>(null);
+  
+  // Local form state for new/editing variant
+  const [size, setSize] = useState('');
+  const [color, setColor] = useState('');
+  const [priceUsd, setPriceUsd] = useState('');
+  const [priceKhr, setPriceKhr] = useState('');
+  const [stock, setStock] = useState('0');
+
+  const handleAddClick = () => {
+    setEditingVariant(null);
+    setSize('');
+    setColor('');
+    setPriceUsd('');
+    setPriceKhr('');
+    setStock('0');
+    onOpen();
+  };
+
+  const handleEditClick = (variant: Partial<ProductVariant>) => {
+    setEditingVariant(variant);
+    setSize(variant.size || '');
+    setColor(variant.color || '');
+    setPriceUsd(variant.price_override_usd || '');
+    setPriceKhr(variant.price_override_khr || '');
+    setStock(variant.stock_qty?.toString() || '0');
+    onOpen();
+  };
+
+  const handleSaveVariant = () => {
+    const newVariant: Partial<ProductVariant> = {
+      ...(editingVariant || {}),
+      size: size || undefined,
+      color: color || undefined,
+      price_override_usd: priceUsd || null,
+      price_override_khr: priceKhr || null,
+      stock_qty: parseInt(stock, 10) || 0,
+      is_active: true,
+    };
+
+    if (editingVariant) {
+      onVariantsChange(variants.map(v => v === editingVariant ? newVariant : v));
+    } else {
+      onVariantsChange([...variants, newVariant]);
+    }
+    onOpenChange();
+  };
+
+  const handleDeleteVariant = (variant: Partial<ProductVariant>) => {
+    onVariantsChange(variants.filter(v => v !== variant));
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-default-50 rounded-lg p-5 border border-default-200">
@@ -40,35 +116,158 @@ export function ProductFormVariantsStep({
         </div>
       </div>
 
-      {/* Info */}
+      {hasVariants && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-default-900">Manage Variants</h3>
+            <Button 
+              size="sm" 
+              color="primary" 
+              variant="flat" 
+              startContent={<Plus className="h-4 w-4" />}
+              onPress={handleAddClick}
+              isDisabled={isLoading}
+            >
+              Add Variant
+            </Button>
+          </div>
+
+          {variants.length > 0 ? (
+            <Table aria-label="Product variants table" removeWrapper>
+              <TableHeader>
+                <TableColumn>VARIANT</TableColumn>
+                <TableColumn>PRICE (USD)</TableColumn>
+                <TableColumn>STOCK</TableColumn>
+                <TableColumn align="end">ACTIONS</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {variants.map((v, i) => (
+                  <TableRow key={v.id || i}>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {[v.size, v.color].filter(Boolean).join(' / ') || 'Standard'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {v.price_override_usd ? `$${v.price_override_usd}` : 'Base Price'}
+                    </TableCell>
+                    <TableCell>{v.stock_qty ?? 0}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-2">
+                        <Tooltip content="Edit variant">
+                          <Button 
+                            isIconOnly 
+                            size="sm" 
+                            variant="light" 
+                            onPress={() => handleEditClick(v)}
+                          >
+                            <Edit className="h-4 w-4 text-default-400" />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip color="danger" content="Delete variant">
+                          <Button 
+                            isIconOnly 
+                            size="sm" 
+                            variant="light" 
+                            onPress={() => handleDeleteVariant(v)}
+                          >
+                            <Trash2 className="h-4 w-4 text-danger" />
+                          </Button>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-8 bg-default-50 rounded-lg border border-dashed border-default-300">
+              <p className="text-xs text-default-400">No variants added yet. Click &quot;Add Variant&quot; to begin.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Info Warning */}
       {!hasVariants && (
         <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-200">
           <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-blue-900">Variants</p>
             <p className="text-xs text-blue-700 mt-1">
-              You can manage variants after creating the product. Add colors,
-              sizes, or other options to increase sales options.
+              Enable variants to add different colors, sizes, or other options. 
+              Each variant can have its own price and stock level.
             </p>
           </div>
         </div>
       )}
 
-      {hasVariants && (
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
-          <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-amber-900">
-              Variants Enabled
-            </p>
-            <p className="text-xs text-amber-700 mt-1">
-              You can add multiple variants (colors, sizes, etc.) for this
-              product after creation. Each variant can have its own price and
-              stock level.
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Add/Edit Variant Modal */}
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="md">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                {editingVariant ? 'Edit Variant' : 'Add New Variant'}
+              </ModalHeader>
+              <ModalBody className="gap-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Size"
+                    placeholder="e.g. M, L, XL"
+                    value={size}
+                    onValueChange={setSize}
+                    variant="bordered"
+                  />
+                  <Input
+                    label="Color"
+                    placeholder="e.g. Red, Blue"
+                    value={color}
+                    onValueChange={setColor}
+                    variant="bordered"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Price (USD)"
+                    placeholder="Override base price"
+                    value={priceUsd}
+                    onValueChange={setPriceUsd}
+                    type="number"
+                    variant="bordered"
+                    startContent={<span className="text-default-400 text-small">$</span>}
+                  />
+                   <Input
+                    label="Price (KHR)"
+                    placeholder="Override base price"
+                    value={priceKhr}
+                    onValueChange={setPriceKhr}
+                    type="number"
+                    variant="bordered"
+                  />
+                </div>
+                <Input
+                  label="Initial Stock"
+                  value={stock}
+                  onValueChange={setStock}
+                  type="number"
+                  variant="bordered"
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="primary" onPress={handleSaveVariant}>
+                  {editingVariant ? 'Update' : 'Add'}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -8,10 +8,23 @@ export const queryKeys = {
   subdomainPreview: (shopName: string) =>
     ['subdomain-preview', shopName] as const,
   orders: ['orders'] as const,
+  orderList: (params?: { status?: string; from?: string; to?: string }) =>
+    [...queryKeys.orders, 'list', params ?? {}] as const,
+  orderDetail: (id: string) => [...queryKeys.orders, 'detail', id] as const,
   dashboardOrders: () => [...queryKeys.orders, 'dashboard'] as const,
   metrics: ['metrics'] as const,
   dashboardMetrics: (dateRange?: string) =>
     [...queryKeys.metrics, 'dashboard', dateRange ?? 'weekly'] as const,
   inventory: ['inventory'] as const,
   lowStockItems: () => [...queryKeys.inventory, 'low-stock'] as const,
+  profile: {
+    base: ['profile'] as const,
+    me: () => [...queryKeys.profile.base, 'me'] as const,
+  },
+  tenants: {
+    base: ['tenants'] as const,
+    status: () => [...queryKeys.tenants.base, 'status'] as const,
+  },
 };
+
+export const QUERY_KEYS = queryKeys;

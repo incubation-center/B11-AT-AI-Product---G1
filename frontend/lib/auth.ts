@@ -267,6 +267,22 @@ export async function generateTelegramLinkCode() {
   });
 }
 
+export async function sendVerificationEmail() {
+  return protectedFetch<{ message: string }>('/api/auth/send-verification-email', {
+    method: 'POST',
+  });
+}
+
+export async function requestPasswordReset(email: string) {
+  return protectedFetch<{ message: string }>('/api/auth/request-password-reset', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  });
+}
+
 export async function updateMyTenant(payload: UpdateTenantPayload) {
   return protectedFetch<{ message: string; tenant: TenantSummary | null }>(
     '/me/tenant',

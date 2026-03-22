@@ -4,6 +4,8 @@ import {
   deactivateProduct,
   createProduct,
   updateProduct,
+  updateProductStock,
+  updateVariantStock,
   syncProductToRag,
   type UpdateProductPayload,
 } from '@/lib/products';
@@ -82,6 +84,27 @@ export function useRestoreProduct() {
 
   return useMutation({
     mutationFn: (id: string) => updateProduct(id, { is_active: true }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    },
+  });
+}
+export function useUpdateProductStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, qty }: { id: string; qty: number }) => updateProductStock(id, qty),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    },
+  });
+}
+
+export function useUpdateVariantStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, qty }: { id: string; qty: number }) => updateVariantStock(id, qty),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
     },

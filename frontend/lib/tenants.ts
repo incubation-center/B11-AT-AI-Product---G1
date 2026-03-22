@@ -1,4 +1,4 @@
-import { API_URL, createTenant } from '@/lib/auth';
+import { API_URL, createTenant, protectedFetch, type TenantSummary } from '@/lib/auth';
 
 export type SubdomainPreview = {
   available: boolean;
@@ -19,6 +19,33 @@ export async function getSubdomainPreview(shopName: string) {
   }
 
   return (await response.json()) as SubdomainPreview;
+}
+
+export async function deactivateMyTenant() {
+  return protectedFetch<{ message: string; tenant: TenantSummary | null }>(
+    '/me/tenant/deactivate',
+    {
+      method: 'PATCH',
+    },
+  );
+}
+
+export async function uploadTenantAsset(type: 'logo' | 'banner', file: File) {
+  const formData = new FormData();
+  formData.append('type', type);
+  formData.append('file', file);
+
+  return protectedFetch<{
+    message: string;
+    upload: {
+      publicUrl: string;
+      assetId: string;
+    };
+  }>('/tenants/upload-url', {
+    method: 'POST',
+    body: formData,
+    // FormData handles its own content-type with boundary
+  });
 }
 
 export { createTenant };

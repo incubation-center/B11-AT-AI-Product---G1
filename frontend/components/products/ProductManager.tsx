@@ -8,7 +8,6 @@ import {
   Button,
   Input,
   Spinner,
-  Pagination,
   Switch,
 } from '@heroui/react';
 import { Plus, Search } from 'lucide-react';
@@ -180,20 +179,10 @@ export default function ProductManager() {
             onRestore={handleRestore}
             onSync={handleSync}
             isLoading={isLoading}
+            page={page}
+            totalPages={response.totalPages}
+            onPageChange={setPage}
           />
-
-          {response.totalPages > 1 && (
-            <div className="flex justify-center py-4">
-              <Pagination
-                total={response.totalPages}
-                page={page}
-                onChange={setPage}
-                showControls
-                color="primary"
-                variant="flat"
-              />
-            </div>
-          )}
         </div>
       )}
 

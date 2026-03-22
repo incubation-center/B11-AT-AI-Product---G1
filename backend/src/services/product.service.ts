@@ -110,6 +110,9 @@ export async function listProducts(
       orderBy: [desc(products.createdAt)],
       limit: pageSize,
       offset,
+      with: {
+        variants: true,
+      },
     }),
     db.select({ count: sql<number>`count(*)::int` }).from(products).where(where),
   ]);
