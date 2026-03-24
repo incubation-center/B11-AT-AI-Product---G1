@@ -144,6 +144,32 @@ export const authOpenApiSpec = {
           totalProducts: { type: "integer", example: 42 },
         },
       },
+      AnalyticsOverdueResponse: {
+        type: "object",
+        required: ["totalOverdueAmount", "overdueOrders"],
+        properties: {
+          totalOverdueAmount: { type: "number", example: 123.45 },
+          overdueOrders: { type: "string", example: "5" },
+        },
+      },
+      AnalyticsBillingResponse: {
+        type: "object",
+        required: ["totalRevenue", "paidOrders", "unpaidOrders"],
+        properties: {
+          totalRevenue: { type: "number", example: 0 },
+          paidOrders: { type: "string", example: "0" },
+          unpaidOrders: { type: "string", example: "0" },
+        },
+      },
+      AnalyticsStorePerformanceResponse: {
+        type: "object",
+        required: ["totalSessions", "totalOrders", "storePerformancePercent"],
+        properties: {
+          totalSessions: { type: "number", example: 100 },
+          totalOrders: { type: "number", example: 25 },
+          storePerformancePercent: { type: "number", example: 25 },
+        },
+      },
       TenantResponse: {
         type: "object",
         required: ["id", "shopName", "shopType", "subdomain", "storeUrl", "isActive"],
@@ -1570,6 +1596,170 @@ export const authOpenApiSpec = {
           },
           "404": {
             description: "Tenant not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/analytics/overdue": {
+      get: {
+        tags: ["Analytics"],
+        summary: "Get overdue payment summary for the current tenant",
+        description: "Returns total overdue amount and count of overdue orders (unpaid payment status or pending order status) for the specified month/year.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "month",
+            in: "query",
+            required: false,
+            schema: { type: "number", minimum: 1, maximum: 12 },
+            description: "Filter overdue (unpaid/pending) orders by month",
+          },
+          {
+            name: "year",
+            in: "query",
+            required: false,
+            schema: { type: "number", example: 2026 },
+            description: "Filter overdue (unpaid/pending) orders by year",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Overdue orders summary",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AnalyticsOverdueResponse" },
+                example: {
+                  totalOverdueAmount: 123.45,
+                  overdueOrders: "5",
+                },
+              },
+            },
+          },
+          "400": {
+            description: "Invalid month or year",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Tenant not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "500": {
+            description: "Unable to load overdue orders summary",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/analytics/billing": {
+      get: {
+        tags: ["Analytics"],
+        summary: "Get billing summary for the current tenant",
+        description: "Returns total revenue, number of paid orders, and unpaid orders for the current tenant.",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Billing summary",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AnalyticsBillingResponse" },
+                example: {
+                  totalRevenue: 0,
+                  paidOrders: "0",
+                  unpaidOrders: "0",
+                },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Tenant not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "500": {
+            description: "Unable to load billing summary",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/analytics/store-performance": {
+      get: {
+        tags: ["Analytics"],
+        summary: "Get store performance summary for the current tenant",
+        description: "Returns total sessions, total orders, and store performance percentage for the current tenant.",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Store performance summary",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AnalyticsStorePerformanceResponse" },
+                example: {
+                  totalSessions: 100,
+                  totalOrders: 25,
+                  storePerformancePercent: 25,
+                },
+              },
+            },
+          },
+          "401": {
+            description: "Unauthorized",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Tenant not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "500": {
+            description: "Unable to load store performance summary",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ErrorResponse" },
