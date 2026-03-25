@@ -13,7 +13,7 @@ import {
   ModalFooter, 
   useDisclosure 
 } from '@heroui/react';
-import { ShieldAlert, LogOut, Trash2 } from 'lucide-react';
+import { LogOut, Trash2 } from 'lucide-react';
 
 interface DangerZoneProps {
   onDeactivateStore: () => void;
@@ -118,7 +118,7 @@ export function DangerZone({
                 This action is irreversible. You will lose access to your owner dashboard and all associated stores. Are you absolutely certain?
               </ModalBody>
               <ModalFooter>
-                <Button variant="light" onPress={onClose}>Wait, I'll stay</Button>
+                <Button variant="light" onPress={onClose}>Wait, I&apos;ll stay</Button>
                 <Button 
                   color="danger" 
                   onPress={() => {

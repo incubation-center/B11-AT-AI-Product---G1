@@ -3,6 +3,7 @@ export type PineconeMetadata = {
   entityType: "tenant_profile" | "product" | "product_variant";
   entityId: string;
   subdomain?: string;
+  shopName?: string;
   shopType?: string;
   productCategory?: string;
   productId?: string;

@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { db } from "../db";
@@ -6,25 +5,37 @@ import { productKnowledge, productVariants, products, tenants } from "../db/sche
 import { env } from "../env";
 import type { PineconeMetadata } from "../types/rag";
 
-function toUnitFloat(hash: Buffer, i: number): number {
-  const value = hash.readUInt16BE((i * 2) % (hash.length - 1));
-  return value / 65535;
-}
+// ---------------------------------------------------------------------------
+// Real OpenAI embedding — text-embedding-3-small
+// ---------------------------------------------------------------------------
+export async function embedText(text: string): Promise<number[]> {
+  if (!env.OPEN_AI_API) throw new Error("OPEN_AI_API is required for embeddings.");
 
-function deterministicEmbed(text: string, dimensions: number): number[] {
-  const seedA = createHash("sha256").update(`a:${text}`).digest();
-  const seedB = createHash("sha256").update(`b:${text}`).digest();
-  const out: number[] = new Array(dimensions);
+  const res = await fetch("https://api.openai.com/v1/embeddings", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.OPEN_AI_API}`,
+    },
+    body: JSON.stringify({
+      model: "text-embedding-3-small",
+      input: text.slice(0, 8000), // stay within token limit
+      dimensions: env.PINECONE_VECTOR_DIM, // matches Pinecone index
+    }),
+  });
 
-  for (let i = 0; i < dimensions; i += 1) {
-    const a = toUnitFloat(seedA, i);
-    const b = toUnitFloat(seedB, i + 7);
-    out[i] = (a + b) / 2;
+  if (!res.ok) {
+    const raw = await res.text();
+    throw new Error(`OpenAI embed failed: ${raw}`);
   }
 
-  return out;
+  const json = (await res.json()) as { data: Array<{ embedding: number[] }> };
+  return json.data[0].embedding;
 }
 
+// ---------------------------------------------------------------------------
+// Text builders
+// ---------------------------------------------------------------------------
 function tenantProfileText(row: typeof tenants.$inferSelect): string {
   return [
     `Shop: ${row.shopName}`,
@@ -89,7 +100,10 @@ function variantText(
     .join("\n");
 }
 
-function buildProductMetadata(row: typeof products.$inferSelect): PineconeMetadata {
+function buildProductMetadata(
+  row: typeof products.$inferSelect,
+  tenant: typeof tenants.$inferSelect
+): PineconeMetadata {
   return {
     tenantId: row.tenantId,
     entityType: "product",
@@ -99,12 +113,15 @@ function buildProductMetadata(row: typeof products.$inferSelect): PineconeMetada
     relationTenantNode: `tenant:${row.tenantId}`,
     relationNode: `product:${row.id}`,
     text: productText(row),
+    subdomain: tenant.subdomain,
+    shopName: tenant.shopName,
   };
 }
 
 function buildVariantMetadata(
   product: typeof products.$inferSelect,
   variant: typeof productVariants.$inferSelect,
+  tenant: typeof tenants.$inferSelect,
   text: string
 ): PineconeMetadata {
   return {
@@ -120,6 +137,8 @@ function buildVariantMetadata(
     relationTenantNode: `tenant:${product.tenantId}`,
     relationNode: `product:${product.id}`,
     text,
+    subdomain: tenant.subdomain,
+    shopName: tenant.shopName,
   };
 }
 
@@ -144,13 +163,26 @@ function getIndex(tenantId: string) {
   return client.index(env.PINECONE_INDEX!).namespace(getNamespace(tenantId));
 }
 
-async function buildProductRecords(tenantId: string, productId: string, dimensions: number) {
+function getGlobalIndex() {
+  const client = new Pinecone({ apiKey: env.PINECONE_API_KEY! });
+  return client.index(env.PINECONE_INDEX!).namespace("");
+}
+
+// ---------------------------------------------------------------------------
+// Build product records (async — calls embedText)
+// ---------------------------------------------------------------------------
+async function buildProductRecords(tenantId: string, productId: string) {
   const product = await db.query.products.findFirst({
     where: eq(products.id, productId),
   });
   if (!product || product.tenantId !== tenantId) return [];
 
-  const [variants, knowledge] = await Promise.all([
+  const tenant = await db.query.tenants.findFirst({
+    where: eq(tenants.id, tenantId),
+  });
+  if (!tenant) return [];
+
+  const [variants, rawKnowledge] = await Promise.all([
     db.query.productVariants.findMany({
       where: eq(productVariants.productId, product.id),
     }),
@@ -158,14 +190,16 @@ async function buildProductRecords(tenantId: string, productId: string, dimensio
       where: eq(productKnowledge.productId, product.id),
     }),
   ]);
+  const knowledge = rawKnowledge ?? null;
 
   const productDoc = [productText(product), productUsageText(knowledge)].filter(Boolean).join("\n");
+
   const records: Array<{ id: string; values: number[]; metadata: PineconeMetadata }> = [
     {
       id: productVectorId(tenantId, product.id),
-      values: deterministicEmbed(productDoc, dimensions),
+      values: await embedText(productDoc),
       metadata: {
-        ...buildProductMetadata(product),
+        ...buildProductMetadata(product, tenant),
         text: productDoc,
       },
     },
@@ -175,19 +209,20 @@ async function buildProductRecords(tenantId: string, productId: string, dimensio
     const text = variantText(product, variant, knowledge);
     records.push({
       id: variantVectorId(tenantId, product.id, variant.id),
-      values: deterministicEmbed(text, dimensions),
-      metadata: buildVariantMetadata(product, variant, text),
+      values: await embedText(text),
+      metadata: buildVariantMetadata(product, variant, tenant, text),
     });
   }
 
   return records;
 }
 
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 export const ragService = {
   async indexTenant(tenantId: string): Promise<void> {
     if (shouldSkip()) return;
-
-    const dimensions = env.PINECONE_VECTOR_DIM;
 
     const tenant = await db.query.tenants.findFirst({
       where: eq(tenants.id, tenantId),
@@ -199,11 +234,12 @@ export const ragService = {
     });
 
     const index = getIndex(tenantId);
+    const tenantText = tenantProfileText(tenant);
 
     const vectors: Array<{ id: string; values: number[]; metadata: PineconeMetadata }> = [
       {
         id: `tenant:${tenant.id}:profile`,
-        values: deterministicEmbed(tenantProfileText(tenant), dimensions),
+        values: await embedText(tenantText),
         metadata: {
           tenantId: tenant.id,
           entityType: "tenant_profile",
@@ -213,28 +249,28 @@ export const ragService = {
           isActive: tenant.isActive,
           relationTenantNode: `tenant:${tenant.id}`,
           relationNode: `tenant:${tenant.id}`,
-          text: tenantProfileText(tenant),
+          text: tenantText,
         } satisfies PineconeMetadata,
       },
     ];
 
     for (const product of tenantProducts) {
-      const records = await buildProductRecords(tenantId, product.id, dimensions);
+      const records = await buildProductRecords(tenantId, product.id);
       vectors.push(...records);
     }
 
     if (vectors.length === 0) return;
     await index.upsert({ records: vectors });
+    await getGlobalIndex().upsert({ records: vectors });
   },
 
   async indexProduct(tenantId: string, productId: string): Promise<void> {
     if (shouldSkip()) return;
-
-    const dimensions = env.PINECONE_VECTOR_DIM;
-    const records = await buildProductRecords(tenantId, productId, dimensions);
+    const records = await buildProductRecords(tenantId, productId);
     if (records.length === 0) return;
     const index = getIndex(tenantId);
     await index.upsert({ records });
+    await getGlobalIndex().upsert({ records });
   },
 
   async deleteProductVector(tenantId: string, productId: string): Promise<void> {
@@ -243,6 +279,10 @@ export const ragService = {
     if (typeof indexAny.deleteMany === "function") {
       await indexAny.deleteMany({ ids: [productVectorId(tenantId, productId)] });
     }
+    const globalIndexAny = getGlobalIndex() as any;
+    if (typeof globalIndexAny.deleteMany === "function") {
+      await globalIndexAny.deleteMany({ ids: [productVectorId(tenantId, productId)] });
+    }
   },
 
   async reindexProduct(tenantId: string, productId: string): Promise<void> {
@@ -250,9 +290,13 @@ export const ragService = {
     const indexAny = getIndex(tenantId) as any;
     if (typeof indexAny.deleteMany === "function") {
       await indexAny.deleteMany({
-        filter: {
-          relationNode: { $eq: `product:${productId}` },
-        },
+        filter: { relationNode: { $eq: `product:${productId}` } },
+      });
+    }
+    const globalIndexAny = getGlobalIndex() as any;
+    if (typeof globalIndexAny.deleteMany === "function") {
+      await globalIndexAny.deleteMany({
+        filter: { relationNode: { $eq: `product:${productId}` } },
       });
     }
     await this.indexProduct(tenantId, productId);
@@ -260,16 +304,12 @@ export const ragService = {
 
   async searchTenant(tenantId: string, query: string, topK = 10) {
     if (shouldSkip()) return [];
-
-    const dimensions = env.PINECONE_VECTOR_DIM;
     const index = getIndex(tenantId);
-
     const result = await index.query({
-      vector: deterministicEmbed(query, dimensions),
+      vector: await embedText(query),
       topK,
       includeMetadata: true,
     });
-
     return result.matches ?? [];
   },
 };

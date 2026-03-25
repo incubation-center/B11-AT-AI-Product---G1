@@ -4,7 +4,7 @@ import React from 'react';
 import { useTelegramLinkStatus, useGenerateTelegramCode } from '@/hooks/use-telegram-queries';
 import { TelegramStatusCard } from '@/components/dashboard/telegram-status-card';
 import { TelegramConnectGuide } from '@/components/dashboard/telegram-connect-guide';
-import { Send, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 export default function TelegramPage() {
   const { 

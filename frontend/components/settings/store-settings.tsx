@@ -14,6 +14,7 @@ import {
 import { Store, Palette, Image as ImageIcon, CheckCircle2, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TenantSummary } from '@/lib/auth';
+import Image from 'next/image';
 
 const STOREFRONT_TEMPLATES = [
   { id: 'boutique-editorial', name: 'Boutique Editorial', description: 'Large imagery and elegant typography for high-end feel.' },
@@ -106,7 +107,7 @@ export function StoreSettings({
                 <div className="relative group">
                   <div className="w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
                     {tenant?.logoUrl ? (
-                      <img src={tenant.logoUrl} className="w-full h-full object-contain p-2" alt="Logo" />
+                      <Image src={tenant.logoUrl} className="w-full h-full object-contain p-2" alt="Logo" />
                     ) : (
                       <ImageIcon size={32} className="text-default-300" />
                     )}
@@ -131,7 +132,7 @@ export function StoreSettings({
                 <div className="relative group">
                   <div className="w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
                   {tenant?.bannerUrl ? (
-                      <img src={tenant.bannerUrl} className="w-full h-full object-cover" alt="Banner" />
+                      <Image src={tenant.bannerUrl} className="w-full h-full object-cover" alt="Banner" />
                     ) : (
                       <ImageIcon size={32} className="text-default-300" />
                     )}

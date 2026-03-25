@@ -112,8 +112,10 @@ export async function redirectIfAuthenticated(pathname = '/dashboard') {
 }
 
 export async function getOwnerFlowState() {
-  const session = await requireServerSession();
-  const tenantStatus = await getServerTenantStatus();
+  const [session, tenantStatus] = await Promise.all([
+    requireServerSession(),
+    getServerTenantStatus(),
+  ]);
 
   if (!tenantStatus) {
     throw new Error('Unable to load tenant status.');

@@ -1,6 +1,8 @@
-﻿import type { NextConfig } from 'next';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
+  allowedDevOrigins: ['may-store.lvh.me', 'localhost:3000'],
   turbopack: {
     root: process.cwd(),
   },
