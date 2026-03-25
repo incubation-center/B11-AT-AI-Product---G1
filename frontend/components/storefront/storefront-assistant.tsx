@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, Send, X } from 'lucide-react';
@@ -87,6 +87,7 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
       if (!response.ok || !data.answer || !data.session_id) {
         throw new Error(data.message ?? 'Unable to ask assistant');
       }
+      const answer = data.answer;
 
       setSessionId(data.session_id);
       window.localStorage.setItem(
@@ -98,7 +99,7 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
         {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          content: data.answer,
+          content: answer,
         },
       ]);
     } catch (submitError) {
@@ -200,3 +201,5 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
     </>
   );
 }
+
+

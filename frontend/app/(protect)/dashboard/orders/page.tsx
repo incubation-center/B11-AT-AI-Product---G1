@@ -4,15 +4,13 @@ import React, { useState } from 'react';
 import { useOrders, useOrder, useCancelOrder } from '@/hooks/use-orders-queries';
 import { OrderTable } from '@/components/orders/order-table';
 import { OrderDetailsDrawer } from '@/components/orders/order-details-drawer';
-import { Card, CardBody, CardHeader, Skeleton } from '@heroui/react';
-import { ShoppingCart } from 'lucide-react';
 
 export default function OrdersPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   const { data: orders = [], isLoading } = useOrders();
-  const { data: orderDetail, isLoading: isLoadingDetail } = useOrder(selectedOrderId);
+  const { data: orderDetail} = useOrder(selectedOrderId);
   const cancelOrder = useCancelOrder();
 
   const handleViewOrder = (orderId: string) => {

@@ -3,7 +3,6 @@
 import React from 'react';
 import { useProducts, useUpdateProductStock, useUpdateVariantStock } from '@/hooks/use-products-queries';
 import { InventoryTable } from '@/components/inventory/inventory-table';
-import { Boxes } from 'lucide-react';
 
 export default function InventoryPage() {
   const { data, isLoading } = useProducts({ page_size: 100 }); // Fetch a larger batch for inventory
