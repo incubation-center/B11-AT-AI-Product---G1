@@ -39,8 +39,6 @@ services:
       TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET}
       TELEGRAM_MINI_APP_URL: ${TELEGRAM_MINI_APP_URL}
       TELEGRAM_MINI_APP_SESSION_TTL_MINUTES: ${TELEGRAM_MINI_APP_SESSION_TTL_MINUTES:-480}
-    ports:
-      - "8080:8080"
     expose:
       - "8080"
 
@@ -58,7 +56,5 @@ services:
       PORT: 3000
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
-    ports:
-      - "3000:3000"
     expose:
       - "3000"
