@@ -1,5 +1,3 @@
-import { API_URL } from '@/lib/auth';
-
 export type StorefrontStore = {
   id: string;
   shopName: string;
@@ -30,6 +28,11 @@ export type StorefrontProduct = {
   isActive: boolean;
 };
 
+const SERVER_API_URL =
+  process.env.INTERNAL_API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://backend:8080';
+
 function stripPort(host: string) {
   return host.replace(/:\d+$/, '');
 }
@@ -59,7 +62,7 @@ export function extractStoreSubdomain(host: string) {
 
 export async function getStorefrontBySubdomain(subdomain: string) {
   const storeResponse = await fetch(
-    `${API_URL}/store/by-subdomain/${subdomain}`,
+    `${SERVER_API_URL}/store/by-subdomain/${subdomain}`,
     {
       cache: 'no-store',
     },
@@ -70,7 +73,7 @@ export async function getStorefrontBySubdomain(subdomain: string) {
   }
 
   const productResponse = await fetch(
-    `${API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
+    `${SERVER_API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
     {
       cache: 'no-store',
     },

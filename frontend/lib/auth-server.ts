@@ -9,6 +9,9 @@ import {
   type TenantStatusResponse,
 } from '@/lib/auth';
 
+const SERVER_API_URL =
+  process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? API_URL;
+
 function toCookieHeader(entries: Array<{ name: string; value: string }>) {
   return entries.map(({ name, value }) => `${name}=${value}`).join('; ');
 }
@@ -30,7 +33,7 @@ export async function getServerSession() {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/get-session`, {
+    const response = await fetch(`${SERVER_API_URL}/api/auth/get-session`, {
       method: 'GET',
       headers: {
         cookie: cookieHeader,
@@ -69,7 +72,7 @@ async function getProtectedServerData<T>(path: string) {
   }
 
   try {
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${SERVER_API_URL}${path}`, {
       headers,
       cache: 'no-store',
     });
