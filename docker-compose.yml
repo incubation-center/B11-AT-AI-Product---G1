@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: coolhat-backend
     restart: unless-stopped
+    env_file:
+      - ./backend/.env
     environment:
       PORT: 8080
     ports:
