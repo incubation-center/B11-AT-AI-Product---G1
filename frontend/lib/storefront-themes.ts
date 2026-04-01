@@ -3,6 +3,11 @@
   | 'hero-category-tiles'
   | 'editorial-lookbook';
 
+export type StorefrontThemeApiId =
+  | 'market-grid'
+  | 'catalog-flow'
+  | 'boutique-editorial';
+
 export type StorefrontThemeOption = {
   id: StorefrontThemeId;
   name: string;
@@ -63,4 +68,12 @@ export function normalizeStorefrontTheme(
   }
 
   return 'modern-minimal-grid';
+}
+
+export function toStorefrontThemeApiValue(
+  template: StorefrontThemeId,
+): StorefrontThemeApiId {
+  if (template === 'modern-minimal-grid') return 'market-grid';
+  if (template === 'hero-category-tiles') return 'catalog-flow';
+  return 'boutique-editorial';
 }

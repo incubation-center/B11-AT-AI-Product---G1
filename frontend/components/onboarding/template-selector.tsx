@@ -6,19 +6,23 @@ import { motion } from 'framer-motion';
 
 import { StorefrontThemePreviewCard } from '@/components/storefront/theme-preview-card';
 import { updateMyTenant } from '@/lib/auth';
-import { STOREFRONT_THEME_OPTIONS } from '@/lib/storefront-themes';
+import {
+  STOREFRONT_THEME_OPTIONS,
+  toStorefrontThemeApiValue,
+  type StorefrontThemeId,
+} from '@/lib/storefront-themes';
 
 export function TemplateSelector() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [, startTransition] = useTransition();
 
-  function handleSelect(templateId: string) {
+  function handleSelect(templateId: StorefrontThemeId) {
     setError('');
     startTransition(async () => {
       try {
         await updateMyTenant({
-          storefront_template: templateId,
+          storefront_template: toStorefrontThemeApiValue(templateId),
         });
         router.push('/dashboard');
         router.refresh();

@@ -85,7 +85,10 @@ export const OrderTable = ({ orders, isLoading, onViewOrder, onCancelOrder }: Or
         return <PaymentStatusChip status={order.payment_status} />;
       case "actions":
         return (
-          <div className="relative flex justify-end items-center gap-2">
+          <div
+            className="relative flex justify-end items-center gap-2"
+            onClick={(event) => event.stopPropagation()}
+          >
             <Dropdown>
               <DropdownTrigger>
                 <Button isIconOnly size="sm" variant="light">
@@ -159,7 +162,11 @@ export const OrderTable = ({ orders, isLoading, onViewOrder, onCancelOrder }: Or
         emptyContent={"No orders found"}
       >
         {(item) => (
-          <TableRow key={item.id}>
+          <TableRow
+            key={item.id}
+            className="cursor-pointer"
+            onClick={() => onViewOrder(item.id)}
+          >
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}

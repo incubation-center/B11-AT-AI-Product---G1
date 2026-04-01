@@ -42,7 +42,7 @@ export function TelegramConnectGuide({
           </div>
           <Button 
             as="a" 
-            href="https://t.me/EavheangCoolhatBot" 
+            href="https://t.me/coolhatstoreBot" 
             target="_blank" 
             color="success" 
             variant="flat"
@@ -94,7 +94,7 @@ export function TelegramConnectGuide({
               <p className="text-xs text-default-400">Navigate to our official bot in your Telegram app</p>
               <Button 
                 as="a" 
-                href="https://t.me/EavheangCoolhatBot" 
+                href="https://t.me/coolhatstoreBot" 
                 target="_blank" 
                 size="sm" 
                 variant="light" 
@@ -102,7 +102,7 @@ export function TelegramConnectGuide({
                 endContent={<ExternalLink size={14} />}
                 className="w-fit h-8 px-0"
               >
-                @EavheangCoolhatBot
+                @coolhatstoreBot
               </Button>
             </div>
           </div>

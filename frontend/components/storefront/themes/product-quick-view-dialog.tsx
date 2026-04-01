@@ -110,10 +110,10 @@ export function ProductQuickViewDialog({
 
                       <button
                         type="button"
-                        disabled={product.hasVariants || product.stockQty <= 0}
+                        disabled={product.stockQty <= 0}
                         className="rounded-xl bg-[#002e6b] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => {
-                          if (!onAddToCart || product.hasVariants) return;
+                          if (!onAddToCart) return;
                           onAddToCart(product, qty);
                           onOpenChange(false);
                         }}
@@ -124,7 +124,7 @@ export function ProductQuickViewDialog({
 
                     {product.hasVariants ? (
                       <p className="text-xs text-amber-700">
-                        This product has variants. Variant selection is not available in storefront checkout yet.
+                        This product has variants. Variant-level selection is not available yet; the base item will be added to cart.
                       </p>
                     ) : null}
                   </div>

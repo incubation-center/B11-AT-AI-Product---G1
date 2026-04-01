@@ -12,6 +12,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
   }
 
+  const candidate = body as { items?: unknown };
+  if (!Array.isArray(candidate.items) || candidate.items.length === 0) {
+    return NextResponse.json(
+      { message: 'Cart items are required for checkout.' },
+      { status: 400 },
+    );
+  }
+
   const hostHeader =
     request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '';
 

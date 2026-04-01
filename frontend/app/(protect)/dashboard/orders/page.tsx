@@ -4,16 +4,23 @@ import React, { useState } from 'react';
 import { useOrders, useOrder, useCancelOrder } from '@/hooks/use-orders-queries';
 import { OrderTable } from '@/components/orders/order-table';
 import { OrderDetailsDrawer } from '@/components/orders/order-details-drawer';
+import type { Order } from '@/types/orders';
 
 export default function OrdersPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedOrderSnapshot, setSelectedOrderSnapshot] = useState<Order | null>(
+    null,
+  );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   const { data: orders = [], isLoading } = useOrders();
-  const { data: orderDetail} = useOrder(selectedOrderId);
+  const { data: orderDetail, isLoading: isOrderDetailLoading } =
+    useOrder(selectedOrderId);
   const cancelOrder = useCancelOrder();
 
   const handleViewOrder = (orderId: string) => {
+    const snapshot = orders.find((order) => order.id === orderId) ?? null;
+    setSelectedOrderSnapshot(snapshot);
     setSelectedOrderId(orderId);
     setIsDrawerOpen(true);
   };
@@ -43,7 +50,8 @@ export default function OrdersPage() {
 
 
       <OrderDetailsDrawer 
-        order={orderDetail || null} 
+        order={orderDetail || selectedOrderSnapshot} 
+        isRefreshing={isOrderDetailLoading}
         isOpen={isDrawerOpen} 
         onClose={() => setIsDrawerOpen(false)} 
       />

@@ -106,7 +106,7 @@ export default function SettingsPage() {
             <StoreSettings 
               key={`${tenantData?.tenant?.id ?? 'no-tenant'}:${tenantData?.tenant?.storefrontTemplate ?? 'no-template'}:${tenantData?.tenant?.shopName ?? ''}:${tenantData?.tenant?.shopType ?? ''}`}
               tenant={tenantData?.tenant || null}
-              onUpdateStore={(payload) => updateTenantMutation.mutate(payload)}
+              onUpdateStore={(payload) => updateTenantMutation.mutateAsync(payload)}
               isUpdatingStore={updateTenantMutation.isPending}
               onUploadAsset={handleAssetUpload}
               isUploadingAsset={uploadAssetMutation.isPending}

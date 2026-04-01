@@ -18,6 +18,8 @@ import { StorefrontThemePreviewCard } from '@/components/storefront/theme-previe
 import {
   normalizeStorefrontTheme,
   STOREFRONT_THEME_OPTIONS,
+  toStorefrontThemeApiValue,
+  type StorefrontThemeId,
 } from '@/lib/storefront-themes';
 
 const SHOP_CATEGORIES = [
@@ -31,7 +33,7 @@ const SHOP_CATEGORIES = [
 
 interface StoreSettingsProps {
   tenant: TenantSummary | null;
-  onUpdateStore: (payload: Record<string, unknown>) => void;
+  onUpdateStore: (payload: Record<string, unknown>) => Promise<unknown>;
   isUpdatingStore: boolean;
   onUploadAsset: (type: 'logo' | 'banner', file: File) => void;
   isUploadingAsset: boolean;
@@ -50,21 +52,42 @@ export function StoreSettings({
   const [selectedTemplate, setSelectedTemplate] = useState(
     normalizeStorefrontTheme(tenant?.storefrontTemplate),
   );
+  const [themeSaveError, setThemeSaveError] = useState('');
 
-  const handleSelectTemplate = (templateId: string) => {
-    setSelectedTemplate(normalizeStorefrontTheme(templateId));
-    onUpdateStore({
-      storefront_template: templateId,
-    });
+  const handleSelectTemplate = async (templateId: StorefrontThemeId) => {
+    if (isUpdatingStore) return;
+
+    const nextTemplate = normalizeStorefrontTheme(templateId);
+    const previousTemplate = selectedTemplate;
+    setThemeSaveError('');
+    setSelectedTemplate(nextTemplate);
+
+    try {
+      await onUpdateStore({
+        storefront_template: toStorefrontThemeApiValue(nextTemplate),
+      });
+    } catch (error) {
+      setSelectedTemplate(previousTemplate);
+      setThemeSaveError(
+        error instanceof Error ? error.message : 'Unable to save storefront theme.',
+      );
+    }
   };
 
-  const handleUpdateStore = () => {
-    onUpdateStore({
-      shop_name: shopName,
-      description: shopDescription,
-      shop_type: shopType,
-      storefront_template: selectedTemplate,
-    });
+  const handleUpdateStore = async () => {
+    setThemeSaveError('');
+    try {
+      await onUpdateStore({
+        shop_name: shopName,
+        description: shopDescription,
+        shop_type: shopType,
+        storefront_template: toStorefrontThemeApiValue(selectedTemplate),
+      });
+    } catch (error) {
+      setThemeSaveError(
+        error instanceof Error ? error.message : 'Unable to update store settings.',
+      );
+    }
   };
 
   return (
@@ -103,6 +126,9 @@ export function StoreSettings({
                   />
                 ))}
               </div>
+              {themeSaveError ? (
+                <p className="text-sm font-medium text-danger">{themeSaveError}</p>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">

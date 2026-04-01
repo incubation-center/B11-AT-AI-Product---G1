@@ -12,8 +12,6 @@ import {
   ScrollShadow,
   Card,
   CardBody,
-  Select,
-  SelectItem,
 } from '@heroui/react';
 import { MapPin, Phone, User, Calendar, ShoppingBag, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import type { Order, OrderItem } from '@/types/orders';
@@ -22,6 +20,7 @@ import { useUpdateOrderStatus, useUpdateOrderPayment } from '@/hooks/use-orders-
 
 interface OrderDetailsDrawerProps {
   order: Order | null;
+  isRefreshing?: boolean;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -40,7 +39,12 @@ const paymentStatusOptions = [
   { label: 'Refunded', value: 'refunded' },
 ];
 
-export const OrderDetailsDrawer = ({ order, isOpen, onClose }: OrderDetailsDrawerProps) => {
+export const OrderDetailsDrawer = ({
+  order,
+  isRefreshing = false,
+  isOpen,
+  onClose,
+}: OrderDetailsDrawerProps) => {
   const updateStatus = useUpdateOrderStatus();
   const updatePayment = useUpdateOrderPayment();
 
@@ -128,33 +132,66 @@ export const OrderDetailsDrawer = ({ order, isOpen, onClose }: OrderDetailsDrawe
                       <SlidersHorizontal size={16} /> Management
                     </h3>
                     <div className="flex flex-col gap-3">
-                      <Select
-                        label="Update Status"
-                        size="sm"
-                        selectedKeys={[order.status]}
-                        onChange={(e) => handleStatusChange(e.target.value)}
-                        isLoading={updateStatus.isPending}
-                      >
-                        {statusOptions.map((opt) => (
-                          <SelectItem key={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-default-500">
+                          Update Status
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {statusOptions.map((opt) => {
+                            const isActive = order.status === opt.value;
+                            return (
+                              <Button
+                                key={opt.value}
+                                size="sm"
+                                variant={isActive ? 'solid' : 'bordered'}
+                                color={isActive ? 'primary' : 'default'}
+                                isDisabled={isActive || updateStatus.isPending}
+                                isLoading={
+                                  updateStatus.isPending &&
+                                  updateStatus.variables?.status === opt.value
+                                }
+                                onPress={() => handleStatusChange(opt.value)}
+                              >
+                                {opt.label}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                      <Select
-                        label="Update Payment"
-                        size="sm"
-                        selectedKeys={[order.payment_status]}
-                        onChange={(e) => handlePaymentChange(e.target.value)}
-                        isLoading={updatePayment.isPending}
-                      >
-                        {paymentStatusOptions.map((opt) => (
-                          <SelectItem key={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-default-500">
+                          Update Payment
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {paymentStatusOptions.map((opt) => {
+                            const isActive = order.payment_status === opt.value;
+                            return (
+                              <Button
+                                key={opt.value}
+                                size="sm"
+                                variant={isActive ? 'solid' : 'bordered'}
+                                color={isActive ? 'primary' : 'default'}
+                                isDisabled={isActive || updatePayment.isPending}
+                                isLoading={
+                                  updatePayment.isPending &&
+                                  updatePayment.variables?.payment_status ===
+                                    opt.value
+                                }
+                                onPress={() => handlePaymentChange(opt.value)}
+                              >
+                                {opt.label}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {isRefreshing ? (
+                        <p className="text-xs text-default-400">
+                          Syncing latest order details...
+                        </p>
+                      ) : null}
                     </div>
                   </section>
                 </div>
