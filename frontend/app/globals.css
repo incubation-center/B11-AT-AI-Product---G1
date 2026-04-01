@@ -76,6 +76,22 @@
 }
 
 @layer utilities {
+  @keyframes splash-slide {
+    0% {
+      transform: translateX(-40%);
+    }
+    50% {
+      transform: translateX(85%);
+    }
+    100% {
+      transform: translateX(-40%);
+    }
+  }
+
+  .animate-splash-slide {
+    animation: splash-slide 1.1s ease-in-out infinite;
+  }
+
   .page-container {
     @apply mx-auto w-full max-w-page px-4 sm:px-6 lg:px-8 py-8;
   }

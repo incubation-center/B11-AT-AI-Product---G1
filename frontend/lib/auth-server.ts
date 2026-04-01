@@ -121,18 +121,22 @@ export async function getOwnerFlowState() {
   ]);
 
   if (!tenantStatus) {
-    throw new Error('Unable to load tenant status.');
+    console.error('[getOwnerFlowState] Unable to load tenant status.');
   }
 
   return {
     session,
-    tenantStatus,
-    selectedTemplate: tenantStatus?.tenant?.storefrontTemplate ?? '',
+    tenantStatus: tenantStatus ?? null,
+    selectedTemplate: tenantStatus?.tenant?.storefrontTemplate ?? null,
   };
 }
 
 export async function requireDashboardReady() {
   const state = await getOwnerFlowState();
+
+  if (!state.tenantStatus) {
+    return state;
+  }
 
   if (!state.tenantStatus.hasTenant) {
     redirect('/onboarding/store');
@@ -148,6 +152,10 @@ export async function requireDashboardReady() {
 export async function requireStoreOnboarding() {
   const state = await getOwnerFlowState();
 
+  if (!state.tenantStatus) {
+    return state;
+  }
+
   if (state.tenantStatus.hasTenant) {
     if (state.selectedTemplate) {
       redirect('/dashboard');
@@ -161,6 +169,10 @@ export async function requireStoreOnboarding() {
 
 export async function requireTemplateOnboarding() {
   const state = await getOwnerFlowState();
+
+  if (!state.tenantStatus) {
+    return state;
+  }
 
   if (!state.tenantStatus.hasTenant) {
     redirect('/onboarding/store');
