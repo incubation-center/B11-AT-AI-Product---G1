@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Card, CardBody, CardHeader, Button, Divider, Spinner, Kbd } from '@heroui/react';
-import { MessageSquare, Zap, ExternalLink, Copy } from 'lucide-react';
+import { Card, CardBody, CardHeader, Button } from '@heroui/react';
+import { Zap, ExternalLink, Copy } from 'lucide-react';
 import { CTAButton } from '@/components/ui/cta-button';
 import type { TelegramLinkStatus } from '@/lib/auth';
 

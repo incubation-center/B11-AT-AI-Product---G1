@@ -1,5 +1,3 @@
-import { API_URL } from '@/lib/auth';
-
 export type StorefrontStore = {
   id: string;
   shopName: string;
@@ -43,6 +41,10 @@ export type StorefrontProduct = {
   isActive: boolean;
 };
 
+const SERVER_API_URL =
+  process.env.INTERNAL_API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://backend:8080';
 
 function stripPort(host: string) {
   return host.replace(/:\d+$/, '');
@@ -72,33 +74,23 @@ export function extractStoreSubdomain(host: string) {
 }
 
 export async function getStorefrontBySubdomain(subdomain: string) {
-  let storeResponse: Response;
-  try {
-    storeResponse = await fetch(
-      `${API_URL}/store/by-subdomain/${subdomain}`,
-      {
-        cache: 'no-store',
-      },
-    );
-  } catch {
-    return null;
-  }
+  const storeResponse = await fetch(
+    `${SERVER_API_URL}/store/by-subdomain/${subdomain}`,
+    {
+      cache: 'no-store',
+    },
+  );
 
   if (!storeResponse.ok) {
     return null;
   }
 
-  let productResponse: Response | null = null;
-  try {
-    productResponse = await fetch(
-      `${API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
-      {
-        cache: 'no-store',
-      },
-    );
-  } catch {
-    productResponse = null;
-  }
+  const productResponse = await fetch(
+    `${SERVER_API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
+    {
+      cache: 'no-store',
+    },
+  );
 
   const storePayload = (await storeResponse.json()) as {
     store: StorefrontStore;
@@ -116,7 +108,7 @@ export async function getStorefrontBySubdomain(subdomain: string) {
 export async function getPublicStores(limit = 24) {
   let response: Response;
   try {
-    response = await fetch(`${API_URL}/store/public?limit=${limit}`, {
+    response = await fetch(`${SERVER_API_URL}/store/public?limit=${limit}`, {
       cache: 'no-store',
     });
   } catch {

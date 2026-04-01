@@ -11,15 +11,14 @@ import {
   SelectItem, 
   Divider,
 } from '@heroui/react';
-import { Store, Palette, Image as ImageIcon, CheckCircle2, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Store, Palette, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { TenantSummary } from '@/lib/auth';
-
-const STOREFRONT_TEMPLATES = [
-  { id: 'boutique-editorial', name: 'Boutique Editorial', description: 'Large imagery and elegant typography for high-end feel.' },
-  { id: 'market-grid', name: 'Market Grid', description: 'Functional grid layout optimized for discovery and speed.' },
-  { id: 'catalog-flow', name: 'Catalog Flow', description: 'Structured categorization for large product inventories.' },
-];
+import Image from 'next/image';
+import { StorefrontThemePreviewCard } from '@/components/storefront/theme-preview-card';
+import {
+  normalizeStorefrontTheme,
+  STOREFRONT_THEME_OPTIONS,
+} from '@/lib/storefront-themes';
 
 const SHOP_CATEGORIES = [
   { id: 'beauty_cosmetics', name: 'Beauty & Cosmetics' },
@@ -48,7 +47,16 @@ export function StoreSettings({
   const [shopName, setShopName] = useState(tenant?.shopName || '');
   const [shopDescription, setShopDescription] = useState(tenant?.description || '');
   const [shopType, setShopType] = useState(tenant?.shopType || '');
-  const [selectedTemplate, setSelectedTemplate] = useState(tenant?.storefrontTemplate || 'market-grid');
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    normalizeStorefrontTheme(tenant?.storefrontTemplate),
+  );
+
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedTemplate(normalizeStorefrontTheme(templateId));
+    onUpdateStore({
+      storefront_template: templateId,
+    });
+  };
 
   const handleUpdateStore = () => {
     onUpdateStore({
@@ -75,27 +83,24 @@ export function StoreSettings({
         <CardBody className="gap-8 py-6 font-semibold shadow-sm">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
-              <p className="text-sm">Storefront Theme</p>
+              <div className="space-y-1">
+                <p className="text-sm">Storefront Theme</p>
+                <p className="text-xs font-medium text-default-500">
+                  Pick with a visual layout preview. The logo and cover spots
+                  below mirror your live storefront structure.
+                </p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {STOREFRONT_TEMPLATES.map((tmpl) => (
-                  <div 
+                {STOREFRONT_THEME_OPTIONS.map((tmpl) => (
+                  <StorefrontThemePreviewCard
                     key={tmpl.id}
-                    onClick={() => setSelectedTemplate(tmpl.id)}
-                    className={cn(
-                      "group relative p-4 rounded-xl border-2 transition-all cursor-pointer",
-                      selectedTemplate === tmpl.id 
-                        ? "border-[#002e6b] bg-blue-50/30" 
-                        : "border-default-100 hover:border-default-300"
-                    )}
-                  >
-                    {selectedTemplate === tmpl.id && (
-                      <div className="absolute top-2 right-2 text-[#002e6b]">
-                        <CheckCircle2 size={16} />
-                      </div>
-                    )}
-                    <p className="font-bold text-sm mb-1">{tmpl.name}</p>
-                    <p className="text-xs text-default-500">{tmpl.description}</p>
-                  </div>
+                    option={tmpl}
+                    selected={selectedTemplate === tmpl.id}
+                    onSelect={handleSelectTemplate}
+                    logoUrl={tenant?.logoUrl}
+                    bannerUrl={tenant?.bannerUrl}
+                    shopName={shopName || tenant?.shopName || 'Your Store'}
+                  />
                 ))}
               </div>
             </div>
@@ -104,9 +109,15 @@ export function StoreSettings({
               <div className="flex flex-col gap-3">
                 <p className="text-sm">Store Logo</p>
                 <div className="relative group">
-                  <div className="w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="relative w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
                     {tenant?.logoUrl ? (
-                      <img src={tenant.logoUrl} className="w-full h-full object-contain p-2" alt="Logo" />
+                      <Image
+                        src={tenant.logoUrl}
+                        alt="Logo"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-contain p-2"
+                      />
                     ) : (
                       <ImageIcon size={32} className="text-default-300" />
                     )}
@@ -129,9 +140,15 @@ export function StoreSettings({
               <div className="flex flex-col gap-3">
                 <p className="text-sm">Banner Image</p>
                 <div className="relative group">
-                  <div className="w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="relative w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
                   {tenant?.bannerUrl ? (
-                      <img src={tenant.bannerUrl} className="w-full h-full object-cover" alt="Banner" />
+                      <Image
+                        src={tenant.bannerUrl}
+                        alt="Banner"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                      />
                     ) : (
                       <ImageIcon size={32} className="text-default-300" />
                     )}

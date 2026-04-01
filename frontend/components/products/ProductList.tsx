@@ -186,22 +186,6 @@ export function ProductList({
     }
   };
 
-  if (products.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 px-4">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-semibold text-default-900">
-            No products yet
-          </h3>
-          <p className="text-sm text-default-500 mt-1">
-            Create your first product to get started
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const bottomContent = React.useMemo(() => {
     if (totalPages <= 1 && products.length === 0) return null;
     
@@ -219,6 +203,22 @@ export function ProductList({
       </div>
     );
   }, [page, totalPages, onPageChange, products.length]);
+
+  if (products.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="text-center">
+          <div className="text-6xl mb-4">📦</div>
+          <h3 className="text-lg font-semibold text-default-900">
+            No products yet
+          </h3>
+          <p className="text-sm text-default-500 mt-1">
+            Create your first product to get started
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Table 

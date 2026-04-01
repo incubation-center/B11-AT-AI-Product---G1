@@ -16,7 +16,7 @@ import {
   SelectItem,
 } from '@heroui/react';
 import { MapPin, Phone, User, Calendar, ShoppingBag, AlertCircle, SlidersHorizontal } from 'lucide-react';
-import type { Order, OrderStatus, PaymentStatus, OrderItem } from '@/types/orders';
+import type { Order, OrderItem } from '@/types/orders';
 import { OrderStatusChip, PaymentStatusChip } from './order-status-chip';
 import { useUpdateOrderStatus, useUpdateOrderPayment } from '@/hooks/use-orders-queries';
 

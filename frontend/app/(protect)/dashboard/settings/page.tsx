@@ -104,7 +104,7 @@ export default function SettingsPage() {
         >
           <div className="mt-6">
             <StoreSettings 
-              key={tenantData?.tenant?.id}
+              key={`${tenantData?.tenant?.id ?? 'no-tenant'}:${tenantData?.tenant?.storefrontTemplate ?? 'no-template'}:${tenantData?.tenant?.shopName ?? ''}:${tenantData?.tenant?.shopType ?? ''}`}
               tenant={tenantData?.tenant || null}
               onUpdateStore={(payload) => updateTenantMutation.mutate(payload)}
               isUpdatingStore={updateTenantMutation.isPending}

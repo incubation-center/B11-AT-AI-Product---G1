@@ -9,6 +9,9 @@ import {
   type TenantStatusResponse,
 } from '@/lib/auth';
 
+const SERVER_API_URL =
+  process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? API_URL;
+
 function toCookieHeader(entries: Array<{ name: string; value: string }>) {
   return entries.map(({ name, value }) => `${name}=${value}`).join('; ');
 }
@@ -30,7 +33,7 @@ export async function getServerSession() {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/get-session`, {
+    const response = await fetch(`${SERVER_API_URL}/api/auth/get-session`, {
       method: 'GET',
       headers: {
         cookie: cookieHeader,
@@ -69,7 +72,7 @@ async function getProtectedServerData<T>(path: string) {
   }
 
   try {
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${SERVER_API_URL}${path}`, {
       headers,
       cache: 'no-store',
     });
@@ -112,22 +115,28 @@ export async function redirectIfAuthenticated(pathname = '/dashboard') {
 }
 
 export async function getOwnerFlowState() {
-  const session = await requireServerSession();
-  const tenantStatus = await getServerTenantStatus();
+  const [session, tenantStatus] = await Promise.all([
+    requireServerSession(),
+    getServerTenantStatus(),
+  ]);
 
   if (!tenantStatus) {
-    throw new Error('Unable to load tenant status.');
+    console.error('[getOwnerFlowState] Unable to load tenant status.');
   }
 
   return {
     session,
-    tenantStatus,
-    selectedTemplate: tenantStatus?.tenant?.storefrontTemplate ?? '',
+    tenantStatus: tenantStatus ?? null,
+    selectedTemplate: tenantStatus?.tenant?.storefrontTemplate ?? null,
   };
 }
 
 export async function requireDashboardReady() {
   const state = await getOwnerFlowState();
+
+  if (!state.tenantStatus) {
+    return state;
+  }
 
   if (!state.tenantStatus.hasTenant) {
     redirect('/onboarding/store');
@@ -143,6 +152,10 @@ export async function requireDashboardReady() {
 export async function requireStoreOnboarding() {
   const state = await getOwnerFlowState();
 
+  if (!state.tenantStatus) {
+    return state;
+  }
+
   if (state.tenantStatus.hasTenant) {
     if (state.selectedTemplate) {
       redirect('/dashboard');
@@ -156,6 +169,10 @@ export async function requireStoreOnboarding() {
 
 export async function requireTemplateOnboarding() {
   const state = await getOwnerFlowState();
+
+  if (!state.tenantStatus) {
+    return state;
+  }
 
   if (!state.tenantStatus.hasTenant) {
     redirect('/onboarding/store');
