@@ -26,27 +26,70 @@ async function getCookieHeader() {
 }
 
 export async function getServerSession() {
-  const cookieHeader = await getCookieHeader();
+  const [cookieHeader, token] = await Promise.all([
+    getCookieHeader(),
+    getServerBearerToken(),
+  ]);
 
-  if (!cookieHeader) {
+  if (!cookieHeader && !token) {
     return null;
   }
 
   try {
+    const headers = new Headers();
+    if (cookieHeader) {
+      headers.set('cookie', cookieHeader);
+    }
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
     const response = await fetch(`${SERVER_API_URL}/api/auth/get-session`, {
       method: 'GET',
-      headers: {
-        cookie: cookieHeader,
-      },
+      headers,
       cache: 'no-store',
     });
 
-    if (!response.ok) {
-      return null;
+    if (response.ok) {
+      const data = (await response.json()) as SessionResponse;
+      if (data?.user) {
+        return data;
+      }
     }
 
-    const data = (await response.json()) as SessionResponse;
-    return data?.user ? data : null;
+    // Fallback for deployments where better-auth session cookie is not available
+    // on the frontend domain but bearer token auth still works.
+    if (token) {
+      const meResponse = await fetch(`${SERVER_API_URL}/me`, {
+        method: 'GET',
+        headers,
+        cache: 'no-store',
+      });
+
+      if (meResponse.ok) {
+        const meData = (await meResponse.json()) as {
+          id?: string;
+          email?: string;
+          profile?: { fullName?: string | null };
+          emailVerified?: boolean;
+        };
+
+        if (meData?.id && meData?.email) {
+          return {
+            user: {
+              id: meData.id,
+              email: meData.email,
+              name: meData.profile?.fullName ?? null,
+              emailVerified: Boolean(meData.emailVerified),
+            },
+            session: null,
+            token,
+          } satisfies SessionResponse;
+        }
+      }
+    }
+
+    return null;
   } catch (error) {
     console.error('[getServerSession] Fetch error:', error);
     return null;
