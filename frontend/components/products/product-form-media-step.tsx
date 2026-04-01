@@ -110,7 +110,10 @@ export function ProductFormMediaStep({
                   <Image
                     src={url}
                     alt={`Preview ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                    unoptimized
+                    className="object-cover"
                   />
                   <button
                     type="button"

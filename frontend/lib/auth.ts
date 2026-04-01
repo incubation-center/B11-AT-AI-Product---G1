@@ -214,6 +214,57 @@ export async function signOut() {
   return parseResponse(response);
 }
 
+export async function forgotPassword(input: { email: string }) {
+  const response = await fetch(`${API_URL}/api/auth/request-password-reset`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: input.email,
+      redirectTo:
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/reset-password`
+          : undefined,
+    }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function verifyResetCode(input: { email: string; code: string }) {
+  const response = await fetch(`${API_URL}/api/auth/verify-reset-code`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: input.email,
+      code: input.code,
+    }),
+  });
+
+  return parseResponse<{ token: string }>(response);
+}
+
+export async function resetPassword(input: { token: string; password: string }) {
+  const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      token: input.token,
+      newPassword: input.password,
+    }),
+  });
+
+  return parseResponse(response);
+}
+
 export async function protectedFetch<T>(path: string, init?: RequestInit) {
   const token = getBrowserCookie(AUTH_TOKEN_COOKIE);
   const headers = new Headers(init?.headers);

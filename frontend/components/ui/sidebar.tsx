@@ -195,7 +195,7 @@ export const SidebarLink = ({
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
         className={cn(
-          'inline-block whitespace-pre text-sm font-medium transition duration-150 group-hover/sidebar:translate-x-1 !m-0 !p-0',
+          'inline-block whitespace-pre text-sm font-semibold transition duration-150 group-hover/sidebar:translate-x-1 !m-0 !p-0',
           active ? 'text-white' : 'text-slate-700',
         )}
       >

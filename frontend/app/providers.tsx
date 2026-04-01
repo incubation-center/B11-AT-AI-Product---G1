@@ -2,7 +2,6 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HeroUIProvider } from '@heroui/react';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { useState } from 'react';
 
 interface ProvidersProps {
@@ -14,13 +13,7 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem={false}
-      >
-        <HeroUIProvider>{children}</HeroUIProvider>
-      </NextThemesProvider>
+      <HeroUIProvider>{children}</HeroUIProvider>
     </QueryClientProvider>
   );
 }

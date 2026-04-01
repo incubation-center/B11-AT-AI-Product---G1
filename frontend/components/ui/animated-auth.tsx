@@ -761,7 +761,7 @@ export function AnimatedSignIn({
               </Label>
             </div>
             <a
-              href="#"
+              href="/forgot-password"
               className="text-sm font-medium text-[#c61c2f] hover:underline"
             >
               Forgot password?

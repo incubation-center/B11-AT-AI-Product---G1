@@ -44,9 +44,20 @@ export function Hero() {
           <div className="flex flex-wrap items-center gap-4">
             <CTAButton
               as={Link}
-              href="#pricing"
+              href="/shops"
               size="lg"
               className="px-7 text-sm shadow-xl shadow-red-200/60"
+              endContent={<ArrowRight size={16} />}
+            >
+              Browse Now
+            </CTAButton>
+            <CTAButton
+              as={Link}
+              href="#pricing"
+              size="lg"
+              tone="secondary"
+              variant="bordered"
+              className="bg-white px-6 text-xs font-medium"
               endContent={<ArrowRight size={16} />}
             >
               Start 14-day free trial

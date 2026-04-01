@@ -15,6 +15,19 @@ export type StorefrontStore = {
   isActive: boolean;
 };
 
+export type PublicStoreSummary = Pick<
+  StorefrontStore,
+  | 'id'
+  | 'shopName'
+  | 'shopType'
+  | 'description'
+  | 'logoUrl'
+  | 'bannerUrl'
+  | 'subdomain'
+  | 'storeUrl'
+  | 'isActive'
+>;
+
 export type StorefrontProduct = {
   id: string;
   name: string;
@@ -29,6 +42,7 @@ export type StorefrontProduct = {
   lowStockThreshold: number;
   isActive: boolean;
 };
+
 
 function stripPort(host: string) {
   return host.replace(/:\d+$/, '');
@@ -58,28 +72,38 @@ export function extractStoreSubdomain(host: string) {
 }
 
 export async function getStorefrontBySubdomain(subdomain: string) {
-  const storeResponse = await fetch(
-    `${API_URL}/store/by-subdomain/${subdomain}`,
-    {
-      cache: 'no-store',
-    },
-  );
+  let storeResponse: Response;
+  try {
+    storeResponse = await fetch(
+      `${API_URL}/store/by-subdomain/${subdomain}`,
+      {
+        cache: 'no-store',
+      },
+    );
+  } catch {
+    return null;
+  }
 
   if (!storeResponse.ok) {
     return null;
   }
 
-  const productResponse = await fetch(
-    `${API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
-    {
-      cache: 'no-store',
-    },
-  );
+  let productResponse: Response | null = null;
+  try {
+    productResponse = await fetch(
+      `${API_URL}/store/by-subdomain/${subdomain}/products?page_size=24`,
+      {
+        cache: 'no-store',
+      },
+    );
+  } catch {
+    productResponse = null;
+  }
 
   const storePayload = (await storeResponse.json()) as {
     store: StorefrontStore;
   };
-  const productPayload = productResponse.ok
+  const productPayload = productResponse?.ok
     ? ((await productResponse.json()) as { products: StorefrontProduct[] })
     : { products: [] };
 
@@ -87,4 +111,22 @@ export async function getStorefrontBySubdomain(subdomain: string) {
     store: storePayload.store,
     products: productPayload.products ?? [],
   };
+}
+
+export async function getPublicStores(limit = 24) {
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/store/public?limit=${limit}`, {
+      cache: 'no-store',
+    });
+  } catch {
+    return [] as PublicStoreSummary[];
+  }
+
+  if (!response.ok) {
+    return [] as PublicStoreSummary[];
+  }
+
+  const payload = (await response.json()) as { stores?: PublicStoreSummary[] };
+  return payload.stores ?? [];
 }

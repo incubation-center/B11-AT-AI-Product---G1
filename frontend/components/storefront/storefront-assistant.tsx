@@ -98,7 +98,7 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
         {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          content: data.answer,
+          content: data.answer ?? '',
         },
       ]);
     } catch (submitError) {
