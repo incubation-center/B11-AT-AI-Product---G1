@@ -136,6 +136,36 @@ export type ProductsListResponse = {
   totalPages: number;
 };
 
+type BackendProductVariant = {
+  id: string;
+  productId?: string;
+  product_id?: string;
+  tenantId?: string;
+  variant_name?: string | null;
+  variantName?: string | null;
+  size?: string | null;
+  color?: string | null;
+  priceUsd?: string | null;
+  price_usd?: string | null;
+  priceKhr?: string | null;
+  price_khr?: string | null;
+  price_override_usd?: string | null;
+  price_override_khr?: string | null;
+  stockQty?: number;
+  stock_qty?: number;
+  lowStockThreshold?: number;
+  low_stock_threshold?: number;
+  isActive?: boolean;
+  is_active?: boolean;
+  image_url?: string | null;
+  imageUrl?: string | null;
+  sku?: string | null;
+  created_at?: string;
+  createdAt?: string;
+  updated_at?: string;
+  updatedAt?: string;
+};
+
 type BackendProduct = {
   id: string;
   tenantId?: string;
@@ -163,8 +193,72 @@ type BackendProduct = {
   created_at?: string;
   updatedAt?: string;
   updated_at?: string;
-  variants?: ProductVariant[];
+  variants?: BackendProductVariant[];
 };
+
+function toPriceOverrideString(
+  ...candidates: Array<string | number | null | undefined>
+): string | null {
+  for (const c of candidates) {
+    if (c === null || c === undefined) continue;
+    const s = typeof c === 'number' ? String(c) : String(c).trim();
+    if (s.length > 0) return s;
+  }
+  return null;
+}
+
+export function normalizeProductVariant(
+  raw: BackendProductVariant,
+): ProductVariant {
+  const priceUsd =
+    raw.price_override_usd ??
+    raw.price_usd ??
+    raw.priceUsd ??
+    null;
+  const priceKhr =
+    raw.price_override_khr ?? raw.price_khr ?? raw.priceKhr ?? null;
+
+  return {
+    id: raw.id,
+    product_id: raw.product_id ?? raw.productId ?? '',
+    variant_name: raw.variant_name ?? raw.variantName ?? null,
+    size: raw.size ?? null,
+    color: raw.color ?? null,
+    price_override_usd: toPriceOverrideString(priceUsd),
+    price_override_khr: toPriceOverrideString(priceKhr),
+    stock_qty: raw.stock_qty ?? raw.stockQty ?? 0,
+    low_stock_threshold:
+      raw.low_stock_threshold ?? raw.lowStockThreshold ?? 5,
+    is_active: raw.is_active ?? raw.isActive ?? true,
+    image_url: raw.image_url ?? raw.imageUrl ?? null,
+    sku: raw.sku ?? null,
+    created_at: raw.created_at ?? raw.createdAt,
+    updated_at: raw.updated_at ?? raw.updatedAt,
+  };
+}
+
+function serializeVariantForApi(
+  payload: CreateVariantPayload | UpdateVariantPayload,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (payload.variant_name !== undefined) body.variant_name = payload.variant_name;
+  if (payload.size !== undefined) body.size = payload.size;
+  if (payload.color !== undefined) body.color = payload.color;
+  if (payload.stock_qty !== undefined) body.stock_qty = payload.stock_qty;
+  if (payload.low_stock_threshold !== undefined) {
+    body.low_stock_threshold = payload.low_stock_threshold;
+  }
+  if (payload.sku !== undefined) body.sku = payload.sku;
+  if (payload.image_url !== undefined) body.image_url = payload.image_url;
+  if (payload.is_active !== undefined) body.is_active = payload.is_active;
+  if (payload.price_override_usd !== undefined) {
+    body.price_usd = payload.price_override_usd;
+  }
+  if (payload.price_override_khr !== undefined) {
+    body.price_khr = payload.price_override_khr;
+  }
+  return body;
+}
 
 type BackendProductsListResponse = {
   data: BackendProduct[];
@@ -198,7 +292,7 @@ function normalizeProduct(product: BackendProduct): Product {
     is_active: product.is_active ?? product.isActive ?? true,
     created_at: product.created_at ?? product.createdAt ?? '',
     updated_at: product.updated_at ?? product.updatedAt ?? '',
-    variants: product.variants,
+    variants: product.variants?.map(normalizeProductVariant),
   };
 }
 
@@ -319,34 +413,46 @@ export async function createVariant(
   productId: string,
   payload: CreateVariantPayload,
 ) {
-  return protectedFetch<{ message: string; variant: ProductVariant }>(
-    `/products/${productId}/variants`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await protectedFetch<{
+    message: string;
+    variant: BackendProductVariant;
+  }>(`/products/${productId}/variants`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(serializeVariantForApi(payload)),
+  });
+  return {
+    ...response,
+    variant: normalizeProductVariant(response.variant),
+  };
 }
 
 export async function updateVariant(id: string, payload: UpdateVariantPayload) {
-  return protectedFetch<{ message: string; variant: ProductVariant }>(
-    `/variants/${id}`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await protectedFetch<{
+    message: string;
+    variant: BackendProductVariant;
+  }>(`/variants/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(serializeVariantForApi(payload)),
+  });
+  return {
+    ...response,
+    variant: normalizeProductVariant(response.variant),
+  };
 }
 
 export async function deactivateVariant(id: string) {
-  return protectedFetch<{ message: string; variant: ProductVariant }>(
-    `/variants/${id}/deactivate`,
-    {
-      method: 'PATCH',
-    },
-  );
+  const response = await protectedFetch<{
+    message: string;
+    variant: BackendProductVariant;
+  }>(`/variants/${id}/deactivate`, {
+    method: 'PATCH',
+  });
+  return {
+    ...response,
+    variant: normalizeProductVariant(response.variant),
+  };
 }
 
 export async function updateVariantStock(id: string, qty: number) {

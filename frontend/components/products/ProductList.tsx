@@ -18,7 +18,7 @@ import {
   DropdownItem,
   Pagination,
 } from '@heroui/react';
-import { Edit, MoreVertical } from 'lucide-react';
+import { Edit, MoreVertical, Layers } from 'lucide-react';
 import React from 'react';
 import type { Product } from '@/lib/products';
 
@@ -28,6 +28,7 @@ interface ProductListProps {
   onDelete: (id: string) => void;
   onRestore: (id: string) => void;
   onSync: (id: string) => void;
+  onManageVariants: (product: Product) => void;
   isLoading?: boolean;
   page?: number;
   totalPages?: number;
@@ -40,6 +41,7 @@ export function ProductList({
   onDelete,
   onRestore,
   onSync,
+  onManageVariants,
   isLoading,
   page = 1,
   totalPages = 1,
@@ -50,6 +52,7 @@ export function ProductList({
     { key: 'category', label: 'Category' },
     { key: 'pricing', label: 'Pricing' },
     { key: 'stock', label: 'Stock' },
+    { key: 'variants', label: 'Variants' },
     { key: 'status', label: 'Status' },
     { key: 'actions', label: 'Actions' },
   ];
@@ -85,25 +88,59 @@ export function ProductList({
           </div>
         );
 
-      case 'stock':
+      case 'stock': {
         const isLowStock =
           product.track_inventory &&
+          !product.has_variants &&
           product.stock_qty <= product.low_stock_threshold;
         return (
           <div className="space-y-1">
-            <p className="text-sm font-medium">{product.stock_qty}</p>
-            {isLowStock && (
-              <Chip
-                size="sm"
-                color="warning"
-                variant="flat"
-                className="text-xs"
-              >
-                Low Stock
-              </Chip>
+            {product.has_variants ? (
+              <p className="text-xs text-default-400 italic">Per variant</p>
+            ) : (
+              <>
+                <p className="text-sm font-medium">{product.stock_qty}</p>
+                {isLowStock && (
+                  <Chip
+                    size="sm"
+                    color="warning"
+                    variant="flat"
+                    className="text-xs"
+                  >
+                    Low Stock
+                  </Chip>
+                )}
+              </>
             )}
           </div>
         );
+      }
+
+      case 'variants': {
+        if (!product.has_variants) {
+          return <p className="text-xs text-default-400">—</p>;
+        }
+        const count = product.variants?.length ?? 0;
+        return (
+          <Tooltip content="Open Variant Manager">
+            <button
+              onClick={() => onManageVariants(product)}
+              aria-label={`Manage variants for ${product.name}`}
+              className="group"
+            >
+              <Chip
+                size="sm"
+                variant="flat"
+                color="secondary"
+                startContent={<Layers size={11} className="ml-1" />}
+                className="cursor-pointer group-hover:bg-secondary-200 transition-colors"
+              >
+                {count} {count === 1 ? 'variant' : 'variants'}
+              </Chip>
+            </button>
+          </Tooltip>
+        );
+      }
 
       case 'status':
         return product.is_active ? (
@@ -118,16 +155,28 @@ export function ProductList({
 
       case 'actions':
         return (
-          <div className="relative flex items-center gap-2">
-            <Tooltip content="Edit product">
+          <div className="relative flex items-center gap-1">
+            <Tooltip content="Edit product details">
               <button
                 onClick={() => onEdit(product)}
                 aria-label={`Edit ${product.name}`}
-                className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors"
+                className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors p-1 rounded"
               >
-                <Edit size={18} />
+                <Edit size={16} />
               </button>
             </Tooltip>
+
+            {product.has_variants && (
+              <Tooltip content="Manage variants">
+                <button
+                  onClick={() => onManageVariants(product)}
+                  aria-label={`Manage variants for ${product.name}`}
+                  className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-secondary transition-colors p-1 rounded"
+                >
+                  <Layers size={16} />
+                </button>
+              </Tooltip>
+            )}
 
             <Dropdown>
               <DropdownTrigger>
@@ -137,7 +186,7 @@ export function ProductList({
                   variant="light"
                   aria-label={`More options for ${product.name}`}
                 >
-                  <MoreVertical size={18} />
+                  <MoreVertical size={16} />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -150,9 +199,20 @@ export function ProductList({
                     onRestore(product.id);
                   } else if (key === 'sync') {
                     onSync(product.id);
+                  } else if (key === 'variants') {
+                    onManageVariants(product);
                   }
                 }}
               >
+                {product.has_variants ? (
+                  <DropdownItem
+                    key="variants"
+                    description="Add, edit or remove variants"
+                    startContent={<Layers size={14} />}
+                  >
+                    Manage Variants
+                  </DropdownItem>
+                ) : null as unknown as React.ReactElement}
                 <DropdownItem
                   key="sync"
                   description="Sync with AI Assistant indexing"

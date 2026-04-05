@@ -413,13 +413,38 @@ export function ProductFormDialog({
                     </Tab>
 
                     <Tab key={TABS.VARIANTS} title="Variants">
-                      <ProductFormVariantsStep
-                        hasVariants={hasVariants}
-                        onHasVariantsChange={setHasVariants}
-                        variants={variants}
-                        onVariantsChange={setVariants}
-                        isLoading={loading}
-                      />
+                      {product && product.has_variants ? (
+                        <div className="py-4 space-y-4">
+                          <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary-50 border border-secondary-200">
+                            <span className="text-secondary-600 text-lg flex-shrink-0">🗂️</span>
+                            <div>
+                              <p className="text-sm font-semibold text-secondary-800">
+                                Variants are managed in the Variant Manager
+                              </p>
+                              <p className="text-xs text-secondary-700 mt-1">
+                                Close this dialog and click the <strong>Manage Variants</strong> button (
+                                <span className="font-mono">⊞</span>) on the product row, or click the variant chip,
+                                to add, edit, or remove variants without leaving the products page.
+                              </p>
+                            </div>
+                          </div>
+                          <ProductFormVariantsStep
+                            hasVariants={hasVariants}
+                            onHasVariantsChange={setHasVariants}
+                            variants={variants}
+                            onVariantsChange={setVariants}
+                            isLoading={loading}
+                          />
+                        </div>
+                      ) : (
+                        <ProductFormVariantsStep
+                          hasVariants={hasVariants}
+                          onHasVariantsChange={setHasVariants}
+                          variants={variants}
+                          onVariantsChange={setVariants}
+                          isLoading={loading}
+                        />
+                      )}
                     </Tab>
                   </Tabs>
                 </form>

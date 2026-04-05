@@ -20,11 +20,16 @@ import {
 } from '@/hooks/use-products-queries';
 import { ProductList } from './ProductList';
 import { ProductFormDialog } from './ProductFormDialog';
+import { ProductVariantDrawer } from './ProductVariantDrawer';
 
 export default function ProductManager() {
   // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Variant Drawer State
+  const [isVariantDrawerOpen, setIsVariantDrawerOpen] = useState(false);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +69,11 @@ export default function ProductManager() {
     setIsDialogOpen(true);
   };
 
+  const handleManageVariants = (product: Product) => {
+    setVariantProduct(product);
+    setIsVariantDrawerOpen(true);
+  };
+
   const handleDelete = async (id: string) => {
     try {
       await deactivateMutation.mutateAsync(id);
@@ -96,6 +106,10 @@ export default function ProductManager() {
 
   const handleSaved = () => {
     setIsDialogOpen(false);
+    refetch?.();
+  };
+
+  const handleVariantsUpdated = () => {
     refetch?.();
   };
 
@@ -178,6 +192,7 @@ export default function ProductManager() {
             onDelete={handleDelete}
             onRestore={handleRestore}
             onSync={handleSync}
+            onManageVariants={handleManageVariants}
             isLoading={isLoading}
             page={page}
             totalPages={response.totalPages}
@@ -186,7 +201,7 @@ export default function ProductManager() {
         </div>
       )}
 
-      {/* Form Dialog */}
+      {/* Product Edit Dialog */}
       {isDialogOpen && (
         <ProductFormDialog
           isOpen={isDialogOpen}
@@ -195,6 +210,17 @@ export default function ProductManager() {
           onSaved={handleSaved}
         />
       )}
+
+      {/* Variant Manager Drawer */}
+      <ProductVariantDrawer
+        product={variantProduct}
+        isOpen={isVariantDrawerOpen}
+        onOpenChange={(open) => {
+          setIsVariantDrawerOpen(open);
+          if (!open) setVariantProduct(null);
+        }}
+        onProductUpdated={handleVariantsUpdated}
+      />
     </main>
   );
 }

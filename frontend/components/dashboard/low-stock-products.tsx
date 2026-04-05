@@ -1,4 +1,4 @@
-﻿// Feature component â€” Dashboard domain
+// Feature component â€” Dashboard domain
 
 'use client';
 
@@ -67,7 +67,7 @@ export function LowStockProducts({ items, isLoading }: LowStockProductsProps) {
 
                 <Button
                   as={Link}
-                  href={`/dashboard/products/${item.product_id}/edit`}
+                  href={`/dashboard/inventory`}
                   color="warning"
                   variant="flat"
                   size="sm"

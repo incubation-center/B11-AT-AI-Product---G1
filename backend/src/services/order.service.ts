@@ -26,7 +26,8 @@ const TRANSITIONS: Record<string, string[]> = {
   confirmed: ["delivering", "cancelled"],
   delivering: ["completed", "cancelled"],
   completed: [],
-  cancelled: [],
+  // Re-open mistaken cancellations: pending = back in queue; confirmed = commit stock again
+  cancelled: ["pending", "confirmed"],
 };
 
 function toMoneyNumber(value: unknown): number {
@@ -287,7 +288,11 @@ export async function updateOwnerOrderStatus(tenantId: string, orderId: string, 
     if (order.status !== "confirmed" && nextStatus === "confirmed") {
       await applyOrderInventoryChange(tx, tenantId, order.id, "decrease");
       inventoryTouched = true;
-    } else if (order.status === "confirmed" && nextStatus === "cancelled") {
+    } else if (
+      (order.status === "confirmed" || order.status === "delivering") &&
+      nextStatus === "cancelled"
+    ) {
+      // Stock was reserved on confirm; return it when cancelling after confirm or while out for delivery
       await applyOrderInventoryChange(tx, tenantId, order.id, "increase");
       inventoryTouched = true;
     }

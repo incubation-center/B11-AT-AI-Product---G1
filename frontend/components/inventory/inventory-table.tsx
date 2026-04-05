@@ -69,10 +69,13 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
       
       if (product.has_variants && product.variants) {
         product.variants.forEach(variant => {
+          const labelParts = [variant.variant_name, variant.size, variant.color].filter(Boolean);
+          const variantLabel = labelParts.length > 0 ? labelParts.join(' / ') : 'Default Variant';
+
           items.push({
             id: variant.id,
-            name: `${product.name} - ${variant.variant_name}`,
-            category: product.category || "General",
+            name: product.name,
+            category: variantLabel,
             stock: variant.stock_qty,
             threshold: product.low_stock_threshold,
             type: 'variant',

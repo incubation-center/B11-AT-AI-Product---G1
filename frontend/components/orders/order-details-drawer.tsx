@@ -136,6 +136,15 @@ export const OrderDetailsDrawer = ({
                         <p className="text-xs font-medium text-default-500">
                           Update Status
                         </p>
+                        {order.status === 'cancelled' ? (
+                          <p className="text-xs text-default-500 leading-relaxed">
+                            This order was cancelled. You can set it back to{' '}
+                            <strong className="font-medium text-default-700">Pending</strong>{' '}
+                            (back in queue, no stock change) or{' '}
+                            <strong className="font-medium text-default-700">Confirmed</strong>{' '}
+                            (reserves stock again). Other steps stay available after that.
+                          </p>
+                        ) : null}
                         <div className="flex flex-wrap gap-2">
                           {statusOptions.map((opt) => {
                             const isActive = order.status === opt.value;
