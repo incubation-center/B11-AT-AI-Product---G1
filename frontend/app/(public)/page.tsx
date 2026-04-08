@@ -6,6 +6,7 @@ import { HowItWorks } from '@/components/how-it-works';
 import { Navbar } from '@/components/navbar';
 import { Pricing } from '@/components/pricing';
 import { PublicStorefront } from '@/components/storefront/public-storefront';
+import { AskAiPopup } from '@/components/landing/ask-ai-popup';
 import {
   extractStoreSubdomain,
   getStorefrontBySubdomain,
@@ -39,6 +40,7 @@ export default async function Home() {
         <HowItWorks />
         <Pricing />
       </main>
+      <AskAiPopup />
       <Footer />
     </div>
   );
