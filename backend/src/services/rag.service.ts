@@ -80,12 +80,86 @@ function productUsageText(knowledge: typeof productKnowledge.$inferSelect | null
     .join("\n");
 }
 
+const CHUNK_MAX_CHARS = 1200;
+const CHUNK_OVERLAP_CHARS = 200;
+
+function splitOverlappingChunks(input: string, maxChars = CHUNK_MAX_CHARS, overlapChars = CHUNK_OVERLAP_CHARS): string[] {
+  const text = input.trim();
+  if (!text) return [];
+  if (text.length <= maxChars) return [text];
+
+  const safeOverlap = Math.max(0, Math.min(overlapChars, maxChars - 1));
+  const step = Math.max(1, maxChars - safeOverlap);
+  const chunks: string[] = [];
+
+  for (let start = 0; start < text.length; start += step) {
+    const chunk = text.slice(start, start + maxChars).trim();
+    if (!chunk) continue;
+    chunks.push(chunk);
+    if (start + maxChars >= text.length) break;
+  }
+
+  return chunks;
+}
+
+type ProductChunk = {
+  chunkType: "product_core" | "knowledge";
+  chunkKey: string;
+  chunkIndex: number;
+  text: string;
+};
+
+function buildProductChunks(
+  product: typeof products.$inferSelect,
+  knowledge: typeof productKnowledge.$inferSelect | null
+): ProductChunk[] {
+  const chunks: ProductChunk[] = [];
+  const core = productText(product);
+
+  if (core) {
+    chunks.push({
+      chunkType: "product_core",
+      chunkKey: "core",
+      chunkIndex: 0,
+      text: core,
+    });
+  }
+
+  const fields: Array<{ key: string; label: string; value: string | null | undefined }> = [
+    { key: "usage_en", label: "Usage (EN)", value: knowledge?.usageEn },
+    { key: "usage_km", label: "Usage (KM)", value: knowledge?.usageKm },
+    { key: "overview_en", label: "Overview (EN)", value: knowledge?.overviewEn },
+    { key: "overview_km", label: "Overview (KM)", value: knowledge?.overviewKm },
+    { key: "suitability_en", label: "Suitability (EN)", value: knowledge?.suitabilityEn },
+    { key: "suitability_km", label: "Suitability (KM)", value: knowledge?.suitabilityKm },
+    { key: "key_specs_en", label: "Key specs (EN)", value: knowledge?.keySpecsEn },
+    { key: "key_specs_km", label: "Key specs (KM)", value: knowledge?.keySpecsKm },
+  ];
+
+  for (const field of fields) {
+    const normalized = field.value?.trim();
+    if (!normalized) continue;
+
+    const fieldChunks = splitOverlappingChunks(normalized);
+    fieldChunks.forEach((chunk, index) => {
+      chunks.push({
+        chunkType: "knowledge",
+        chunkKey: field.key,
+        chunkIndex: index,
+        text: [`Product: ${product.name}`, `${field.label}: ${chunk}`].join("\n"),
+      });
+    });
+  }
+
+  return chunks;
+}
+
 function variantText(
   product: typeof products.$inferSelect,
   variant: typeof productVariants.$inferSelect,
   knowledge: typeof productKnowledge.$inferSelect | null
 ): string {
-  const usage = productUsageText(knowledge);
+  const usage = splitOverlappingChunks(productUsageText(knowledge), 900, 150)[0] ?? "";
   return [
     `Product: ${product.name}`,
     variant.size ? `Variant size: ${variant.size}` : "",
@@ -102,17 +176,23 @@ function variantText(
 
 function buildProductMetadata(
   row: typeof products.$inferSelect,
-  tenant: typeof tenants.$inferSelect
+  tenant: typeof tenants.$inferSelect,
+  text: string,
+  chunk: Pick<ProductChunk, "chunkType" | "chunkKey" | "chunkIndex">
 ): PineconeMetadata {
   return {
     tenantId: row.tenantId,
     entityType: "product",
     entityId: row.id,
+    productId: row.id,
+    chunkType: chunk.chunkType,
+    chunkKey: chunk.chunkKey,
+    chunkIndex: chunk.chunkIndex,
     ...(row.category ? { productCategory: row.category } : {}),
     isActive: row.isActive,
     relationTenantNode: `tenant:${row.tenantId}`,
     relationNode: `product:${row.id}`,
-    text: productText(row),
+    text,
     subdomain: tenant.subdomain,
     shopName: tenant.shopName,
   };
@@ -133,6 +213,9 @@ function buildVariantMetadata(
     ...(product.category ? { productCategory: product.category } : {}),
     ...(variant.size ? { variantSize: variant.size } : {}),
     ...(variant.color ? { variantColor: variant.color } : {}),
+    chunkType: "variant_core",
+    chunkKey: "variant",
+    chunkIndex: 0,
     isActive: variant.isActive,
     relationTenantNode: `tenant:${product.tenantId}`,
     relationNode: `product:${product.id}`,
@@ -142,8 +225,8 @@ function buildVariantMetadata(
   };
 }
 
-function productVectorId(tenantId: string, productId: string): string {
-  return `tenant:${tenantId}:product:${productId}`;
+function productChunkVectorId(tenantId: string, productId: string, chunkKey: string, chunkIndex: number): string {
+  return `tenant:${tenantId}:product:${productId}:chunk:${chunkKey}:${chunkIndex}`;
 }
 
 function variantVectorId(tenantId: string, productId: string, variantId: string): string {
@@ -191,19 +274,16 @@ async function buildProductRecords(tenantId: string, productId: string) {
     }),
   ]);
   const knowledge = rawKnowledge ?? null;
+  const productChunks = buildProductChunks(product, knowledge);
 
-  const productDoc = [productText(product), productUsageText(knowledge)].filter(Boolean).join("\n");
-
-  const records: Array<{ id: string; values: number[]; metadata: PineconeMetadata }> = [
-    {
-      id: productVectorId(tenantId, product.id),
-      values: await embedText(productDoc),
-      metadata: {
-        ...buildProductMetadata(product, tenant),
-        text: productDoc,
-      },
-    },
-  ];
+  const records: Array<{ id: string; values: number[]; metadata: PineconeMetadata }> = [];
+  for (const chunk of productChunks) {
+    records.push({
+      id: productChunkVectorId(tenantId, product.id, chunk.chunkKey, chunk.chunkIndex),
+      values: await embedText(chunk.text),
+      metadata: buildProductMetadata(product, tenant, chunk.text, chunk),
+    });
+  }
 
   for (const variant of variants) {
     const text = variantText(product, variant, knowledge);
@@ -244,6 +324,9 @@ export const ragService = {
           tenantId: tenant.id,
           entityType: "tenant_profile",
           entityId: tenant.id,
+          chunkType: "tenant_profile",
+          chunkKey: "profile",
+          chunkIndex: 0,
           subdomain: tenant.subdomain,
           shopType: tenant.shopType,
           isActive: tenant.isActive,
@@ -277,11 +360,15 @@ export const ragService = {
     if (shouldSkip()) return;
     const indexAny = getIndex(tenantId) as any;
     if (typeof indexAny.deleteMany === "function") {
-      await indexAny.deleteMany({ ids: [productVectorId(tenantId, productId)] });
+      await indexAny.deleteMany({
+        filter: { relationNode: { $eq: `product:${productId}` } },
+      });
     }
     const globalIndexAny = getGlobalIndex() as any;
     if (typeof globalIndexAny.deleteMany === "function") {
-      await globalIndexAny.deleteMany({ ids: [productVectorId(tenantId, productId)] });
+      await globalIndexAny.deleteMany({
+        filter: { relationNode: { $eq: `product:${productId}` } },
+      });
     }
   },
 

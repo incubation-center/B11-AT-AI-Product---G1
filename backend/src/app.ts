@@ -45,7 +45,7 @@ app.use(
   "*",
   cors({
     origin: (origin) => {
-      if (!origin) return "*";
+      if (!origin) return "";
       const normalized = origin.replace(/\/$/, "");
       if (allowedOrigins.has(normalized) || allowLocalWildcardOrigin(normalized)) {
         return origin;

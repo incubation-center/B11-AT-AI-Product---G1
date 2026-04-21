@@ -22,7 +22,7 @@ import { getTenantLinkByTelegramUser } from "./telegram-link.service";
 import { uploadProductImageToCloudinary } from "../lib/cloudinary";
 import type { ShopType } from "../types/tenant";
 
-type TelegramMiniAppClaims = {
+export type TelegramMiniAppClaims = {
   v: 1;
   tenantId: string;
   telegramUserId: number;

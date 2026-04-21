@@ -59,6 +59,101 @@ function toNumericString(value: unknown): string | null {
   return null;
 }
 
+function parseOptionalNumericField(
+  body: any,
+  fieldName: string
+): { value: string | undefined; message: string | null } {
+  const rawValue = body?.[fieldName];
+  if (rawValue === undefined) return { value: undefined, message: null };
+
+  const parsedValue = toNumericString(rawValue);
+  if (!parsedValue) return { value: undefined, message: `${fieldName} must be a number` };
+
+  return { value: parsedValue, message: null };
+}
+
+function parseOptionalIntegerField(
+  body: any,
+  fieldName: string
+): { value: number | undefined; message: string | null } {
+  const rawValue = body?.[fieldName];
+  if (rawValue === undefined) return { value: undefined, message: null };
+
+  const parsedValue = toInteger(rawValue);
+  if (parsedValue === null) return { value: undefined, message: `${fieldName} must be an integer` };
+
+  return { value: parsedValue, message: null };
+}
+
+function parseOptionalStringArray(body: any, fieldName: string): string[] | undefined {
+  if (!Array.isArray(body?.[fieldName])) return undefined;
+  return body[fieldName].filter((value: unknown): value is string => typeof value === "string");
+}
+
+function validateProductPricingAndInventory(body: any): {
+  values?: {
+    basePriceUsd: string | undefined;
+    basePriceKhr: string | undefined;
+    stockQty: number | undefined;
+    lowStockThreshold: number | undefined;
+  };
+  message: string | null;
+} {
+  const basePriceUsd = parseOptionalNumericField(body, "base_price_usd");
+  if (basePriceUsd.message) return { message: basePriceUsd.message };
+
+  const basePriceKhr = parseOptionalNumericField(body, "base_price_khr");
+  if (basePriceKhr.message) return { message: basePriceKhr.message };
+
+  const stockQty = parseOptionalIntegerField(body, "stock_qty");
+  if (stockQty.message) return { message: stockQty.message };
+
+  const lowStockThreshold = parseOptionalIntegerField(body, "low_stock_threshold");
+  if (lowStockThreshold.message) return { message: lowStockThreshold.message };
+
+  return {
+    values: {
+      basePriceUsd: basePriceUsd.value,
+      basePriceKhr: basePriceKhr.value,
+      stockQty: stockQty.value,
+      lowStockThreshold: lowStockThreshold.value,
+    },
+    message: null,
+  };
+}
+
+function validateVariantPricingAndInventory(body: any): {
+  values?: {
+    priceUsd: string | undefined;
+    priceKhr: string | undefined;
+    stockQty: number | undefined;
+    lowStockThreshold: number | undefined;
+  };
+  message: string | null;
+} {
+  const priceUsd = parseOptionalNumericField(body, "price_usd");
+  if (priceUsd.message) return { message: priceUsd.message };
+
+  const priceKhr = parseOptionalNumericField(body, "price_khr");
+  if (priceKhr.message) return { message: priceKhr.message };
+
+  const stockQty = parseOptionalIntegerField(body, "stock_qty");
+  if (stockQty.message) return { message: stockQty.message };
+
+  const lowStockThreshold = parseOptionalIntegerField(body, "low_stock_threshold");
+  if (lowStockThreshold.message) return { message: lowStockThreshold.message };
+
+  return {
+    values: {
+      priceUsd: priceUsd.value,
+      priceKhr: priceKhr.value,
+      stockQty: stockQty.value,
+      lowStockThreshold: lowStockThreshold.value,
+    },
+    message: null,
+  };
+}
+
 async function getSessionUser(c: Context) {
   const session = await auth.api.getSession({
     headers: c.req.raw.headers,
@@ -299,27 +394,13 @@ productRoutes.post("/products", requireBearer, async (c) => {
   const name = cleanText(body?.name);
   if (!name) return c.json({ message: "name is required" }, 400);
 
-  const basePriceUsd = body?.base_price_usd !== undefined ? toNumericString(body.base_price_usd) : undefined;
-  const basePriceKhr = body?.base_price_khr !== undefined ? toNumericString(body.base_price_khr) : undefined;
-  if (body?.base_price_usd !== undefined && !basePriceUsd) {
-    return c.json({ message: "base_price_usd must be a number" }, 400);
-  }
-  if (body?.base_price_khr !== undefined && !basePriceKhr) {
-    return c.json({ message: "base_price_khr must be a number" }, 400);
+  const productValidation = validateProductPricingAndInventory(body);
+  if (productValidation.message || !productValidation.values) {
+    return c.json({ message: productValidation.message ?? "Invalid product payload" }, 400);
   }
 
-  const stockQty = body?.stock_qty !== undefined ? toInteger(body.stock_qty) : undefined;
-  const lowStockThreshold = body?.low_stock_threshold !== undefined ? toInteger(body.low_stock_threshold) : undefined;
-  if (body?.stock_qty !== undefined && stockQty === null) {
-    return c.json({ message: "stock_qty must be an integer" }, 400);
-  }
-  if (body?.low_stock_threshold !== undefined && lowStockThreshold === null) {
-    return c.json({ message: "low_stock_threshold must be an integer" }, 400);
-  }
-
-  const imageUrls = Array.isArray(body?.image_urls)
-    ? body.image_urls.filter((v: unknown): v is string => typeof v === "string")
-    : undefined;
+  const { basePriceUsd, basePriceKhr, stockQty, lowStockThreshold } = productValidation.values;
+  const imageUrls = parseOptionalStringArray(body, "image_urls");
 
   const product = await createProduct(tenantId, {
     name,
@@ -384,27 +465,13 @@ productRoutes.patch("/products/:id", requireBearer, async (c) => {
 
   const body = await c.req.json().catch(() => null);
 
-  const basePriceUsd = body?.base_price_usd !== undefined ? toNumericString(body.base_price_usd) : undefined;
-  const basePriceKhr = body?.base_price_khr !== undefined ? toNumericString(body.base_price_khr) : undefined;
-  if (body?.base_price_usd !== undefined && !basePriceUsd) {
-    return c.json({ message: "base_price_usd must be a number" }, 400);
-  }
-  if (body?.base_price_khr !== undefined && !basePriceKhr) {
-    return c.json({ message: "base_price_khr must be a number" }, 400);
+  const productValidation = validateProductPricingAndInventory(body);
+  if (productValidation.message || !productValidation.values) {
+    return c.json({ message: productValidation.message ?? "Invalid product payload" }, 400);
   }
 
-  const stockQty = body?.stock_qty !== undefined ? toInteger(body.stock_qty) : undefined;
-  const lowStockThreshold = body?.low_stock_threshold !== undefined ? toInteger(body.low_stock_threshold) : undefined;
-  if (body?.stock_qty !== undefined && stockQty === null) {
-    return c.json({ message: "stock_qty must be an integer" }, 400);
-  }
-  if (body?.low_stock_threshold !== undefined && lowStockThreshold === null) {
-    return c.json({ message: "low_stock_threshold must be an integer" }, 400);
-  }
-
-  const imageUrls = Array.isArray(body?.image_urls)
-    ? body.image_urls.filter((v: unknown): v is string => typeof v === "string")
-    : undefined;
+  const { basePriceUsd, basePriceKhr, stockQty, lowStockThreshold } = productValidation.values;
+  const imageUrls = parseOptionalStringArray(body, "image_urls");
 
   const product = await updateProduct(tenantId, productId, {
     name: body?.name,
@@ -466,23 +533,12 @@ productRoutes.post("/products/:id/variants", requireBearer, async (c) => {
   if (!productId) return c.json({ message: "product id is required" }, 400);
 
   const body = await c.req.json().catch(() => null);
-  const priceUsd = body?.price_usd !== undefined ? toNumericString(body.price_usd) : undefined;
-  const priceKhr = body?.price_khr !== undefined ? toNumericString(body.price_khr) : undefined;
-  if (body?.price_usd !== undefined && !priceUsd) {
-    return c.json({ message: "price_usd must be a number" }, 400);
-  }
-  if (body?.price_khr !== undefined && !priceKhr) {
-    return c.json({ message: "price_khr must be a number" }, 400);
+  const variantValidation = validateVariantPricingAndInventory(body);
+  if (variantValidation.message || !variantValidation.values) {
+    return c.json({ message: variantValidation.message ?? "Invalid variant payload" }, 400);
   }
 
-  const stockQty = body?.stock_qty !== undefined ? toInteger(body.stock_qty) : undefined;
-  const lowStockThreshold = body?.low_stock_threshold !== undefined ? toInteger(body.low_stock_threshold) : undefined;
-  if (body?.stock_qty !== undefined && stockQty === null) {
-    return c.json({ message: "stock_qty must be an integer" }, 400);
-  }
-  if (body?.low_stock_threshold !== undefined && lowStockThreshold === null) {
-    return c.json({ message: "low_stock_threshold must be an integer" }, 400);
-  }
+  const { priceUsd, priceKhr, stockQty, lowStockThreshold } = variantValidation.values;
 
   try {
     const variant = await createVariant(tenantId, productId, {
@@ -514,23 +570,12 @@ productRoutes.patch("/variants/:id", requireBearer, async (c) => {
   if (!variantId) return c.json({ message: "variant id is required" }, 400);
 
   const body = await c.req.json().catch(() => null);
-  const priceUsd = body?.price_usd !== undefined ? toNumericString(body.price_usd) : undefined;
-  const priceKhr = body?.price_khr !== undefined ? toNumericString(body.price_khr) : undefined;
-  if (body?.price_usd !== undefined && !priceUsd) {
-    return c.json({ message: "price_usd must be a number" }, 400);
-  }
-  if (body?.price_khr !== undefined && !priceKhr) {
-    return c.json({ message: "price_khr must be a number" }, 400);
+  const variantValidation = validateVariantPricingAndInventory(body);
+  if (variantValidation.message || !variantValidation.values) {
+    return c.json({ message: variantValidation.message ?? "Invalid variant payload" }, 400);
   }
 
-  const stockQty = body?.stock_qty !== undefined ? toInteger(body.stock_qty) : undefined;
-  const lowStockThreshold = body?.low_stock_threshold !== undefined ? toInteger(body.low_stock_threshold) : undefined;
-  if (body?.stock_qty !== undefined && stockQty === null) {
-    return c.json({ message: "stock_qty must be an integer" }, 400);
-  }
-  if (body?.low_stock_threshold !== undefined && lowStockThreshold === null) {
-    return c.json({ message: "low_stock_threshold must be an integer" }, 400);
-  }
+  const { priceUsd, priceKhr, stockQty, lowStockThreshold } = variantValidation.values;
 
   try {
     const variant = await updateVariant(tenantId, variantId, {

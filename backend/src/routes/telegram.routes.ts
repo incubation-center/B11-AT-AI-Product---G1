@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { auth } from "../auth/config";
 import { env } from "../env";
-import { requireBearer } from "../middleware/require-bearer";
+import { requireAuthorizationBearer, requireBearer } from "../middleware/require-bearer";
 import { handleTelegramWebhook } from "../services/telegram-bot.service";
 import { createTelegramLinkCode, getTelegramLinkStatus } from "../services/telegram-link.service";
 import {
@@ -109,7 +109,7 @@ telegramRoutes.post("/telegram/miniapp/session", async (c) => {
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/bootstrap", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/bootstrap", requireAuthorizationBearer, async (c) => {
   try {
     const result = await getTelegramMiniAppBootstrap(c.req.header("authorization"));
     return c.json(result);
@@ -119,7 +119,7 @@ telegramRoutes.get("/telegram/miniapp/bootstrap", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/tenant", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/tenant", requireAuthorizationBearer, async (c) => {
   try {
     const tenant = await getTelegramMiniAppTenant(c.req.header("authorization"));
     return c.json({ tenant });
@@ -129,7 +129,7 @@ telegramRoutes.get("/telegram/miniapp/tenant", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.patch("/telegram/miniapp/tenant", requireBearer, async (c) => {
+telegramRoutes.patch("/telegram/miniapp/tenant", requireAuthorizationBearer, async (c) => {
   const body = await c.req.json().catch(() => null);
   try {
     const tenant = await updateTelegramMiniAppTenant(c.req.header("authorization"), body ?? {});
@@ -140,7 +140,7 @@ telegramRoutes.patch("/telegram/miniapp/tenant", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.post("/telegram/miniapp/tenant/assets", requireBearer, async (c) => {
+telegramRoutes.post("/telegram/miniapp/tenant/assets", requireAuthorizationBearer, async (c) => {
   const form = await c.req.formData().catch(() => null);
   const type = form?.get("type");
   const file = form?.get("file");
@@ -161,7 +161,7 @@ telegramRoutes.post("/telegram/miniapp/tenant/assets", requireBearer, async (c) 
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/products", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/products", requireAuthorizationBearer, async (c) => {
   try {
     const result = await listTelegramMiniAppProducts(c.req.header("authorization"), {
       q: c.req.query("q"),
@@ -176,7 +176,7 @@ telegramRoutes.get("/telegram/miniapp/products", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.post("/telegram/miniapp/products", requireBearer, async (c) => {
+telegramRoutes.post("/telegram/miniapp/products", requireAuthorizationBearer, async (c) => {
   const body = await c.req.json().catch(() => null);
   try {
     const product = await createTelegramMiniAppProduct(c.req.header("authorization"), body ?? {});
@@ -187,7 +187,7 @@ telegramRoutes.post("/telegram/miniapp/products", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/products/:id", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/products/:id", requireAuthorizationBearer, async (c) => {
   const productId = c.req.param("id")?.trim();
   if (!productId) {
     return c.json({ message: "product id is required" }, 400);
@@ -203,7 +203,7 @@ telegramRoutes.get("/telegram/miniapp/products/:id", requireBearer, async (c) =>
   }
 });
 
-telegramRoutes.patch("/telegram/miniapp/products/:id", requireBearer, async (c) => {
+telegramRoutes.patch("/telegram/miniapp/products/:id", requireAuthorizationBearer, async (c) => {
   const productId = c.req.param("id")?.trim();
   if (!productId) {
     return c.json({ message: "product id is required" }, 400);
@@ -220,7 +220,7 @@ telegramRoutes.patch("/telegram/miniapp/products/:id", requireBearer, async (c) 
   }
 });
 
-telegramRoutes.patch("/telegram/miniapp/products/:id/deactivate", requireBearer, async (c) => {
+telegramRoutes.patch("/telegram/miniapp/products/:id/deactivate", requireAuthorizationBearer, async (c) => {
   const productId = c.req.param("id")?.trim();
   if (!productId) {
     return c.json({ message: "product id is required" }, 400);
@@ -236,7 +236,7 @@ telegramRoutes.patch("/telegram/miniapp/products/:id/deactivate", requireBearer,
   }
 });
 
-telegramRoutes.patch("/telegram/miniapp/products/:id/stock", requireBearer, async (c) => {
+telegramRoutes.patch("/telegram/miniapp/products/:id/stock", requireAuthorizationBearer, async (c) => {
   const productId = c.req.param("id")?.trim();
   if (!productId) {
     return c.json({ message: "product id is required" }, 400);
@@ -253,7 +253,7 @@ telegramRoutes.patch("/telegram/miniapp/products/:id/stock", requireBearer, asyn
   }
 });
 
-telegramRoutes.post("/telegram/miniapp/products/:id/images", requireBearer, async (c) => {
+telegramRoutes.post("/telegram/miniapp/products/:id/images", requireAuthorizationBearer, async (c) => {
   const productId = c.req.param("id")?.trim();
   if (!productId) {
     return c.json({ message: "product id is required" }, 400);
@@ -274,7 +274,7 @@ telegramRoutes.post("/telegram/miniapp/products/:id/images", requireBearer, asyn
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/orders", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/orders", requireAuthorizationBearer, async (c) => {
   try {
     const orders = await listTelegramMiniAppOrders(c.req.header("authorization"), {
       status: c.req.query("status"),
@@ -288,7 +288,7 @@ telegramRoutes.get("/telegram/miniapp/orders", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/orders/:id", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/orders/:id", requireAuthorizationBearer, async (c) => {
   const orderId = c.req.param("id")?.trim();
   if (!orderId) {
     return c.json({ message: "order id is required" }, 400);
@@ -304,7 +304,7 @@ telegramRoutes.get("/telegram/miniapp/orders/:id", requireBearer, async (c) => {
   }
 });
 
-telegramRoutes.patch("/telegram/miniapp/orders/:id/status", requireBearer, async (c) => {
+telegramRoutes.patch("/telegram/miniapp/orders/:id/status", requireAuthorizationBearer, async (c) => {
   const orderId = c.req.param("id")?.trim();
   if (!orderId) {
     return c.json({ message: "order id is required" }, 400);
@@ -320,7 +320,7 @@ telegramRoutes.patch("/telegram/miniapp/orders/:id/status", requireBearer, async
   }
 });
 
-telegramRoutes.patch("/telegram/miniapp/orders/:id/payment", requireBearer, async (c) => {
+telegramRoutes.patch("/telegram/miniapp/orders/:id/payment", requireAuthorizationBearer, async (c) => {
   const orderId = c.req.param("id")?.trim();
   if (!orderId) {
     return c.json({ message: "order id is required" }, 400);
@@ -336,7 +336,7 @@ telegramRoutes.patch("/telegram/miniapp/orders/:id/payment", requireBearer, asyn
   }
 });
 
-telegramRoutes.post("/telegram/miniapp/orders/:id/cancel", requireBearer, async (c) => {
+telegramRoutes.post("/telegram/miniapp/orders/:id/cancel", requireAuthorizationBearer, async (c) => {
   const orderId = c.req.param("id")?.trim();
   if (!orderId) {
     return c.json({ message: "order id is required" }, 400);
@@ -351,7 +351,7 @@ telegramRoutes.post("/telegram/miniapp/orders/:id/cancel", requireBearer, async 
   }
 });
 
-telegramRoutes.get("/telegram/miniapp/inventory/low-stock", requireBearer, async (c) => {
+telegramRoutes.get("/telegram/miniapp/inventory/low-stock", requireAuthorizationBearer, async (c) => {
   try {
     const items = await listTelegramMiniAppLowStock(c.req.header("authorization"));
     return c.json({ items });

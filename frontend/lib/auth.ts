@@ -1,8 +1,6 @@
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8080';
 
-export const AUTH_TOKEN_COOKIE = 'coolhat_owner_token';
-
 export type SessionUser = {
   id: string;
   email: string;
@@ -72,70 +70,6 @@ export type UpdateTenantPayload = Partial<CreateTenantPayload> & {
 
 type UnknownJson = Record<string, unknown>;
 
-function isRecord(value: unknown): value is UnknownJson {
-  return typeof value === 'object' && value !== null;
-}
-
-function setBrowserCookie(
-  name: string,
-  value: string,
-  maxAgeSeconds = 60 * 60 * 24 * 30,
-) {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  document.cookie = `${name}=${encodeURIComponent(
-    value,
-  )}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
-}
-
-function removeBrowserCookie(name: string) {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
-}
-
-export function getBrowserCookie(name: string) {
-  if (typeof document === 'undefined') {
-    return '';
-  }
-
-  const key = `${name}=`;
-  const found = document.cookie
-    .split('; ')
-    .find((entry) => entry.startsWith(key));
-
-  return found ? decodeURIComponent(found.slice(key.length)) : '';
-}
-
-function extractBearerToken(payload: unknown): string {
-  if (!payload) return '';
-  if (typeof payload === 'string' && payload.trim()) return payload.trim();
-  if (!isRecord(payload)) return '';
-
-  const directKeys = ['token', 'bearerToken', 'accessToken'];
-  for (const key of directKeys) {
-    const value = payload[key];
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
-  }
-
-  const nestedKeys = ['session', 'data'];
-  for (const key of nestedKeys) {
-    const nested = payload[key];
-    const token = extractBearerToken(nested);
-    if (token) {
-      return token;
-    }
-  }
-
-  return '';
-}
-
 async function parseResponse<T>(response: Response): Promise<T> {
   const text = await response.text();
   const data = text
@@ -169,12 +103,6 @@ export async function signInWithEmail(input: {
   });
 
   const data = await parseResponse<UnknownJson>(response);
-  const token = extractBearerToken(data);
-
-  if (token) {
-    setBrowserCookie(AUTH_TOKEN_COOKIE, token);
-  }
-
   return data;
 }
 
@@ -198,18 +126,10 @@ export async function signUpWithEmail(input: {
 }
 
 export async function signOut() {
-  const token = getBrowserCookie(AUTH_TOKEN_COOKIE);
   const response = await fetch(`${API_URL}/api/auth/sign-out`, {
     method: 'POST',
     credentials: 'include',
-    headers: token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : undefined,
   });
-
-  removeBrowserCookie(AUTH_TOKEN_COOKIE);
 
   return parseResponse(response);
 }
@@ -266,11 +186,7 @@ export async function resetPassword(input: { token: string; password: string }) 
 }
 
 export async function protectedFetch<T>(path: string, init?: RequestInit) {
-  const token = getBrowserCookie(AUTH_TOKEN_COOKIE);
   const headers = new Headers(init?.headers);
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
 
   const response = await fetch(`${API_URL}${path}`, {
     ...init,

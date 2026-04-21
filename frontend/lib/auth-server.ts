@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 
 import {
   API_URL,
-  AUTH_TOKEN_COOKIE,
   type SessionResponse,
   type TelegramLinkStatus,
   type TenantStatusResponse,
@@ -26,12 +25,9 @@ async function getCookieHeader() {
 }
 
 export async function getServerSession() {
-  const [cookieHeader, token] = await Promise.all([
-    getCookieHeader(),
-    getServerBearerToken(),
-  ]);
+  const cookieHeader = await getCookieHeader();
 
-  if (!cookieHeader && !token) {
+  if (!cookieHeader) {
     return null;
   }
 
@@ -39,9 +35,6 @@ export async function getServerSession() {
     const headers = new Headers();
     if (cookieHeader) {
       headers.set('cookie', cookieHeader);
-    }
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
     }
 
     const response = await fetch(`${SERVER_API_URL}/api/auth/get-session`, {
@@ -57,38 +50,6 @@ export async function getServerSession() {
       }
     }
 
-    // Fallback for deployments where better-auth session cookie is not available
-    // on the frontend domain but bearer token auth still works.
-    if (token) {
-      const meResponse = await fetch(`${SERVER_API_URL}/me`, {
-        method: 'GET',
-        headers,
-        cache: 'no-store',
-      });
-
-      if (meResponse.ok) {
-        const meData = (await meResponse.json()) as {
-          id?: string;
-          email?: string;
-          profile?: { fullName?: string | null };
-          emailVerified?: boolean;
-        };
-
-        if (meData?.id && meData?.email) {
-          return {
-            user: {
-              id: meData.id,
-              email: meData.email,
-              name: meData.profile?.fullName ?? null,
-              emailVerified: Boolean(meData.emailVerified),
-            },
-            session: null,
-            token,
-          } satisfies SessionResponse;
-        }
-      }
-    }
-
     return null;
   } catch (error) {
     console.error('[getServerSession] Fetch error:', error);
@@ -96,22 +57,15 @@ export async function getServerSession() {
   }
 }
 
-async function getServerBearerToken() {
-  const cookieStore = await getCookieStore();
-  return cookieStore.get(AUTH_TOKEN_COOKIE)?.value ?? '';
-}
-
 async function getProtectedServerData<T>(path: string) {
-  const [cookieHeader, token] = await Promise.all([
-    getCookieHeader(),
-    getServerBearerToken(),
-  ]);
+  const cookieHeader = await getCookieHeader();
+  if (!cookieHeader) {
+    return null;
+  }
+
   const headers = new Headers();
   if (cookieHeader) {
     headers.set('cookie', cookieHeader);
-  }
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
   }
 
   try {
