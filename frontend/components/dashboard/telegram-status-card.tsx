@@ -1,7 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Card, CardBody, CardHeader, Chip, Button, Divider } from '@heroui/react';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Chip,
+  Button,
+  Divider,
+} from '@heroui/react';
 import { Send, CheckCircle2, XCircle, RefreshCw, User } from 'lucide-react';
 import type { TelegramLinkStatus } from '@/lib/auth';
 
@@ -11,7 +18,11 @@ interface TelegramStatusCardProps {
   onRefresh: () => void;
 }
 
-export function TelegramStatusCard({ status, isLoading, onRefresh }: TelegramStatusCardProps) {
+export function TelegramStatusCard({
+  status,
+  isLoading,
+  onRefresh,
+}: TelegramStatusCardProps) {
   const isLinked = status?.linked;
 
   return (
@@ -26,10 +37,10 @@ export function TelegramStatusCard({ status, isLoading, onRefresh }: TelegramSta
             <p className="text-sm text-default-400">Current connection state</p>
           </div>
         </div>
-        <Button 
-          isIconOnly 
-          variant="flat" 
-          size="sm" 
+        <Button
+          isIconOnly
+          variant="flat"
+          size="sm"
           onPress={onRefresh}
           isLoading={isLoading}
         >
@@ -49,17 +60,19 @@ export function TelegramStatusCard({ status, isLoading, onRefresh }: TelegramSta
                 {isLinked ? 'Connected' : 'Not Linked'}
               </p>
               <p className="text-xs text-default-400">
-                {isLinked ? 'Your store is linked to a Telegram bot' : 'No Telegram account linked yet'}
+                {isLinked
+                  ? 'Your store is linked to a Telegram bot'
+                  : 'No Telegram account linked yet'}
               </p>
             </div>
           </div>
           <Chip
-            color={isLinked ? "success" : "danger"}
+            color={isLinked ? 'success' : 'danger'}
             variant="flat"
             size="sm"
             className="capitalize"
           >
-            {isLinked ? "Active" : "Inactive"}
+            {isLinked ? 'Active' : 'Inactive'}
           </Chip>
         </div>
 
@@ -68,15 +81,23 @@ export function TelegramStatusCard({ status, isLoading, onRefresh }: TelegramSta
             <Divider />
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-white rounded-xl border border-default-100">
-                <p className="text-[10px] uppercase font-bold text-default-400 mb-1">Telegram User ID</p>
+                <p className="text-[10px] uppercase font-bold text-default-400 mb-1">
+                  Telegram User ID
+                </p>
                 <div className="flex items-center gap-2">
                   <User size={14} className="text-primary" />
-                  <span className="text-sm font-semibold">{status?.telegramUserId || 'N/A'}</span>
+                  <span className="text-sm font-semibold">
+                    {status?.telegramUserId || 'N/A'}
+                  </span>
                 </div>
               </div>
               <div className="p-3 bg-white rounded-xl border border-default-100">
-                <p className="text-[10px] uppercase font-bold text-default-400 mb-1">Linked Store</p>
-                <p className="text-sm font-semibold truncate">{status?.tenant?.shopName || 'Unknown'}</p>
+                <p className="text-[10px] uppercase font-bold text-default-400 mb-1">
+                  Linked Store
+                </p>
+                <p className="text-sm font-semibold truncate">
+                  {status?.tenant?.shopName || 'Unknown'}
+                </p>
               </div>
             </div>
           </div>

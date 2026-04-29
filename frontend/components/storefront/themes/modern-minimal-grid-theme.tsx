@@ -4,7 +4,11 @@ import { useMemo, useState } from 'react';
 
 import { StorefrontCartCheckout } from '@/components/storefront/themes/storefront-cart-checkout';
 import { StorefrontNavbar } from '@/components/storefront/themes/storefront-navbar';
-import { ProductImage, ThemeLogo, formatStorePrice } from '@/components/storefront/themes/shared';
+import {
+  ProductImage,
+  ThemeLogo,
+  formatStorePrice,
+} from '@/components/storefront/themes/shared';
 import { ProductQuickViewDialog } from '@/components/storefront/themes/product-quick-view-dialog';
 import { useStorefrontCart } from '@/components/storefront/themes/use-storefront-cart';
 import type { StorefrontThemeProps } from '@/components/storefront/themes/shared';
@@ -34,10 +38,14 @@ function ProductCard({
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7a7f87]">
           {product.category ?? 'Collection'}
         </p>
-        <h3 className="line-clamp-1 text-base font-semibold text-[#17191d]">{product.name}</h3>
+        <h3 className="line-clamp-1 text-base font-semibold text-[#17191d]">
+          {product.name}
+        </h3>
 
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-[#0f2745]">{formatStorePrice(product)}</p>
+          <p className="text-sm font-semibold text-[#0f2745]">
+            {formatStorePrice(product)}
+          </p>
           <p className="text-xs text-[#7a7f87]">Stock {product.stockQty}</p>
         </div>
 
@@ -63,12 +71,21 @@ function ProductCard({
   );
 }
 
-export function ModernMinimalGridTheme({ store, products }: StorefrontThemeProps) {
-  const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
-  const { cartItems, totalItems, addToCart, updateQty, removeItem, clearCart } = useStorefrontCart(store.subdomain);
+export function ModernMinimalGridTheme({
+  store,
+  products,
+}: StorefrontThemeProps) {
+  const [selectedProduct, setSelectedProduct] =
+    useState<StorefrontProduct | null>(null);
+  const { cartItems, totalItems, addToCart, updateQty, removeItem, clearCart } =
+    useStorefrontCart(store.subdomain);
 
   const topCategories = useMemo(
-    () => Array.from(new Set(products.map((item) => item.category || 'All'))).slice(0, 6),
+    () =>
+      Array.from(new Set(products.map((item) => item.category || 'All'))).slice(
+        0,
+        6,
+      ),
     [products],
   );
 
@@ -86,8 +103,12 @@ export function ModernMinimalGridTheme({ store, products }: StorefrontThemeProps
                 className="relative h-11 w-11 overflow-hidden rounded-xl border border-[#e1e3e8] bg-white"
               />
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7a7f87]">{store.shopType}</p>
-                <p className="text-base font-semibold text-[#17191d]">{store.shopName}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7a7f87]">
+                  {store.shopType}
+                </p>
+                <p className="text-base font-semibold text-[#17191d]">
+                  {store.shopName}
+                </p>
               </div>
             </div>
 
@@ -98,14 +119,20 @@ export function ModernMinimalGridTheme({ store, products }: StorefrontThemeProps
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <h1 className="text-3xl leading-tight md:text-5xl">Clean Shopping. Fast Decisions.</h1>
+              <h1 className="text-3xl leading-tight md:text-5xl">
+                Clean Shopping. Fast Decisions.
+              </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[#555b63] md:text-base">
-                {store.description ?? 'A refined storefront focused on clear products, confident pricing, and frictionless add-to-cart.'}
+                {store.description ??
+                  'A refined storefront focused on clear products, confident pricing, and frictionless add-to-cart.'}
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
                 {topCategories.map((category) => (
-                  <span key={category} className="rounded-full border border-[#d7deea] bg-white px-3 py-1 text-xs font-semibold text-[#41506a]">
+                  <span
+                    key={category}
+                    className="rounded-full border border-[#d7deea] bg-white px-3 py-1 text-xs font-semibold text-[#41506a]"
+                  >
                     {category}
                   </span>
                 ))}
@@ -124,10 +151,15 @@ export function ModernMinimalGridTheme({ store, products }: StorefrontThemeProps
         </div>
       </section>
 
-      <section id="products" className="mx-auto w-full max-w-[1440px] px-4 pb-16 md:px-8 lg:px-12">
+      <section
+        id="products"
+        className="mx-auto w-full max-w-[1440px] px-4 pb-16 md:px-8 lg:px-12"
+      >
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7a7f87]">Products</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7a7f87]">
+              Products
+            </p>
             <h2 className="mt-2 text-2xl md:text-3xl">Shop The Collection</h2>
           </div>
           <p className="text-sm text-[#636a73]">{products.length} items</p>

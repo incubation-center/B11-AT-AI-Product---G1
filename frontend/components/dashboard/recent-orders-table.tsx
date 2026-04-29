@@ -12,6 +12,7 @@ import {
   Chip,
   Spinner,
 } from '@heroui/react';
+import { useTranslations } from 'next-intl';
 import type { Order } from '@/types/orders';
 
 const statusColorMap: Record<
@@ -45,18 +46,19 @@ export function RecentOrdersTable({
   isLoading,
   onOrderClick,
 }: RecentOrdersTableProps) {
+  const t = useTranslations('dashboard.recentOrders');
   return (
-    <Table aria-label="Recent orders table">
+    <Table aria-label={t('tableAria')}>
       <TableHeader>
-        <TableColumn>Order #</TableColumn>
-        <TableColumn>Customer</TableColumn>
-        <TableColumn>Amount</TableColumn>
-        <TableColumn>Status</TableColumn>
-        <TableColumn>Payment</TableColumn>
-        <TableColumn>Date</TableColumn>
+        <TableColumn>{t('orderNo')}</TableColumn>
+        <TableColumn>{t('customer')}</TableColumn>
+        <TableColumn>{t('amount')}</TableColumn>
+        <TableColumn>{t('status')}</TableColumn>
+        <TableColumn>{t('payment')}</TableColumn>
+        <TableColumn>{t('date')}</TableColumn>
       </TableHeader>
       <TableBody
-        emptyContent={isLoading ? 'Loading...' : 'No orders found'}
+        emptyContent={isLoading ? t('loading') : t('empty')}
         isLoading={isLoading}
         loadingContent={<Spinner color="primary" />}
       >
@@ -73,7 +75,7 @@ export function RecentOrdersTable({
               <div className="flex flex-col">
                 <p className="font-semibold">{order.customer_name}</p>
                 <p className="text-small text-default-500">
-                  {order.customer_phone || 'N/A'}
+                  {order.customer_phone || t('naPhone')}
                 </p>
               </div>
             </TableCell>

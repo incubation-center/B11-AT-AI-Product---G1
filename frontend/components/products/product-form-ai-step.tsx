@@ -1,6 +1,7 @@
 // Feature component — Product Form AI Step
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Input, Spinner } from '@heroui/react';
 import { AlertCircle, Zap } from 'lucide-react';
 
@@ -18,19 +19,15 @@ export function ProductFormAiStep({
   onAiAnswerChange,
   isLoading,
 }: ProductFormAiStepProps) {
+  const t = useTranslations('products.form.ai');
   return (
     <div className="space-y-6">
       {/* AI Review Header */}
       <div className="rounded-lg border border-default-300 bg-default-50 p-5 flex items-start gap-3">
         <Zap className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-default-900">
-            AI-Powered Product Review
-          </p>
-          <p className="text-xs text-default-600 mt-1">
-            Answer a few quick questions to help our AI system optimize your
-            product listing for better visibility and sales.
-          </p>
+          <p className="text-sm font-semibold text-default-900">{t('title')}</p>
+          <p className="text-xs text-default-600 mt-1">{t('description')}</p>
         </div>
       </div>
 
@@ -41,8 +38,8 @@ export function ProductFormAiStep({
             <p className="text-sm font-medium text-default-900">{aiQuestion}</p>
           </div>
           <Input
-            placeholder="Type your answer here..."
-            aria-label="Answer to AI question"
+            placeholder={t('answerPlaceholder')}
+            aria-label={t('answerAria')}
             value={aiAnswer}
             onValueChange={onAiAnswerChange}
             isDisabled={isLoading}
@@ -57,14 +54,8 @@ export function ProductFormAiStep({
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-8">
-          <Spinner
-            size="lg"
-            color="current"
-            label="Processing your product..."
-          />
-          <p className="text-sm text-default-500 mt-4">
-            This may take a few moments...
-          </p>
+          <Spinner size="lg" color="current" label={t('processing')} />
+          <p className="text-sm text-default-500 mt-4">{t('processingHint')}</p>
         </div>
       )}
 
@@ -72,9 +63,7 @@ export function ProductFormAiStep({
       {aiQuestion && !aiAnswer.trim() && (
         <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
           <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-red-700">
-            Please answer the question to continue.
-          </p>
+          <p className="text-xs text-red-700">{t('answerRequired')}</p>
         </div>
       )}
     </div>

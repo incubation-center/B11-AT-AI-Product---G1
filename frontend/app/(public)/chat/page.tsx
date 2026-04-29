@@ -1,10 +1,15 @@
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { GlobalAiSearch } from '@/components/global-search/global-ai-search';
 
-export const metadata = {
-  title: 'Ask Coolhat — AI Product Discovery',
-  description:
-    'Search for products across all Coolhat SME stores using AI. Describe what you need and get instant, personalized recommendations with direct store links.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('meta');
+
+  return {
+    title: t('chatTitle'),
+    description: t('chatDescription'),
+  };
+}
 
 export default function ChatPage() {
   return <GlobalAiSearch />;

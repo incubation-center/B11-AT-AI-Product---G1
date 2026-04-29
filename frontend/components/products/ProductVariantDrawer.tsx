@@ -157,7 +157,12 @@ export function ProductVariantDrawer({
   };
 
   const handleDelete = async (v: ProductVariant) => {
-    if (!confirm(`Remove variant "${[v.size, v.color].filter(Boolean).join(' / ') || 'this variant'}"?`)) return;
+    if (
+      !confirm(
+        `Remove variant "${[v.size, v.color].filter(Boolean).join(' / ') || 'this variant'}"?`,
+      )
+    )
+      return;
     try {
       await deactivateVariant(v.id);
       setLocalVariants((prev) => prev.filter((x) => x.id !== v.id));
@@ -213,9 +218,12 @@ export function ProductVariantDrawer({
                   className="flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{product.name}</p>
+                  <p className="text-sm font-semibold truncate">
+                    {product.name}
+                  </p>
                   <p className="text-xs text-default-400 font-normal">
-                    {product.category || 'Uncategorised'} &mdash; base ${product.base_price_usd || '—'}
+                    {product.category || 'Uncategorised'} &mdash; base $
+                    {product.base_price_usd || '—'}
                   </p>
                 </div>
                 <Chip
@@ -233,13 +241,15 @@ export function ProductVariantDrawer({
 
             <ModalBody>
               <ScrollShadow className="px-6 py-5 space-y-5">
-
                 {/* Enable Variants Toggle */}
                 <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-default-50 border border-default-200">
                   <div>
-                    <p className="text-sm font-semibold">Product has variants</p>
+                    <p className="text-sm font-semibold">
+                      Product has variants
+                    </p>
                     <p className="text-xs text-default-500 mt-0.5">
-                      Enable to manage size, colour, or other options with individual prices &amp; stock.
+                      Enable to manage size, colour, or other options with
+                      individual prices &amp; stock.
                     </p>
                   </div>
                   <Switch
@@ -258,7 +268,9 @@ export function ProductVariantDrawer({
                       <p className="text-sm font-semibold text-default-700">
                         Variants
                         {variants.length > 0 && (
-                          <span className="ml-2 text-default-400 font-normal">({variants.length})</span>
+                          <span className="ml-2 text-default-400 font-normal">
+                            ({variants.length})
+                          </span>
                         )}
                       </p>
                       {!isEditing && (
@@ -277,7 +289,10 @@ export function ProductVariantDrawer({
                     {/* Error banner */}
                     {error && (
                       <div className="flex gap-2 p-3 rounded-lg bg-danger-50 border border-danger-200 text-danger-700">
-                        <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                        <AlertCircle
+                          size={16}
+                          className="flex-shrink-0 mt-0.5"
+                        />
                         <p className="text-xs">{error}</p>
                       </div>
                     )}
@@ -297,10 +312,16 @@ export function ProductVariantDrawer({
                     {/* Variants List */}
                     {variants.length === 0 && editingId !== 'new' ? (
                       <div className="text-center py-10 border border-dashed border-default-300 rounded-xl bg-default-50">
-                        <Layers size={32} className="mx-auto text-default-300 mb-2" />
-                        <p className="text-sm text-default-500 font-medium">No variants yet</p>
+                        <Layers
+                          size={32}
+                          className="mx-auto text-default-300 mb-2"
+                        />
+                        <p className="text-sm text-default-500 font-medium">
+                          No variants yet
+                        </p>
                         <p className="text-xs text-default-400 mt-1">
-                          Click <strong>Add Variant</strong> to create your first one.
+                          Click <strong>Add Variant</strong> to create your
+                          first one.
                         </p>
                       </div>
                     ) : (
@@ -334,10 +355,14 @@ export function ProductVariantDrawer({
 
                 {!hasVariants && (
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-100">
-                    <AlertCircle size={16} className="text-blue-500 flex-shrink-0 mt-0.5" />
+                    <AlertCircle
+                      size={16}
+                      className="text-blue-500 flex-shrink-0 mt-0.5"
+                    />
                     <p className="text-xs text-blue-700">
-                      Toggle <strong>Product has variants</strong> above to start managing sizes,
-                      colours or other options for this product.
+                      Toggle <strong>Product has variants</strong> above to
+                      start managing sizes, colours or other options for this
+                      product.
                     </p>
                   </div>
                 )}
@@ -368,7 +393,13 @@ interface VariantRowProps {
   disabled: boolean;
 }
 
-function VariantRow({ variant, label, onEdit, onDelete, disabled }: VariantRowProps) {
+function VariantRow({
+  variant,
+  label,
+  onEdit,
+  onDelete,
+  disabled,
+}: VariantRowProps) {
   const hasPrice = !!variant.price_override_usd;
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-default-200 bg-content1 hover:bg-default-50 transition-colors group">
@@ -385,7 +416,8 @@ function VariantRow({ variant, label, onEdit, onDelete, disabled }: VariantRowPr
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium">{label}</p>
         <p className="text-xs text-default-400">
-          {hasPrice ? `$${variant.price_override_usd}` : 'Base price'} &nbsp;·&nbsp; {variant.stock_qty} in stock
+          {hasPrice ? `$${variant.price_override_usd}` : 'Base price'}{' '}
+          &nbsp;·&nbsp; {variant.stock_qty} in stock
         </p>
       </div>
 
@@ -490,10 +522,22 @@ function VariantInlineForm({
         />
       </div>
       <div className="flex justify-end gap-2">
-        <Button size="sm" variant="light" onPress={onCancel} isDisabled={saving} startContent={<X size={13} />}>
+        <Button
+          size="sm"
+          variant="light"
+          onPress={onCancel}
+          isDisabled={saving}
+          startContent={<X size={13} />}
+        >
           Cancel
         </Button>
-        <Button size="sm" color="primary" onPress={onSave} isLoading={saving} startContent={!saving ? <Check size={13} /> : undefined}>
+        <Button
+          size="sm"
+          color="primary"
+          onPress={onSave}
+          isLoading={saving}
+          startContent={!saving ? <Check size={13} /> : undefined}
+        >
           {isNew ? 'Add' : 'Save'}
         </Button>
       </div>

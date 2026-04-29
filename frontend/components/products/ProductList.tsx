@@ -1,5 +1,4 @@
-// Feature component — Product List Table
-'use client';
+﻿'use client';
 
 import {
   Table,
@@ -20,6 +19,7 @@ import {
 } from '@heroui/react';
 import { Edit, MoreVertical, Layers } from 'lucide-react';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import type { Product } from '@/lib/products';
 
 interface ProductListProps {
@@ -47,14 +47,16 @@ export function ProductList({
   totalPages = 1,
   onPageChange,
 }: ProductListProps) {
+  const t = useTranslations('products');
+
   const columns = [
-    { key: 'product', label: 'Product' },
-    { key: 'category', label: 'Category' },
-    { key: 'pricing', label: 'Pricing' },
-    { key: 'stock', label: 'Stock' },
-    { key: 'variants', label: 'Variants' },
-    { key: 'status', label: 'Status' },
-    { key: 'actions', label: 'Actions' },
+    { key: 'product', label: t('table.product') },
+    { key: 'category', label: t('table.category') },
+    { key: 'pricing', label: t('table.pricing') },
+    { key: 'stock', label: t('table.stock') },
+    { key: 'variants', label: t('table.variants') },
+    { key: 'status', label: t('table.status') },
+    { key: 'actions', label: t('table.actions') },
   ];
 
   const renderCell = (product: Product, columnKey: string | number) => {
@@ -65,7 +67,7 @@ export function ProductList({
           <User
             avatarProps={{
               src: product.image_urls?.[0] || undefined,
-              fallback: '📦',
+              fallback: 'P',
               size: 'md',
             }}
             description={product.description?.slice(0, 50)}
@@ -75,7 +77,7 @@ export function ProductList({
 
       case 'category':
         return (
-          <p className="text-sm text-default-600">{product.category || '—'}</p>
+          <p className="text-sm text-default-600">{product.category || '-'}</p>
         );
 
       case 'pricing':
@@ -83,7 +85,7 @@ export function ProductList({
           <div className="space-y-1">
             <p className="text-sm font-medium">${product.base_price_usd}</p>
             <p className="text-xs text-default-500">
-              {product.base_price_khr}៛
+              {product.base_price_khr} KHR
             </p>
           </div>
         );
@@ -96,7 +98,9 @@ export function ProductList({
         return (
           <div className="space-y-1">
             {product.has_variants ? (
-              <p className="text-xs text-default-400 italic">Per variant</p>
+              <p className="text-xs text-default-400 italic">
+                {t('perVariant')}
+              </p>
             ) : (
               <>
                 <p className="text-sm font-medium">{product.stock_qty}</p>
@@ -107,7 +111,7 @@ export function ProductList({
                     variant="flat"
                     className="text-xs"
                   >
-                    Low Stock
+                    {t('lowStock')}
                   </Chip>
                 )}
               </>
@@ -118,14 +122,14 @@ export function ProductList({
 
       case 'variants': {
         if (!product.has_variants) {
-          return <p className="text-xs text-default-400">—</p>;
+          return <p className="text-xs text-default-400">-</p>;
         }
         const count = product.variants?.length ?? 0;
         return (
-          <Tooltip content="Open Variant Manager">
+          <Tooltip content={t('actions.openVariantManager')}>
             <button
               onClick={() => onManageVariants(product)}
-              aria-label={`Manage variants for ${product.name}`}
+              aria-label={`${t('actions.manageVariantsFor')} ${product.name}`}
               className="group"
             >
               <Chip
@@ -135,7 +139,7 @@ export function ProductList({
                 startContent={<Layers size={11} className="ml-1" />}
                 className="cursor-pointer group-hover:bg-secondary-200 transition-colors"
               >
-                {count} {count === 1 ? 'variant' : 'variants'}
+                {count} {count === 1 ? t('variant') : t('variants')}
               </Chip>
             </button>
           </Tooltip>
@@ -145,21 +149,21 @@ export function ProductList({
       case 'status':
         return product.is_active ? (
           <Chip size="sm" variant="flat" color="success" className="capitalize">
-            Active
+            {t('active')}
           </Chip>
         ) : (
           <Chip size="sm" variant="flat" color="default" className="capitalize">
-            Inactive
+            {t('inactive')}
           </Chip>
         );
 
       case 'actions':
         return (
           <div className="relative flex items-center gap-1">
-            <Tooltip content="Edit product details">
+            <Tooltip content={t('actions.editProductDetails')}>
               <button
                 onClick={() => onEdit(product)}
-                aria-label={`Edit ${product.name}`}
+                aria-label={`${t('actions.edit')} ${product.name}`}
                 className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors p-1 rounded"
               >
                 <Edit size={16} />
@@ -167,10 +171,10 @@ export function ProductList({
             </Tooltip>
 
             {product.has_variants && (
-              <Tooltip content="Manage variants">
+              <Tooltip content={t('actions.manageVariants')}>
                 <button
                   onClick={() => onManageVariants(product)}
-                  aria-label={`Manage variants for ${product.name}`}
+                  aria-label={`${t('actions.manageVariantsFor')} ${product.name}`}
                   className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-secondary transition-colors p-1 rounded"
                 >
                   <Layers size={16} />
@@ -184,22 +188,22 @@ export function ProductList({
                   isIconOnly
                   size="sm"
                   variant="light"
-                  aria-label={`More options for ${product.name}`}
+                  aria-label={`${t('actions.moreOptionsFor')} ${product.name}`}
                 >
                   <MoreVertical size={16} />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
-                onAction={(key) => {
-                  if (key === 'delete') {
-                    if (confirm('Deactivate this product?')) {
+                onAction={(actionKey) => {
+                  if (actionKey === 'delete') {
+                    if (confirm(t('actions.confirmDeactivate'))) {
                       onDelete(product.id);
                     }
-                  } else if (key === 'restore') {
+                  } else if (actionKey === 'restore') {
                     onRestore(product.id);
-                  } else if (key === 'sync') {
+                  } else if (actionKey === 'sync') {
                     onSync(product.id);
-                  } else if (key === 'variants') {
+                  } else if (actionKey === 'variants') {
                     onManageVariants(product);
                   }
                 }}
@@ -207,33 +211,32 @@ export function ProductList({
                 {product.has_variants ? (
                   <DropdownItem
                     key="variants"
-                    description="Add, edit or remove variants"
+                    description={t('actions.variantsDesc')}
                     startContent={<Layers size={14} />}
                   >
-                    Manage Variants
+                    {t('actions.manageVariants')}
                   </DropdownItem>
-                ) : null as unknown as React.ReactElement}
-                <DropdownItem
-                  key="sync"
-                  description="Sync with AI Assistant indexing"
-                >
-                  Sync to AI
+                ) : (
+                  (null as unknown as React.ReactElement)
+                )}
+                <DropdownItem key="sync" description={t('actions.syncDesc')}>
+                  {t('actions.syncToAi')}
                 </DropdownItem>
                 {product.is_active ? (
                   <DropdownItem
                     key="delete"
                     color="danger"
-                    description="Mark as inactive"
+                    description={t('actions.markInactive')}
                   >
-                    Deactivate
+                    {t('actions.deactivate')}
                   </DropdownItem>
                 ) : (
                   <DropdownItem
                     key="restore"
                     color="success"
-                    description="Mark as active"
+                    description={t('actions.markActive')}
                   >
-                    Restore
+                    {t('actions.restore')}
                   </DropdownItem>
                 )}
               </DropdownMenu>
@@ -248,7 +251,7 @@ export function ProductList({
 
   const bottomContent = React.useMemo(() => {
     if (totalPages <= 1 && products.length === 0) return null;
-    
+
     return (
       <div className="py-2 px-2 flex justify-end items-center">
         <Pagination
@@ -268,21 +271,19 @@ export function ProductList({
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
         <div className="text-center">
-          <div className="text-6xl mb-4">📦</div>
+          <div className="text-6xl mb-4">P</div>
           <h3 className="text-lg font-semibold text-default-900">
-            No products yet
+            {t('empty.title')}
           </h3>
-          <p className="text-sm text-default-500 mt-1">
-            Create your first product to get started
-          </p>
+          <p className="text-sm text-default-500 mt-1">{t('empty.subtitle')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <Table 
-      aria-label="Products table"
+    <Table
+      aria-label={t('tableAria')}
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
     >

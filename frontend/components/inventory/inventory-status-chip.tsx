@@ -9,17 +9,34 @@ interface InventoryStatusChipProps {
   threshold: number;
 }
 
-const statusColorMap: Record<string, "warning" | "success" | "danger" | "default" | "primary" | "secondary" | undefined> = {
-  low: "warning",
-  healthy: "success",
-  out: "danger",
+const statusColorMap: Record<
+  string,
+  | 'warning'
+  | 'success'
+  | 'danger'
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | undefined
+> = {
+  low: 'warning',
+  healthy: 'success',
+  out: 'danger',
 };
 
-export function InventoryStatusChip({ stock, threshold }: InventoryStatusChipProps) {
-  const status = stock <= 0 ? "out" : stock <= threshold ? "low" : "healthy";
-  const label = status === "out" ? "Out of Stock" : status === "low" ? "Low Stock" : "Healthy";
-  const Icon = status === "healthy" ? CheckCircle2 : AlertTriangle;
-  
+export function InventoryStatusChip({
+  stock,
+  threshold,
+}: InventoryStatusChipProps) {
+  const status = stock <= 0 ? 'out' : stock <= threshold ? 'low' : 'healthy';
+  const label =
+    status === 'out'
+      ? 'Out of Stock'
+      : status === 'low'
+        ? 'Low Stock'
+        : 'Healthy';
+  const Icon = status === 'healthy' ? CheckCircle2 : AlertTriangle;
+
   return (
     <Chip
       className="capitalize"

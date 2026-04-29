@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardHeader, 
-  CardBody, 
-  Input, 
-  Button, 
-  Select, 
-  SelectItem, 
+import { useTranslations } from 'next-intl';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Input,
+  Button,
+  Select,
+  SelectItem,
   Divider,
 } from '@heroui/react';
 import { Store, Palette, Image as ImageIcon, ExternalLink } from 'lucide-react';
@@ -44,10 +45,13 @@ export function StoreSettings({
   onUpdateStore,
   isUpdatingStore,
   onUploadAsset,
-  isUploadingAsset
+  isUploadingAsset,
 }: StoreSettingsProps) {
+  const t = useTranslations('settings.store');
   const [shopName, setShopName] = useState(tenant?.shopName || '');
-  const [shopDescription, setShopDescription] = useState(tenant?.description || '');
+  const [shopDescription, setShopDescription] = useState(
+    tenant?.description || '',
+  );
   const [shopType, setShopType] = useState(tenant?.shopType || '');
   const [selectedTemplate, setSelectedTemplate] = useState(
     normalizeStorefrontTheme(tenant?.storefrontTemplate),
@@ -69,7 +73,7 @@ export function StoreSettings({
     } catch (error) {
       setSelectedTemplate(previousTemplate);
       setThemeSaveError(
-        error instanceof Error ? error.message : 'Unable to save storefront theme.',
+        error instanceof Error ? error.message : t('unableSaveTheme'),
       );
     }
   };
@@ -85,7 +89,7 @@ export function StoreSettings({
       });
     } catch (error) {
       setThemeSaveError(
-        error instanceof Error ? error.message : 'Unable to update store settings.',
+        error instanceof Error ? error.message : t('unableUpdateStore'),
       );
     }
   };
@@ -98,19 +102,20 @@ export function StoreSettings({
             <Palette size={20} />
           </div>
           <div className="flex flex-col">
-            <p className="text-md font-bold">Branding & Theme</p>
-            <p className="text-small text-default-500">Customize how your store looks to buyers.</p>
+            <p className="text-md font-bold">{t('brandingTheme')}</p>
+            <p className="text-small text-default-500">
+              {t('brandingThemeDesc')}
+            </p>
           </div>
         </CardHeader>
-        <Divider/>
+        <Divider />
         <CardBody className="gap-8 py-6 font-semibold shadow-sm">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               <div className="space-y-1">
-                <p className="text-sm">Storefront Theme</p>
+                <p className="text-sm">{t('storefrontTheme')}</p>
                 <p className="text-xs font-medium text-default-500">
-                  Pick with a visual layout preview. The logo and cover spots
-                  below mirror your live storefront structure.
+                  {t('storefrontThemeDesc')}
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -122,18 +127,20 @@ export function StoreSettings({
                     onSelect={handleSelectTemplate}
                     logoUrl={tenant?.logoUrl}
                     bannerUrl={tenant?.bannerUrl}
-                    shopName={shopName || tenant?.shopName || 'Your Store'}
+                    shopName={shopName || tenant?.shopName || t('yourStore')}
                   />
                 ))}
               </div>
               {themeSaveError ? (
-                <p className="text-sm font-medium text-danger">{themeSaveError}</p>
+                <p className="text-sm font-medium text-danger">
+                  {themeSaveError}
+                </p>
               ) : null}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
               <div className="flex flex-col gap-3">
-                <p className="text-sm">Store Logo</p>
+                <p className="text-sm">{t('storeLogo')}</p>
                 <div className="relative group">
                   <div className="relative w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
                     {tenant?.logoUrl ? (
@@ -149,13 +156,16 @@ export function StoreSettings({
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <label className="cursor-pointer bg-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                        {isUploadingAsset ? 'Uploading...' : 'Change Logo'}
-                        <input 
-                          type="file" 
-                          className="hidden" 
+                        {isUploadingAsset ? t('uploading') : t('changeLogo')}
+                        <input
+                          type="file"
+                          className="hidden"
                           accept="image/*"
                           disabled={isUploadingAsset}
-                          onChange={(e) => e.target.files?.[0] && onUploadAsset('logo', e.target.files[0])}
+                          onChange={(e) =>
+                            e.target.files?.[0] &&
+                            onUploadAsset('logo', e.target.files[0])
+                          }
                         />
                       </label>
                     </div>
@@ -164,10 +174,10 @@ export function StoreSettings({
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-sm">Banner Image</p>
+                <p className="text-sm">{t('bannerImage')}</p>
                 <div className="relative group">
                   <div className="relative w-full h-32 bg-default-50 rounded-xl border-2 border-dashed border-default-200 flex flex-col items-center justify-center overflow-hidden">
-                  {tenant?.bannerUrl ? (
+                    {tenant?.bannerUrl ? (
                       <Image
                         src={tenant.bannerUrl}
                         alt="Banner"
@@ -180,13 +190,16 @@ export function StoreSettings({
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <label className="cursor-pointer bg-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                        {isUploadingAsset ? 'Uploading...' : 'Upload Banner'}
-                        <input 
-                          type="file" 
-                          className="hidden" 
+                        {isUploadingAsset ? t('uploading') : t('uploadBanner')}
+                        <input
+                          type="file"
+                          className="hidden"
                           accept="image/*"
                           disabled={isUploadingAsset}
-                          onChange={(e) => e.target.files?.[0] && onUploadAsset('banner', e.target.files[0])}
+                          onChange={(e) =>
+                            e.target.files?.[0] &&
+                            onUploadAsset('banner', e.target.files[0])
+                          }
                         />
                       </label>
                     </div>
@@ -204,64 +217,66 @@ export function StoreSettings({
             <Store size={20} />
           </div>
           <div className="flex flex-col">
-            <p className="text-md font-bold">Store Details</p>
-            <p className="text-small text-default-500">Manage your business profile and location.</p>
+            <p className="text-md font-bold">{t('storeDetails')}</p>
+            <p className="text-small text-default-500">
+              {t('storeDetailsDesc')}
+            </p>
           </div>
         </CardHeader>
-        <Divider/>
+        <Divider />
         <CardBody className="gap-6 py-6 font-semibold shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             <Input
-              label="Shop Name"
+              label={t('shopName')}
               variant="bordered"
               value={shopName}
               onValueChange={setShopName}
             />
             <Select
-              label="Business Category"
+              label={t('businessCategory')}
               variant="bordered"
               selectedKeys={[shopType]}
-              onSelectionChange={(keys) => setShopType(Array.from(keys)[0] as string)}
+              onSelectionChange={(keys) =>
+                setShopType(Array.from(keys)[0] as string)
+              }
             >
               {SHOP_CATEGORIES.map((cat) => (
-                <SelectItem key={cat.id}>
-                  {cat.name}
-                </SelectItem>
+                <SelectItem key={cat.id}>{cat.name}</SelectItem>
               ))}
             </Select>
             <Input
-              label="Public Subdomain"
+              label={t('publicSubdomain')}
               value={tenant?.subdomain || ''}
               variant="flat"
               isReadOnly
               description={
                 tenant?.storeUrl && (
-                  <a 
-                    href={tenant.storeUrl} 
-                    target="_blank" 
+                  <a
+                    href={tenant.storeUrl}
+                    target="_blank"
                     rel="noreferrer"
                     className="text-[#002e6b] flex items-center gap-1 mt-1 hover:underline"
                   >
-                    Visit Store <ExternalLink size={12} />
+                    {t('visitStore')} <ExternalLink size={12} />
                   </a>
                 )
               }
             />
             <Input
-              label="Shop Description"
+              label={t('shopDescription')}
               variant="bordered"
               value={shopDescription}
               onValueChange={setShopDescription}
             />
           </div>
           <div className="flex justify-end mt-2">
-            <Button 
-              color="primary" 
+            <Button
+              color="primary"
               className="bg-[#002e6b]"
               onPress={handleUpdateStore}
               isLoading={isUpdatingStore}
             >
-              Update Store
+              {t('updateStore')}
             </Button>
           </div>
         </CardBody>

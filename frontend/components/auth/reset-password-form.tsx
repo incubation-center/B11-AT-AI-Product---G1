@@ -14,7 +14,10 @@ interface ResetPasswordFormProps {
   initialEmail?: string;
 }
 
-export function ResetPasswordForm({ token, initialEmail }: ResetPasswordFormProps) {
+export function ResetPasswordForm({
+  token,
+  initialEmail,
+}: ResetPasswordFormProps) {
   const router = useRouter();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');

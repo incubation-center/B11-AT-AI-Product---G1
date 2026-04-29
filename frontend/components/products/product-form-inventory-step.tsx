@@ -1,6 +1,7 @@
 // Feature component — Product Form Inventory Step
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Input, Checkbox } from '@heroui/react';
 
 interface ProductFormInventoryStepProps {
@@ -22,6 +23,7 @@ export function ProductFormInventoryStep({
   onLowStockChange,
   isLoading,
 }: ProductFormInventoryStepProps) {
+  const t = useTranslations('products.form.inventory');
   return (
     <div className="space-y-6">
       {/* Track Inventory Toggle */}
@@ -29,7 +31,7 @@ export function ProductFormInventoryStep({
         <div className="flex items-start space-x-3">
           <Checkbox
             id="track-inventory"
-            aria-label="Enable inventory tracking"
+            aria-label={t('enableTrackingAria')}
             isSelected={trackInventory}
             onValueChange={onTrackInventoryChange}
             isDisabled={isLoading}
@@ -42,11 +44,10 @@ export function ProductFormInventoryStep({
               htmlFor="track-inventory"
               className="text-sm font-semibold text-default-900 cursor-pointer"
             >
-              Track Inventory
+              {t('trackInventory')}
             </label>
             <p className="text-xs text-default-500">
-              Enable inventory tracking to monitor stock levels and receive
-              low-stock alerts.
+              {t('trackInventoryHelp')}
             </p>
           </div>
         </div>
@@ -63,12 +64,12 @@ export function ProductFormInventoryStep({
             htmlFor="stock-qty"
             className="text-sm font-semibold text-default-900"
           >
-            Current Stock <span className="text-red-500">*</span>
+            {t('currentStock')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="stock-qty"
             type="number"
-            aria-label="Current Stock"
+            aria-label={t('currentStockAria')}
             min="0"
             placeholder="0"
             value={stock}
@@ -88,12 +89,12 @@ export function ProductFormInventoryStep({
             htmlFor="low-stock-threshold"
             className="text-sm font-semibold text-default-900"
           >
-            Low Stock Threshold <span className="text-red-500">*</span>
+            {t('lowStockThreshold')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="low-stock-threshold"
             type="number"
-            aria-label="Low Stock Threshold"
+            aria-label={t('lowStockThresholdAria')}
             min="0"
             placeholder="5"
             value={lowStock}

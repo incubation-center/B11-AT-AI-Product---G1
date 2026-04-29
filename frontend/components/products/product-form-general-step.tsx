@@ -1,6 +1,7 @@
 // Feature component — Product Form General Step
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Input, Textarea } from '@heroui/react';
 
 interface ProductFormGeneralStepProps {
@@ -30,6 +31,7 @@ export function ProductFormGeneralStep({
   onPriceKhrChange,
   isLoading,
 }: ProductFormGeneralStepProps) {
+  const t = useTranslations('products.form.general');
   return (
     <div className="space-y-6">
       {/* Product Name & Category */}
@@ -39,13 +41,13 @@ export function ProductFormGeneralStep({
             htmlFor="product-name"
             className="text-sm font-semibold text-default-900"
           >
-            Product Name <span className="text-red-500">*</span>
+            {t('productName')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="product-name"
             isClearable
-            aria-label="Product name"
-            placeholder="e.g. Classic White T-Shirt"
+            aria-label={t('productNameAria')}
+            placeholder={t('productNamePlaceholder')}
             value={name}
             onValueChange={onNameChange}
             isDisabled={isLoading}
@@ -63,13 +65,13 @@ export function ProductFormGeneralStep({
             htmlFor="category"
             className="text-sm font-semibold text-default-900"
           >
-            Category <span className="text-red-500">*</span>
+            {t('category')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="category"
             isClearable
-            aria-label="Category"
-            placeholder="e.g. Apparel"
+            aria-label={t('categoryAria')}
+            placeholder={t('categoryPlaceholder')}
             value={category}
             onValueChange={onCategoryChange}
             isDisabled={isLoading}
@@ -90,12 +92,12 @@ export function ProductFormGeneralStep({
           htmlFor="description"
           className="text-sm font-semibold text-default-900"
         >
-          Description <span className="text-red-500">*</span>
+          {t('description')} <span className="text-red-500">*</span>
         </label>
         <Textarea
           id="description"
-          aria-label="Description"
-          placeholder="Provide a detailed product description..."
+          aria-label={t('descriptionAria')}
+          placeholder={t('descriptionPlaceholder')}
           value={description}
           onValueChange={onDescriptionChange}
           isDisabled={isLoading}
@@ -116,12 +118,12 @@ export function ProductFormGeneralStep({
             htmlFor="price-usd"
             className="text-sm font-semibold text-default-900"
           >
-            Price (USD) <span className="text-red-500">*</span>
+            {t('priceUsd')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="price-usd"
             type="number"
-            aria-label="Price in USD"
+            aria-label={t('priceUsdAria')}
             placeholder="0.00"
             value={priceUsd}
             onValueChange={onPriceUsdChange}
@@ -141,12 +143,12 @@ export function ProductFormGeneralStep({
             htmlFor="price-khr"
             className="text-sm font-semibold text-default-900"
           >
-            Price (KHR) <span className="text-red-500">*</span>
+            {t('priceKhr')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="price-khr"
             type="number"
-            aria-label="Price in KHR"
+            aria-label={t('priceKhrAria')}
             placeholder="0.00"
             value={priceKhr}
             onValueChange={onPriceKhrChange}

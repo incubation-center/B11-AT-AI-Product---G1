@@ -8,8 +8,12 @@ export function SearchHeader() {
           <Sparkles size={14} className="text-white" />
         </div>
         <div>
-          <p className="text-sm font-semibold leading-none text-white">Ask Coolhat</p>
-          <p className="mt-0.5 text-[11px] text-white/40">AI-powered product discovery</p>
+          <p className="text-sm font-semibold leading-none text-white">
+            Ask Coolhat
+          </p>
+          <p className="mt-0.5 text-[11px] text-white/40">
+            AI-powered product discovery
+          </p>
         </div>
       </div>
       <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/50">

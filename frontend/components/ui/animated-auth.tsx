@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import NextLink from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -584,6 +585,8 @@ export function AnimatedAuthLayout({
   password,
   showPassword,
 }: AnimatedAuthLayoutProps) {
+  const t = useTranslations('common');
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-gradient-to-br from-[#002e6b] via-[#0a4b93] to-[#003d8f] p-12 text-white lg:flex lg:flex-col lg:justify-between">
@@ -614,13 +617,13 @@ export function AnimatedAuthLayout({
 
         <div className="relative z-20 flex items-center gap-8 text-sm text-white/60">
           <a href="#" className="transition-colors hover:text-white">
-            Privacy Policy
+            {t('privacyPolicy')}
           </a>
           <a href="#" className="transition-colors hover:text-white">
-            Terms of Service
+            {t('termsOfService')}
           </a>
           <a href="#" className="transition-colors hover:text-white">
-            Contact
+            {t('contact')}
           </a>
         </div>
 
@@ -648,6 +651,7 @@ export function AnimatedSignIn({
   isPending,
   signUpHref = '/sign-up',
 }: SignInPageProps) {
+  const t = useTranslations('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -676,14 +680,12 @@ export function AnimatedSignIn({
 
         <div className="mb-10 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#c61c2f]">
-            Sign in
+            {t('signIn')}
           </p>
           <h1 className="mb-2 text-3xl font-bold tracking-tight text-[#002e6b]">
-            Welcome back!
+            {t('welcomeBack')}
           </h1>
-          <p className="text-sm text-black">
-            Enter your account details to continue
-          </p>
+          <p className="text-sm text-black">{t('continueWithAccount')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -692,12 +694,12 @@ export function AnimatedSignIn({
               htmlFor="email"
               className="py-2 text-md font-medium text-black"
             >
-              Email
+              {t('email')}
             </Label>
             <Input
               id="email"
               type="email"
-              placeholder="owner@shop.com"
+              placeholder={t('ownerEmailPlaceholder')}
               value={email}
               autoComplete="off"
               onChange={(event) => setEmail(event.target.value)}
@@ -713,7 +715,7 @@ export function AnimatedSignIn({
               htmlFor="password"
               className="py-2 text-md font-medium text-black"
             >
-              Password
+              {t('password')}
             </Label>
             <div className="relative">
               <Input
@@ -738,7 +740,9 @@ export function AnimatedSignIn({
                   setShowPassword(nextShowPassword);
                   authAnimation.schedulePurplePeek(password, nextShowPassword);
                 }}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={
+                  showPassword ? t('hidePassword') : t('showPassword')
+                }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
               >
                 {showPassword ? (
@@ -757,14 +761,14 @@ export function AnimatedSignIn({
                 htmlFor="remember"
                 className="cursor-pointer text-md font-normal text-black"
               >
-                Remember for 30 days
+                {t('remember30Days')}
               </Label>
             </div>
             <a
               href="/forgot-password"
               className="text-sm font-medium text-[#c61c2f] hover:underline"
             >
-              Forgot password?
+              {t('forgotPassword')}
             </a>
           </div>
 
@@ -779,17 +783,17 @@ export function AnimatedSignIn({
             className="h-12 w-full rounded-xl bg-[#002e6b] text-base font-medium text-white hover:bg-[#003d8f]"
             disabled={isPending}
           >
-            {isPending ? 'Signing in...' : 'Sign in'}
+            {isPending ? t('signingIn') : t('signIn')}
           </Button>
         </form>
 
         <p className="mt-8 text-center text-sm text-black">
-          Don&apos;t have an account?{' '}
+          {t('dontHaveAccount')}{' '}
           <a
             href={signUpHref}
             className="font-semibold text-[#c61c2f] hover:underline"
           >
-            Sign up
+            {t('signUp')}
           </a>
         </p>
       </div>
@@ -804,6 +808,7 @@ export function AnimatedSignUp({
   isPending,
   signInHref = '/sign-in',
 }: SignUpPageProps) {
+  const t = useTranslations('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -833,14 +838,12 @@ export function AnimatedSignUp({
 
         <div className="mb-10 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#c61c2f]">
-            Sign up
+            {t('signUp')}
           </p>
           <h1 className="mb-2 text-3xl font-bold tracking-tight text-[#002e6b]">
-            Create your account
+            {t('createYourAccount')}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Start your 14-day free trial - no credit card needed
-          </p>
+          <p className="text-sm text-muted-foreground">{t('freeTrial')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -849,12 +852,12 @@ export function AnimatedSignUp({
               htmlFor="name"
               className="py-2 text-md font-medium text-black"
             >
-              Full name
+              {t('fullName')}
             </Label>
             <Input
               id="name"
               type="text"
-              placeholder="John Doe"
+              placeholder={t('namePlaceholder')}
               value={name}
               onChange={(event) => setName(event.target.value)}
               onFocus={authAnimation.startTyping}
@@ -869,12 +872,12 @@ export function AnimatedSignUp({
               htmlFor="email"
               className="py-2 text-md font-medium text-black"
             >
-              Email
+              {t('email')}
             </Label>
             <Input
               id="email"
               type="email"
-              placeholder="owner@shop.com"
+              placeholder={t('ownerEmailPlaceholder')}
               value={email}
               autoComplete="off"
               onChange={(event) => setEmail(event.target.value)}
@@ -890,13 +893,13 @@ export function AnimatedSignUp({
               htmlFor="password"
               className="py-2 text-md font-medium text-black"
             >
-              Password
+              {t('password')}
             </Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="At least 8 characters"
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(event) => {
                   const nextPassword = event.target.value;
@@ -916,7 +919,9 @@ export function AnimatedSignUp({
                   setShowPassword(nextShowPassword);
                   authAnimation.schedulePurplePeek(password, nextShowPassword);
                 }}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={
+                  showPassword ? t('hidePassword') : t('showPassword')
+                }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
               >
                 {showPassword ? (
@@ -945,17 +950,17 @@ export function AnimatedSignUp({
             className="h-12 w-full rounded-xl bg-[#002e6b] text-base font-medium text-white hover:bg-[#003d8f]"
             disabled={isPending}
           >
-            {isPending ? 'Creating account...' : 'Create account'}
+            {isPending ? t('creatingAccount') : t('createAccount')}
           </Button>
         </form>
 
         <p className="mt-8 text-center text-sm text-black">
-          Already have an account?{' '}
+          {t('alreadyHaveAccount')}{' '}
           <a
             href={signInHref}
             className="font-semibold text-[#c61c2f] hover:underline"
           >
-            Sign in
+            {t('signIn')}
           </a>
         </p>
       </div>

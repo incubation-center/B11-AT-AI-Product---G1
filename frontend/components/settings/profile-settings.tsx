@@ -1,16 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardHeader, 
-  CardBody, 
-  Input, 
-  Button, 
-  Divider, 
-  Avatar 
+import { useTranslations } from 'next-intl';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Input,
+  Button,
+  Divider,
+  Avatar,
 } from '@heroui/react';
-import { User, Mail, ShieldAlert, CheckCircle2, AlertCircle, Lock } from 'lucide-react';
+import {
+  User,
+  Mail,
+  ShieldAlert,
+  CheckCircle2,
+  AlertCircle,
+  Lock,
+} from 'lucide-react';
 import { UserProfile } from '@/lib/profile';
 
 interface ProfileSettingsProps {
@@ -30,8 +38,9 @@ export function ProfileSettings({
   onSendVerification,
   isSendingVerification,
   onRequestPasswordReset,
-  isRequestingReset
+  isRequestingReset,
 }: ProfileSettingsProps) {
+  const t = useTranslations('settings.profile');
   const [fullName, setFullName] = useState(profile?.profile?.fullName || '');
 
   return (
@@ -42,27 +51,33 @@ export function ProfileSettings({
             <User size={20} />
           </div>
           <div className="flex flex-col">
-            <p className="text-md font-bold">Personal Information</p>
-            <p className="text-small text-default-500">Update your name and contact details.</p>
+            <p className="text-md font-bold">{t('personalInfo')}</p>
+            <p className="text-small text-default-500">
+              {t('personalInfoDesc')}
+            </p>
           </div>
         </CardHeader>
-        <Divider/>
+        <Divider />
         <CardBody className="gap-6 py-6 font-semibold shadow-sm">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-            <Avatar 
-              src={profile?.email ? `https://avatar.vercel.sh/${profile.email}` : ''}
+            <Avatar
+              src={
+                profile?.email
+                  ? `https://avatar.vercel.sh/${profile.email}`
+                  : ''
+              }
               className="w-20 h-20 text-large border-2 border-white shadow-md"
             />
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <Input
-                label="Full Name"
-                placeholder="Enter your full name"
+                label={t('fullName')}
+                placeholder={t('fullNamePlaceholder')}
                 variant="bordered"
                 value={fullName}
                 onValueChange={setFullName}
               />
               <Input
-                label="Email Address"
+                label={t('emailAddress')}
                 value={profile?.email || ''}
                 variant="flat"
                 isReadOnly
@@ -71,13 +86,13 @@ export function ProfileSettings({
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-2">
-            <Button 
-              color="primary" 
+            <Button
+              color="primary"
               className="bg-[#002e6b]"
               onPress={() => onUpdateName(fullName)}
               isLoading={isUpdatingName}
             >
-              Save Name
+              {t('saveName')}
             </Button>
           </div>
         </CardBody>
@@ -89,34 +104,46 @@ export function ProfileSettings({
             <ShieldAlert size={20} />
           </div>
           <div className="flex flex-col">
-            <p className="text-md font-bold">Account Security</p>
-            <p className="text-small text-default-500">Manage email verification and password.</p>
+            <p className="text-md font-bold">{t('accountSecurity')}</p>
+            <p className="text-small text-default-500">
+              {t('accountSecurityDesc')}
+            </p>
           </div>
         </CardHeader>
-        <Divider/>
+        <Divider />
         <CardBody className="gap-6 py-6 font-semibold shadow-sm">
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between p-4 bg-default-50 rounded-xl border border-default-100">
               <div className="flex items-center gap-3">
-                <div className={profile?.emailVerified ? "text-success" : "text-warning"}>
-                  {profile?.emailVerified ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                <div
+                  className={
+                    profile?.emailVerified ? 'text-success' : 'text-warning'
+                  }
+                >
+                  {profile?.emailVerified ? (
+                    <CheckCircle2 size={20} />
+                  ) : (
+                    <AlertCircle size={20} />
+                  )}
                 </div>
                 <div>
-                  <p className="text-sm">Email Verification</p>
+                  <p className="text-sm">{t('emailVerification')}</p>
                   <p className="text-xs text-default-500">
-                    {profile?.emailVerified ? 'Your email is verified.' : 'Verify your email to secure your account.'}
+                    {profile?.emailVerified
+                      ? t('emailVerified')
+                      : t('emailNotVerified')}
                   </p>
                 </div>
               </div>
               {!profile?.emailVerified && (
-                <Button 
-                  size="sm" 
-                  variant="flat" 
+                <Button
+                  size="sm"
+                  variant="flat"
                   color="warning"
                   onPress={onSendVerification}
                   isLoading={isSendingVerification}
                 >
-                  Send Link
+                  {t('sendLink')}
                 </Button>
               )}
             </div>
@@ -127,18 +154,22 @@ export function ProfileSettings({
                   <Lock size={20} />
                 </div>
                 <div>
-                  <p className="text-sm">Password Reset</p>
-                  <p className="text-xs text-default-500">Send a password reset link to your email.</p>
+                  <p className="text-sm">{t('passwordReset')}</p>
+                  <p className="text-xs text-default-500">
+                    {t('passwordResetDesc')}
+                  </p>
                 </div>
               </div>
-              <Button 
-                size="sm" 
-                variant="flat" 
+              <Button
+                size="sm"
+                variant="flat"
                 color="primary"
-                onPress={() => profile?.email && onRequestPasswordReset(profile.email)}
+                onPress={() =>
+                  profile?.email && onRequestPasswordReset(profile.email)
+                }
                 isLoading={isRequestingReset}
               >
-                Request Reset
+                {t('requestReset')}
               </Button>
             </div>
           </div>

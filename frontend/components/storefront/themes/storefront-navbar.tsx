@@ -19,19 +19,30 @@ export function StorefrontNavbar({ store, totalItems }: StorefrontNavbarProps) {
             {store.shopType}
           </span>
           <span className="h-1 w-1 rounded-full bg-slate-300" />
-          <span className="text-base font-semibold text-slate-900">{store.shopName}</span>
+          <span className="text-base font-semibold text-slate-900">
+            {store.shopName}
+          </span>
         </Link>
 
         <div className="hidden items-center gap-5 md:flex">
-          <a href="/" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+          <Link
+            href="/"
+            className="text-sm font-semibold text-slate-700 hover:text-slate-900"
+          >
             Home
-          </a>
-          <a href="#products" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+          </Link>
+          <Link
+            href="#products"
+            className="text-sm font-semibold text-slate-700 hover:text-slate-900"
+          >
             Products
-          </a>
-          <a href="/cart" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+          </Link>
+          <Link
+            href="/cart"
+            className="text-sm font-semibold text-slate-700 hover:text-slate-900"
+          >
             Cart
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">

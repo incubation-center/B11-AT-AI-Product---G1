@@ -9,7 +9,10 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
 
   if (!body || typeof body !== 'object') {
-    return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
+    return NextResponse.json(
+      { message: 'Invalid request body' },
+      { status: 400 },
+    );
   }
 
   const candidate = body as { items?: unknown };
@@ -21,7 +24,9 @@ export async function POST(request: Request) {
   }
 
   const hostHeader =
-    request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '';
+    request.headers.get('x-forwarded-host') ??
+    request.headers.get('host') ??
+    '';
 
   const response = await fetch(`${API_URL}/checkout`, {
     method: 'POST',

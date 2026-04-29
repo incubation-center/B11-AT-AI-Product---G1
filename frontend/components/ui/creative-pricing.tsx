@@ -2,6 +2,12 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Helper function to detect if text contains Khmer characters
+function hasKhmerText(text: string): boolean {
+  const khmerRegex = /[\u1780-\u17FF]/g;
+  return khmerRegex.test(text);
+}
+
 interface PricingTier {
   name: string;
   icon: React.ReactNode;
@@ -140,14 +146,26 @@ function CreativePricing({
 
               {/* Features */}
               <div className="space-y-2 mb-6">
-                {tier.features.map((feature) => (
-                  <div key={feature} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full border-2 border-zinc-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3" />
+                {tier.features.map((feature) => {
+                  const isKhmer = hasKhmerText(feature);
+                  return (
+                    <div key={feature} className="flex items-start gap-3">
+                      <div className="w-5 h-5 rounded-full border-2 border-zinc-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3" />
+                      </div>
+                      <span
+                        className={cn(
+                          'text-zinc-800',
+                          isKhmer
+                            ? 'font-khmer text-base leading-relaxed'
+                            : 'text-sm',
+                        )}
+                      >
+                        {feature}
+                      </span>
                     </div>
-                    <span className="text-sm text-zinc-800">{feature}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <Button

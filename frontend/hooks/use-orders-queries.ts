@@ -4,7 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '@/lib/orders';
 import { queryKeys } from '@/lib/query-keys';
 
-export function useOrders(filters: { status?: string; from?: string; to?: string } = {}) {
+export function useOrders(
+  filters: { status?: string; from?: string; to?: string } = {},
+) {
   return useQuery({
     queryKey: queryKeys.orderList(filters),
     queryFn: async () => {
@@ -14,7 +16,7 @@ export function useOrders(filters: { status?: string; from?: string; to?: string
       // Client-side filtering as backend doesn't support all filters perfectly in README description
       // but service.ts shows it supports status, from, to.
       // We'll trust the backend service.ts logic but provide this hook for the UI.
-      
+
       // If we want to add more client-side filtering (like search by order_no or customer name)
       // we can do it here if needed, but for now we'll just return what backend gives.
       return orders;
@@ -46,8 +48,13 @@ export function useUpdateOrderPayment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payment_status }: { id: string; payment_status: string }) =>
-      ordersApi.updatePaymentStatus(id, payment_status),
+    mutationFn: ({
+      id,
+      payment_status,
+    }: {
+      id: string;
+      payment_status: string;
+    }) => ordersApi.updatePaymentStatus(id, payment_status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders });
     },

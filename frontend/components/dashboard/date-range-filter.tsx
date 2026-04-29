@@ -2,6 +2,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ButtonGroup, Button } from '@heroui/react';
 import type { DateRangeFilter } from '@/hooks/use-dashboard-metrics';
 
@@ -10,16 +11,18 @@ interface DateRangeFilterProps {
   onRangeChange: (range: DateRangeFilter) => void;
 }
 
-const filterOptions: { label: string; value: DateRangeFilter }[] = [
-  { label: 'Daily', value: 'daily' },
-  { label: 'Weekly', value: 'weekly' },
-  { label: 'Monthly', value: 'monthly' },
+const filterOptions: { key: string; value: DateRangeFilter }[] = [
+  { key: 'today', value: 'daily' },
+  { key: 'thisWeek', value: 'weekly' },
+  { key: 'thisMonth', value: 'monthly' },
 ];
 
 export function DateRangeFilter({
   selectedRange,
   onRangeChange,
 }: DateRangeFilterProps) {
+  const t = useTranslations('dashboard.overview');
+
   return (
     <ButtonGroup variant="flat">
       {filterOptions.map((option) => (
@@ -29,7 +32,7 @@ export function DateRangeFilter({
           color={selectedRange === option.value ? 'primary' : 'default'}
           className={selectedRange === option.value ? 'font-semibold' : ''}
         >
-          {option.label}
+          {t(option.key)}
         </Button>
       ))}
     </ButtonGroup>

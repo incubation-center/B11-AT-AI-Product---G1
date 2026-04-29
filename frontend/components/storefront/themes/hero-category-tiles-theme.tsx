@@ -3,7 +3,11 @@
 import { useMemo, useState } from 'react';
 
 import { ProductQuickViewDialog } from '@/components/storefront/themes/product-quick-view-dialog';
-import { ProductImage, ThemeLogo, formatStorePrice } from '@/components/storefront/themes/shared';
+import {
+  ProductImage,
+  ThemeLogo,
+  formatStorePrice,
+} from '@/components/storefront/themes/shared';
 import { StorefrontCartCheckout } from '@/components/storefront/themes/storefront-cart-checkout';
 import { StorefrontNavbar } from '@/components/storefront/themes/storefront-navbar';
 import { useStorefrontCart } from '@/components/storefront/themes/use-storefront-cart';
@@ -11,7 +15,10 @@ import type { StorefrontThemeProps } from '@/components/storefront/themes/shared
 import type { StorefrontProduct } from '@/lib/storefront';
 
 function toSlug(input: string) {
-  return input.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
 function ProductTile({
@@ -34,9 +41,15 @@ function ProductTile({
         />
       </div>
       <div className="space-y-2 p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#778195]">{product.category ?? 'All Products'}</p>
-        <h3 className="line-clamp-1 text-base font-semibold text-[#111827]">{product.name}</h3>
-        <p className="text-sm font-semibold text-[#0f2745]">{formatStorePrice(product)}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#778195]">
+          {product.category ?? 'All Products'}
+        </p>
+        <h3 className="line-clamp-1 text-base font-semibold text-[#111827]">
+          {product.name}
+        </h3>
+        <p className="text-sm font-semibold text-[#0f2745]">
+          {formatStorePrice(product)}
+        </p>
 
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
@@ -60,12 +73,22 @@ function ProductTile({
   );
 }
 
-export function HeroCategoryTilesTheme({ store, products }: StorefrontThemeProps) {
-  const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
-  const { cartItems, totalItems, addToCart, updateQty, removeItem, clearCart } = useStorefrontCart(store.subdomain);
+export function HeroCategoryTilesTheme({
+  store,
+  products,
+}: StorefrontThemeProps) {
+  const [selectedProduct, setSelectedProduct] =
+    useState<StorefrontProduct | null>(null);
+  const { cartItems, totalItems, addToCart, updateQty, removeItem, clearCart } =
+    useStorefrontCart(store.subdomain);
 
   const categories = useMemo(
-    () => Array.from(new Set(products.map((product) => product.category?.trim() || 'All Products'))).slice(0, 8),
+    () =>
+      Array.from(
+        new Set(
+          products.map((product) => product.category?.trim() || 'All Products'),
+        ),
+      ).slice(0, 8),
     [products],
   );
 
@@ -96,7 +119,9 @@ export function HeroCategoryTilesTheme({ store, products }: StorefrontThemeProps
                     shopName={store.shopName}
                     className="relative h-11 w-11 overflow-hidden rounded-xl border border-white/35 bg-white/95"
                   />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">{store.shopType}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">
+                    {store.shopType}
+                  </p>
                 </div>
                 <div className="rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[#0f2745]">
                   Cart {totalItems}
@@ -104,11 +129,17 @@ export function HeroCategoryTilesTheme({ store, products }: StorefrontThemeProps
               </div>
 
               <div className="max-w-2xl">
-                <h1 className="text-3xl font-semibold leading-tight md:text-5xl">{store.shopName}</h1>
+                <h1 className="text-3xl font-semibold leading-tight md:text-5xl">
+                  {store.shopName}
+                </h1>
                 <p className="mt-4 text-sm leading-7 text-white/85 md:text-base">
-                  {store.description ?? 'Browse by category, discover quickly, and add products in one click.'}
+                  {store.description ??
+                    'Browse by category, discover quickly, and add products in one click.'}
                 </p>
-                <a href="#products" className="mt-6 inline-flex rounded-full bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#0f1724]">
+                <a
+                  href="#products"
+                  className="mt-6 inline-flex rounded-full bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#0f1724]"
+                >
                   Shop now
                 </a>
               </div>
@@ -117,15 +148,25 @@ export function HeroCategoryTilesTheme({ store, products }: StorefrontThemeProps
 
           <aside className="grid gap-3 rounded-[30px] border border-[#d9dee6] bg-white p-4 md:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-2xl border border-[#e8ebf0] bg-[#f5f7fb] p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#687182]">Products</p>
-              <p className="mt-2 text-2xl font-semibold text-[#111827]">{products.length}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#687182]">
+                Products
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[#111827]">
+                {products.length}
+              </p>
             </div>
             <div className="rounded-2xl border border-[#e8ebf0] bg-[#f5f7fb] p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#687182]">Categories</p>
-              <p className="mt-2 text-2xl font-semibold text-[#111827]">{categories.length}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#687182]">
+                Categories
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[#111827]">
+                {categories.length}
+              </p>
             </div>
             <div className="rounded-2xl border border-[#e8ebf0] bg-[#f5f7fb] p-4 md:col-span-2 lg:col-span-1">
-              <p className="text-sm font-semibold text-[#111827]">One tap add-to-cart across all products.</p>
+              <p className="text-sm font-semibold text-[#111827]">
+                One tap add-to-cart across all products.
+              </p>
             </div>
           </aside>
         </div>
@@ -133,8 +174,12 @@ export function HeroCategoryTilesTheme({ store, products }: StorefrontThemeProps
 
       <section className="mx-auto w-full max-w-[1500px] px-4 pb-6 md:px-8 lg:px-12">
         <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-2xl font-semibold md:text-3xl">Browse Categories</h2>
-          <p className="text-sm text-[#687182]">Jump to your favorite section</p>
+          <h2 className="text-2xl font-semibold md:text-3xl">
+            Browse Categories
+          </h2>
+          <p className="text-sm text-[#687182]">
+            Jump to your favorite section
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
@@ -150,10 +195,16 @@ export function HeroCategoryTilesTheme({ store, products }: StorefrontThemeProps
         </div>
       </section>
 
-      <section id="products" className="mx-auto w-full max-w-[1500px] px-4 pb-14 md:px-8 lg:px-12">
+      <section
+        id="products"
+        className="mx-auto w-full max-w-[1500px] px-4 pb-14 md:px-8 lg:px-12"
+      >
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {featured.map((product) => (
-            <div key={product.id} id={toSlug(product.category?.trim() || 'All Products')}>
+            <div
+              key={product.id}
+              id={toSlug(product.category?.trim() || 'All Products')}
+            >
               <ProductTile
                 product={product}
                 onQuickView={() => setSelectedProduct(product)}

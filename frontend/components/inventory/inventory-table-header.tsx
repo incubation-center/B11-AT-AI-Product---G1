@@ -1,8 +1,17 @@
 'use client';
 
 import React from 'react';
-import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Selection } from '@heroui/react';
+import {
+  Input,
+  Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Selection,
+} from '@heroui/react';
 import { Search, ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface InventoryTableHeaderProps {
   filterValue: string;
@@ -21,44 +30,56 @@ export function InventoryTableHeader({
   totalItems,
   onRowsPerPageChange,
 }: InventoryTableHeaderProps) {
+  const t = useTranslations('inventory');
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between gap-3 items-end">
         <Input
           isClearable
           className="w-full sm:max-w-[44%]"
-          placeholder="Search by name or category..."
+          placeholder={t('searchPlaceholder')}
           startContent={<Search className="text-default-300" />}
           value={filterValue}
-          onClear={() => onFilterChange("")}
+          onClear={() => onFilterChange('')}
           onValueChange={onFilterChange}
         />
         <div className="flex gap-3">
           <Dropdown>
             <DropdownTrigger className="hidden sm:flex">
-              <Button endContent={<ChevronDown className="text-small" />} variant="flat">
-                Status
+              <Button
+                endContent={<ChevronDown className="text-small" />}
+                variant="flat"
+              >
+                {t('status')}
               </Button>
             </DropdownTrigger>
             <DropdownMenu
               disallowEmptySelection
-              aria-label="Table Columns"
+              aria-label={t('tableColumnsAria')}
               closeOnSelect={false}
               selectedKeys={statusFilter}
               selectionMode="multiple"
               onSelectionChange={onStatusFilterChange}
             >
-              <DropdownItem key="healthy" className="capitalize">Healthy</DropdownItem>
-              <DropdownItem key="low" className="capitalize">Low Stock</DropdownItem>
-              <DropdownItem key="out" className="capitalize">Out of Stock</DropdownItem>
+              <DropdownItem key="healthy" className="capitalize">
+                {t('healthy')}
+              </DropdownItem>
+              <DropdownItem key="low" className="capitalize">
+                {t('lowStock')}
+              </DropdownItem>
+              <DropdownItem key="out" className="capitalize">
+                {t('outOfStock')}
+              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-default-400 text-small">Total {totalItems} items</span>
+        <span className="text-default-400 text-small">
+          {t('totalItems', { count: totalItems })}
+        </span>
         <label className="flex items-center text-default-400 text-small">
-          Rows per page:
+          {t('rowsPerPage')}
           <select
             className="bg-transparent outline-none text-default-400 text-small"
             onChange={onRowsPerPageChange}

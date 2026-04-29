@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { BotMessageSquare, Pencil, Send } from 'lucide-react';
 import type React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 
@@ -43,43 +44,30 @@ const StepCard: React.FC<StepCardProps> = ({
   </div>
 );
 
-const stepsData = [
-  {
-    icon: <Pencil className="h-6 w-6" />,
-    title: 'Describe your shop',
-    description:
-      'Tell Coolhat about your products, pricing, and customers. It turns that into a ready-to-share storefront and product catalog.',
-    benefits: [
-      'AI-generated product descriptions',
-      'Instant storefront preview',
-      'Easy edits at any time',
-    ],
-  },
-  {
-    icon: <Send className="h-6 w-6" />,
-    title: 'Connect your Telegram',
-    description:
-      'Link the channel you already use every day. New orders, buyer questions, and updates land right there.',
-    benefits: [
-      'No new dashboard to learn',
-      'Real-time order notifications',
-      'Works with existing groups',
-    ],
-  },
-  {
-    icon: <BotMessageSquare className="h-6 w-6" />,
-    title: 'Let the AI handle it',
-    description:
-      'Your AI assistant answers product questions, recommends items, and generates clean checkout links for buyers.',
-    benefits: [
-      '24/7 customer responses',
-      'Smart product recommendations',
-      'One-tap checkout links',
-    ],
-  },
-];
-
 export function HowItWorks() {
+  const t = useTranslations('landing.how');
+
+  const stepsData = [
+    {
+      icon: <Pencil className="h-6 w-6" />,
+      title: t('steps.one.title'),
+      description: t('steps.one.description'),
+      benefits: [t('steps.one.b1'), t('steps.one.b2'), t('steps.one.b3')],
+    },
+    {
+      icon: <Send className="h-6 w-6" />,
+      title: t('steps.two.title'),
+      description: t('steps.two.description'),
+      benefits: [t('steps.two.b1'), t('steps.two.b2'), t('steps.two.b3')],
+    },
+    {
+      icon: <BotMessageSquare className="h-6 w-6" />,
+      title: t('steps.three.title'),
+      description: t('steps.three.description'),
+      benefits: [t('steps.three.b1'), t('steps.three.b2'), t('steps.three.b3')],
+    },
+  ];
+
   return (
     <motion.section
       id="how-it-works"
@@ -90,17 +78,15 @@ export function HowItWorks() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <div className="mx-auto max-w-5xl px-4">
-        {/* Header */}
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-[#ffbd59]">
-            How it works
+            {t('eyebrow')}
           </p>
           <h2 className="text-3xl font-bold tracking-tight text-[#002e6b] md:text-4xl">
-            From product idea to AI-assisted storefront in three steps.
+            {t('title')}
           </h2>
         </div>
 
-        {/* Step indicators */}
         <div className="relative mx-auto mb-8 max-w-4xl">
           <div
             aria-hidden="true"
@@ -118,7 +104,6 @@ export function HowItWorks() {
           </div>
         </div>
 
-        {/* Step cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {stepsData.map((step, index) => (
             <StepCard

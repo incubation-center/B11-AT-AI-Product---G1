@@ -28,13 +28,18 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
   const [customerPhone, setCustomerPhone] = useState('');
   const [addressText, setAddressText] = useState('');
   const [googleMapUrl, setGoogleMapUrl] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'aba_transfer'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'aba_transfer'>(
+    'cod',
+  );
   const [currency, setCurrency] = useState<'USD' | 'KHR'>('USD');
   const [notes, setNotes] = useState('');
 
   const estimatedTotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
-      const rawPrice = currency === 'USD' ? item.product.basePriceUsd : item.product.basePriceKhr;
+      const rawPrice =
+        currency === 'USD'
+          ? item.product.basePriceUsd
+          : item.product.basePriceKhr;
       const parsed = Number(rawPrice ?? 0);
       const unit = Number.isFinite(parsed) ? parsed : 0;
       return sum + unit * item.qty;
@@ -77,7 +82,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
         }),
       });
 
-      const payload = (await response.json().catch(() => ({}))) as CheckoutResponse;
+      const payload = (await response
+        .json()
+        .catch(() => ({}))) as CheckoutResponse;
 
       if (!response.ok) {
         setError(payload.message ?? 'Unable to checkout.');
@@ -97,8 +104,12 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
     return (
       <main className="min-h-screen bg-[#f8fafc] px-4 py-10 text-slate-900 md:px-8">
         <div className="mx-auto w-full max-w-3xl rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-          <p className="text-lg font-semibold text-slate-900">No items to checkout.</p>
-          <p className="mt-2 text-sm text-slate-600">Add products to your cart before checkout.</p>
+          <p className="text-lg font-semibold text-slate-900">
+            No items to checkout.
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            Add products to your cart before checkout.
+          </p>
           <Link
             href="/cart"
             className="mt-4 inline-flex rounded-xl bg-[#002e6b] px-4 py-2 text-sm font-semibold text-white"
@@ -157,7 +168,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
           <select
             className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
             value={paymentMethod}
-            onChange={(event) => setPaymentMethod(event.target.value as 'cod' | 'aba_transfer')}
+            onChange={(event) =>
+              setPaymentMethod(event.target.value as 'cod' | 'aba_transfer')
+            }
           >
             <option value="cod">Cash on Delivery</option>
             <option value="aba_transfer">ABA Transfer</option>
@@ -166,7 +179,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
           <select
             className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
             value={currency}
-            onChange={(event) => setCurrency(event.target.value as 'USD' | 'KHR')}
+            onChange={(event) =>
+              setCurrency(event.target.value as 'USD' | 'KHR')
+            }
           >
             <option value="USD">USD</option>
             <option value="KHR">KHR</option>
@@ -181,7 +196,10 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
         />
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
-          Estimated total: <span className="font-semibold">{estimatedTotal.toFixed(2)} {currency}</span>
+          Estimated total:{' '}
+          <span className="font-semibold">
+            {estimatedTotal.toFixed(2)} {currency}
+          </span>
         </div>
 
         {error ? <p className="text-sm text-rose-600">{error}</p> : null}

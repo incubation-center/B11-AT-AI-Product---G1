@@ -1,4 +1,9 @@
-import { API_URL, createTenant, protectedFetch, type TenantSummary } from '@/lib/auth';
+import {
+  API_URL,
+  createTenant,
+  protectedFetch,
+  type TenantSummary,
+} from '@/lib/auth';
 
 export type SubdomainPreview = {
   available: boolean;

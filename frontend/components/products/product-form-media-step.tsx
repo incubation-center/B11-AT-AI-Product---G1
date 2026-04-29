@@ -4,6 +4,7 @@
 import { Cloud, AlertCircle, X } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface ProductFormMediaStepProps {
   imageFiles: File[];
@@ -22,6 +23,7 @@ export function ProductFormMediaStep({
   isLoading,
   isValid,
 }: ProductFormMediaStepProps) {
+  const t = useTranslations('products.form.media');
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const handleAddFiles = (newFiles: FileList | null) => {
@@ -31,7 +33,7 @@ export function ProductFormMediaStep({
     const totalFiles = imageFiles.length + filesArray.length;
 
     if (totalFiles > MAX_IMAGES) {
-      alert(`You can upload a maximum of ${MAX_IMAGES} images`);
+      alert(t('maxImages', { count: MAX_IMAGES }));
       return;
     }
 
@@ -58,7 +60,7 @@ export function ProductFormMediaStep({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label className="text-sm font-semibold text-default-900 block">
-            Product Images <span className="text-red-500">*</span>
+            {t('productImages')} <span className="text-red-500">*</span>
           </label>
           <span className="text-xs text-default-500">
             {imageFiles.length}/{MAX_IMAGES}
@@ -78,11 +80,9 @@ export function ProductFormMediaStep({
             <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4">
               <Cloud className="h-10 w-10 text-default-400 mb-2" />
               <p className="mb-1 text-sm font-medium text-default-700">
-                Click to upload or drag and drop
+                {t('uploadCta')}
               </p>
-              <p className="text-xs text-default-500">
-                PNG, JPG, GIF up to 10MB
-              </p>
+              <p className="text-xs text-default-500">{t('uploadHint')}</p>
             </div>
             <input
               id="image-upload"
@@ -90,7 +90,7 @@ export function ProductFormMediaStep({
               className="hidden"
               accept="image/*"
               disabled={isLoading}
-              aria-label="Upload product image"
+              aria-label={t('uploadAria')}
               multiple
               onChange={(e) => handleAddFiles(e.target.files)}
             />
@@ -100,7 +100,9 @@ export function ProductFormMediaStep({
         {/* Image Previews Grid */}
         {imageFiles.length > 0 && (
           <div className="space-y-3">
-            <p className="text-xs text-default-500 px-1">Uploaded images:</p>
+            <p className="text-xs text-default-500 px-1">
+              {t('uploadedImages')}
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {previewUrls.map((url, index) => (
                 <div
@@ -119,7 +121,7 @@ export function ProductFormMediaStep({
                     type="button"
                     onClick={() => handleRemoveFile(index)}
                     disabled={isLoading}
-                    aria-label="Remove image"
+                    aria-label={t('removeImageAria')}
                     className="absolute top-1 right-1 bg-danger-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
                   >
                     <X className="h-4 w-4" />
@@ -135,10 +137,11 @@ export function ProductFormMediaStep({
 
         {/* Info Text */}
         <p className="text-xs text-default-500 px-1">
-          Upload high-quality, square images (1:1 aspect ratio) for best
-          results. You can upload up to{' '}
-          <span className="font-semibold">{MAX_IMAGES} images</span>. Additional
-          images can be added after saving.
+          {t('guidelinePrefix')}{' '}
+          <span className="font-semibold">
+            {t('guidelineCount', { count: MAX_IMAGES })}
+          </span>
+          . {t('guidelineSuffix')}
         </p>
 
         {/* Existing Image Alert */}
@@ -147,9 +150,7 @@ export function ProductFormMediaStep({
             <div className="text-blue-600 flex-shrink-0 mt-0.5">
               <AlertCircle className="h-4 w-4" />
             </div>
-            <p className="text-xs text-blue-700">
-              Existing images will be kept if no new images are uploaded.
-            </p>
+            <p className="text-xs text-blue-700">{t('existingImagesKept')}</p>
           </div>
         )}
 
@@ -159,9 +160,7 @@ export function ProductFormMediaStep({
             <div className="text-red-600 flex-shrink-0 mt-0.5">
               <AlertCircle className="h-4 w-4" />
             </div>
-            <p className="text-xs text-red-700">
-              At least one image is required.
-            </p>
+            <p className="text-xs text-red-700">{t('atLeastOneImage')}</p>
           </div>
         )}
       </div>

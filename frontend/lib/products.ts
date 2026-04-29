@@ -211,10 +211,7 @@ export function normalizeProductVariant(
   raw: BackendProductVariant,
 ): ProductVariant {
   const priceUsd =
-    raw.price_override_usd ??
-    raw.price_usd ??
-    raw.priceUsd ??
-    null;
+    raw.price_override_usd ?? raw.price_usd ?? raw.priceUsd ?? null;
   const priceKhr =
     raw.price_override_khr ?? raw.price_khr ?? raw.priceKhr ?? null;
 
@@ -227,8 +224,7 @@ export function normalizeProductVariant(
     price_override_usd: toPriceOverrideString(priceUsd),
     price_override_khr: toPriceOverrideString(priceKhr),
     stock_qty: raw.stock_qty ?? raw.stockQty ?? 0,
-    low_stock_threshold:
-      raw.low_stock_threshold ?? raw.lowStockThreshold ?? 5,
+    low_stock_threshold: raw.low_stock_threshold ?? raw.lowStockThreshold ?? 5,
     is_active: raw.is_active ?? raw.isActive ?? true,
     image_url: raw.image_url ?? raw.imageUrl ?? null,
     sku: raw.sku ?? null,
@@ -241,7 +237,8 @@ function serializeVariantForApi(
   payload: CreateVariantPayload | UpdateVariantPayload,
 ): Record<string, unknown> {
   const body: Record<string, unknown> = {};
-  if (payload.variant_name !== undefined) body.variant_name = payload.variant_name;
+  if (payload.variant_name !== undefined)
+    body.variant_name = payload.variant_name;
   if (payload.size !== undefined) body.size = payload.size;
   if (payload.color !== undefined) body.color = payload.color;
   if (payload.stock_qty !== undefined) body.stock_qty = payload.stock_qty;

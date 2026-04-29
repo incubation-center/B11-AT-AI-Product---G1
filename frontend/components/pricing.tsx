@@ -2,71 +2,74 @@
 
 import { motion } from 'framer-motion';
 import { Gift, Zap, TrendingUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { CreativePricing } from '@/components/ui/creative-pricing';
 import type { PricingTier } from '@/components/ui/creative-pricing';
 
-const tiers: PricingTier[] = [
-  {
-    name: 'Free Trial',
-    icon: <Gift className="w-6 h-6" />,
-    price: 'Free',
-    priceNote: '14 days · No credit card required',
-    commission: '0% commission',
-    description: 'Try Coolhat with no risk',
-    color: 'emerald',
-    isFree: true,
-    ctaLabel: 'Start Free Trial',
-    features: [
-      'Up to 50 products',
-      'AI Sales Assistant (Fair Usage)',
-      'Telegram Business Control',
-      'ABA Pay + COD checkout',
-      'CoolHat Branding',
-      'Standard support',
-    ],
-  },
-  {
-    name: 'Starter',
-    icon: <Zap className="w-6 h-6" />,
-    price: 5,
-    commission: '1% commission per order',
-    description: 'Designed for growing SMEs',
-    color: 'amber',
-    popular: true,
-    ctaLabel: 'Get Starter',
-    features: [
-      'Up to 50 products',
-      'AI Sales Assistant (Optimized)',
-      'Telegram Integration',
-      'ABA Pay + COD checkout',
-      'Order Management',
-      'Basic Analytics',
-      '"Powered by CoolHat" branding',
-    ],
-  },
-  {
-    name: 'Growth',
-    icon: <TrendingUp className="w-6 h-6" />,
-    price: 10,
-    commission: '1% commission per order',
-    priceNote: 'Optional commission cap ~$30/mo',
-    description: 'For serious scaling businesses',
-    color: 'blue',
-    ctaLabel: 'Get Growth',
-    features: [
-      'Unlimited products',
-      'AI Sales Assistant (Higher Priority)',
-      'Telegram Integration',
-      'ABA Pay + COD checkout',
-      'Advanced Analytics',
-      'Branding removed',
-      'Priority support',
-    ],
-  },
-];
-
 export function Pricing() {
+  const t = useTranslations('landing.pricing');
+
+  const tiers: PricingTier[] = [
+    {
+      name: t('freeTrial'),
+      icon: <Gift className="w-6 h-6" />,
+      price: t('freePrice'),
+      priceNote: t('freePriceNote'),
+      commission: t('zeroCommission'),
+      description: t('riskDesc'),
+      color: 'emerald',
+      isFree: true,
+      ctaLabel: t('startTrialCta'),
+      features: [
+        t('features.free1'),
+        t('features.free2'),
+        t('features.free3'),
+        t('features.free4'),
+        t('features.free5'),
+        t('features.free6'),
+      ],
+    },
+    {
+      name: t('starter'),
+      icon: <Zap className="w-6 h-6" />,
+      price: 5,
+      commission: t('oneCommission'),
+      description: t('starterDesc'),
+      color: 'amber',
+      popular: true,
+      ctaLabel: t('getStarterCta'),
+      features: [
+        t('features.starter1'),
+        t('features.starter2'),
+        t('features.starter3'),
+        t('features.starter4'),
+        t('features.starter5'),
+        t('features.starter6'),
+        t('features.starter7'),
+      ],
+    },
+    {
+      name: t('growth'),
+      icon: <TrendingUp className="w-6 h-6" />,
+      price: 10,
+      commission: t('oneCommission'),
+      priceNote: t('growthPriceNote'),
+      description: t('growthDesc'),
+      color: 'blue',
+      ctaLabel: t('getGrowthCta'),
+      features: [
+        t('features.growth1'),
+        t('features.growth2'),
+        t('features.growth3'),
+        t('features.growth4'),
+        t('features.growth5'),
+        t('features.growth6'),
+        t('features.growth7'),
+      ],
+    },
+  ];
+
   return (
     <motion.section
       id="pricing"
@@ -77,9 +80,9 @@ export function Pricing() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <CreativePricing
-        tag="Pricing"
-        title="Simple plans for growing SMEs."
-        description="Start free for 14 days. No credit card required. Scale as your business grows."
+        tag={t('tag')}
+        title={t('title')}
+        description={t('description')}
         tiers={tiers}
       />
     </motion.section>

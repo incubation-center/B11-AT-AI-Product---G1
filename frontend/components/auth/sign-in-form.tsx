@@ -1,12 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 
 import { AnimatedSignIn } from '@/components/ui/animated-auth';
 import { signInWithEmail } from '@/lib/auth';
 
 export function SignInForm() {
+  const t = useTranslations('auth');
   const router = useRouter();
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -27,7 +29,7 @@ export function SignInForm() {
         setError(
           submitError instanceof Error
             ? submitError.message
-            : 'Unable to sign in',
+            : t('errors.unableSignIn'),
         );
       }
     });

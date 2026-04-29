@@ -10,7 +10,11 @@ import type { StorefrontCartItem } from '@/components/storefront/themes/use-stor
 type StorefrontCartCheckoutProps = {
   cartItems: StorefrontCartItem[];
   totalItems: number;
-  onUpdateQty: (productId: string, qty: number, variantId?: string | null) => void;
+  onUpdateQty: (
+    productId: string,
+    qty: number,
+    variantId?: string | null,
+  ) => void;
   onRemoveItem: (productId: string, variantId?: string | null) => void;
   onClearCart: () => void;
 };
@@ -32,14 +36,24 @@ export function StorefrontCartCheckout({
 
   return (
     <>
-      <Modal isOpen={isOpen} onOpenChange={setIsOpen} size="2xl" placement="center" scrollBehavior="inside">
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        size="2xl"
+        placement="center"
+        scrollBehavior="inside"
+      >
         <ModalContent>
           {() => (
             <>
               <ModalHeader className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Your Cart</p>
-                  <h3 className="text-xl font-semibold text-slate-900">{totalItems} item{totalItems > 1 ? 's' : ''}</h3>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Your Cart
+                  </p>
+                  <h3 className="text-xl font-semibold text-slate-900">
+                    {totalItems} item{totalItems > 1 ? 's' : ''}
+                  </h3>
                 </div>
                 {cartItems.length ? (
                   <button
@@ -62,13 +76,19 @@ export function StorefrontCartCheckout({
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{item.product.name}</p>
-                            <p className="text-xs text-slate-500">{formatStorePrice(item.product)}</p>
+                            <p className="text-sm font-semibold text-slate-900">
+                              {item.product.name}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {formatStorePrice(item.product)}
+                            </p>
                           </div>
                           <button
                             type="button"
                             className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600"
-                            onClick={() => onRemoveItem(item.product.id, item.variantId)}
+                            onClick={() =>
+                              onRemoveItem(item.product.id, item.variantId)
+                            }
                           >
                             <Trash2 className="h-3.5 w-3.5" /> Remove
                           </button>
@@ -78,15 +98,29 @@ export function StorefrontCartCheckout({
                           <button
                             type="button"
                             className="h-8 w-8 rounded border border-slate-300 text-sm"
-                            onClick={() => onUpdateQty(item.product.id, item.qty - 1, item.variantId)}
+                            onClick={() =>
+                              onUpdateQty(
+                                item.product.id,
+                                item.qty - 1,
+                                item.variantId,
+                              )
+                            }
                           >
                             -
                           </button>
-                          <span className="min-w-8 text-center text-sm font-semibold">{item.qty}</span>
+                          <span className="min-w-8 text-center text-sm font-semibold">
+                            {item.qty}
+                          </span>
                           <button
                             type="button"
                             className="h-8 w-8 rounded border border-slate-300 text-sm"
-                            onClick={() => onUpdateQty(item.product.id, item.qty + 1, item.variantId)}
+                            onClick={() =>
+                              onUpdateQty(
+                                item.product.id,
+                                item.qty + 1,
+                                item.variantId,
+                              )
+                            }
                           >
                             +
                           </button>
@@ -95,7 +129,10 @@ export function StorefrontCartCheckout({
                     ))}
 
                     <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
-                      Estimated total: <span className="font-semibold text-[#002e6b]">${estimatedTotalUsd.toFixed(2)}</span>
+                      Estimated total:{' '}
+                      <span className="font-semibold text-[#002e6b]">
+                        ${estimatedTotalUsd.toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 ) : (

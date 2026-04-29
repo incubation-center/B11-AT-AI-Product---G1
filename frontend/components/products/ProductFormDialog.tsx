@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Modal,
   ModalContent,
@@ -30,7 +31,12 @@ import { ProductFormInventoryStep } from './product-form-inventory-step';
 import { ProductFormMediaStep } from './product-form-media-step';
 import { ProductFormVariantsStep } from './product-form-variants-step';
 import { ProductFormAiStep } from './product-form-ai-step';
-import type { ProductVariant, ProductDraft, AiDraftResponse, AiConfirmResponse } from '@/types';
+import type {
+  ProductVariant,
+  ProductDraft,
+  AiDraftResponse,
+  AiConfirmResponse,
+} from '@/types';
 import { AlertCircle } from 'lucide-react';
 
 interface ProductFormDialogProps {
@@ -54,6 +60,7 @@ export function ProductFormDialog({
   product,
   onSaved,
 }: ProductFormDialogProps) {
+  const t = useTranslations('products.dialog');
   // Form State
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
@@ -297,7 +304,9 @@ export function ProductFormDialog({
       }
 
       // Handle deactivations
-      const currentIds = new Set(currentVariants.map((v) => v.id).filter(Boolean));
+      const currentIds = new Set(
+        currentVariants.map((v) => v.id).filter(Boolean),
+      );
       for (const ev of existingVariants) {
         if (!currentIds.has(ev.id)) {
           await deactivateVariant(ev.id);
@@ -328,15 +337,13 @@ export function ProductFormDialog({
           <>
             <ModalHeader className="flex flex-col gap-1">
               <h2 id="modal-title">
-                {product ? 'Edit Product' : 'Create Product'}
+                {product ? t('editTitle') : t('createTitle')}
               </h2>
               <p
                 id="modal-description"
                 className="text-default-500 font-normal"
               >
-                {product
-                  ? 'Update your product details and inventory'
-                  : 'Add a new product with AI assistance'}
+                {product ? t('editSubtitle') : t('createSubtitle')}
               </p>
             </ModalHeader>
 
@@ -416,15 +423,20 @@ export function ProductFormDialog({
                       {product && product.has_variants ? (
                         <div className="py-4 space-y-4">
                           <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary-50 border border-secondary-200">
-                            <span className="text-secondary-600 text-lg flex-shrink-0">🗂️</span>
+                            <span className="text-secondary-600 text-lg flex-shrink-0">
+                              🗂️
+                            </span>
                             <div>
                               <p className="text-sm font-semibold text-secondary-800">
                                 Variants are managed in the Variant Manager
                               </p>
                               <p className="text-xs text-secondary-700 mt-1">
-                                Close this dialog and click the <strong>Manage Variants</strong> button (
-                                <span className="font-mono">⊞</span>) on the product row, or click the variant chip,
-                                to add, edit, or remove variants without leaving the products page.
+                                Close this dialog and click the{' '}
+                                <strong>Manage Variants</strong> button (
+                                <span className="font-mono">⊞</span>) on the
+                                product row, or click the variant chip, to add,
+                                edit, or remove variants without leaving the
+                                products page.
                               </p>
                             </div>
                           </div>
@@ -455,7 +467,7 @@ export function ProductFormDialog({
 
             <ModalFooter className="gap-2">
               <Button variant="bordered" onPress={onClose} isDisabled={loading}>
-                Cancel
+                {t('cancel')}
               </Button>
 
               {!isAiMode && !product && (
@@ -465,7 +477,7 @@ export function ProductFormDialog({
                   isLoading={loading}
                   isDisabled={!isGeneralValid}
                 >
-                  Start AI Review
+                  {t('startAiReview')}
                 </Button>
               )}
 
@@ -477,7 +489,7 @@ export function ProductFormDialog({
                   isLoading={loading}
                   isDisabled={!isGeneralValid}
                 >
-                  Save
+                  {t('save')}
                 </Button>
               )}
 
@@ -488,7 +500,7 @@ export function ProductFormDialog({
                   isLoading={loading}
                   isDisabled={!aiAnswer.trim()}
                 >
-                  {aiQuestion ? 'Continue' : 'Confirm'}
+                  {aiQuestion ? t('continue') : t('confirm')}
                 </Button>
               )}
             </ModalFooter>

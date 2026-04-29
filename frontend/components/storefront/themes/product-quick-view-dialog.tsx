@@ -1,9 +1,12 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 
-import { ProductImage, formatStorePrice } from '@/components/storefront/themes/shared';
+import {
+  ProductImage,
+  formatStorePrice,
+} from '@/components/storefront/themes/shared';
 import type { StorefrontProduct } from '@/lib/storefront';
 
 type ProductQuickViewDialogProps = {
@@ -21,20 +24,25 @@ export function ProductQuickViewDialog({
 }: ProductQuickViewDialogProps) {
   const [qty, setQty] = useState(1);
 
-  useEffect(() => {
-    setQty(1);
-  }, [product?.id, isOpen]);
-
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
-      <ModalContent>
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      size="3xl"
+      placement="center"
+    >
+      <ModalContent
+        key={`${product?.id ?? 'none'}-${isOpen ? 'open' : 'closed'}`}
+      >
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                 Product details
               </p>
-              <h3 className="text-xl font-semibold text-slate-900">{product?.name ?? 'Product'}</h3>
+              <h3 className="text-xl font-semibold text-slate-900">
+                {product?.name ?? 'Product'}
+              </h3>
             </ModalHeader>
             <ModalBody className="pb-6">
               {product ? (
@@ -62,13 +70,17 @@ export function ProductQuickViewDialog({
                         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                           Price
                         </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">{formatStorePrice(product)}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                          {formatStorePrice(product)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                           Stock
                         </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">{product.stockQty}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                          {product.stockQty}
+                        </p>
                       </div>
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -85,7 +97,8 @@ export function ProductQuickViewDialog({
                         Description
                       </p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        {product.description ?? 'No product description available.'}
+                        {product.description ??
+                          'No product description available.'}
                       </p>
                     </div>
 
@@ -94,15 +107,23 @@ export function ProductQuickViewDialog({
                         <button
                           type="button"
                           className="h-8 w-8 rounded border border-slate-300 text-sm"
-                          onClick={() => setQty((value) => Math.max(1, value - 1))}
+                          onClick={() =>
+                            setQty((value) => Math.max(1, value - 1))
+                          }
                         >
                           -
                         </button>
-                        <span className="min-w-8 text-center text-sm font-semibold">{qty}</span>
+                        <span className="min-w-8 text-center text-sm font-semibold">
+                          {qty}
+                        </span>
                         <button
                           type="button"
                           className="h-8 w-8 rounded border border-slate-300 text-sm"
-                          onClick={() => setQty((value) => Math.min(product.stockQty || 1, value + 1))}
+                          onClick={() =>
+                            setQty((value) =>
+                              Math.min(product.stockQty || 1, value + 1),
+                            )
+                          }
                         >
                           +
                         </button>
@@ -124,7 +145,8 @@ export function ProductQuickViewDialog({
 
                     {product.hasVariants ? (
                       <p className="text-xs text-amber-700">
-                        This product has variants. Variant-level selection is not available yet; the base item will be added to cart.
+                        This product has variants. Variant-level selection is
+                        not available yet; the base item will be added to cart.
                       </p>
                     ) : null}
                   </div>

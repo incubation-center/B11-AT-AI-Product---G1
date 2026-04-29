@@ -23,7 +23,11 @@ export const STOREFRONT_THEME_OPTIONS: StorefrontThemeOption[] = [
     tone: 'DTC-ready layout with clean structure, whitespace, and premium pacing.',
     summary:
       'Centered 12-column composition with fast-scanning product cards for modern brands.',
-    highlights: ['Clean 12-column structure', '3-4 / 2 / 1 product grid', 'Premium minimal look'],
+    highlights: [
+      'Clean 12-column structure',
+      '3-4 / 2 / 1 product grid',
+      'Premium minimal look',
+    ],
   },
   {
     id: 'hero-category-tiles',
@@ -31,7 +35,11 @@ export const STOREFRONT_THEME_OPTIONS: StorefrontThemeOption[] = [
     tone: 'Marketplace-first experience built for category discovery and quick jumps.',
     summary:
       'Large hero moment up top followed by symmetric category cards for rapid navigation.',
-    highlights: ['Asymmetric hero section', 'Symmetric category tile grid', 'SKU discovery focused'],
+    highlights: [
+      'Asymmetric hero section',
+      'Symmetric category tile grid',
+      'SKU discovery focused',
+    ],
   },
   {
     id: 'editorial-lookbook',
@@ -39,7 +47,11 @@ export const STOREFRONT_THEME_OPTIONS: StorefrontThemeOption[] = [
     tone: 'Story-driven storefront with magazine rhythm and curated product moments.',
     summary:
       'Alternating narrative blocks with mixed-grid product strips for boutique positioning.',
-    highlights: ['Alternating story blocks', 'Curated 3-column strips', 'Luxury brand storytelling'],
+    highlights: [
+      'Alternating story blocks',
+      'Curated 3-column strips',
+      'Luxury brand storytelling',
+    ],
   },
 ];
 

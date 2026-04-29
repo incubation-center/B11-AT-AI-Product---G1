@@ -8,10 +8,15 @@ type AskGlobalAssistantBody = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as AskGlobalAssistantBody | null;
+  const body = (await request
+    .json()
+    .catch(() => null)) as AskGlobalAssistantBody | null;
 
   if (!body?.question?.trim()) {
-    return NextResponse.json({ message: 'question is required' }, { status: 400 });
+    return NextResponse.json(
+      { message: 'question is required' },
+      { status: 400 },
+    );
   }
 
   const response = await fetch(`${API_URL}/assistant/ask/global`, {

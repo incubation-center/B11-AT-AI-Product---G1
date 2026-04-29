@@ -201,5 +201,3 @@ export function StorefrontAssistant({ store }: StorefrontAssistantProps) {
     </>
   );
 }
-
-

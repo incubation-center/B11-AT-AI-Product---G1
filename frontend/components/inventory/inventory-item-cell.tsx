@@ -9,10 +9,14 @@ interface InventoryItemCellProps {
   image?: string;
 }
 
-export function InventoryItemCell({ name, category, image }: InventoryItemCellProps) {
+export function InventoryItemCell({
+  name,
+  category,
+  image,
+}: InventoryItemCellProps) {
   return (
     <User
-      avatarProps={{ radius: "lg", src: image }}
+      avatarProps={{ radius: 'lg', src: image }}
       description={category}
       name={name}
     >

@@ -1,0 +1,510 @@
+{
+  "meta": {
+    "appTitle": "Coolhat - Your Virtual Shop Assistant",
+    "appDescription": "Coolhat helps SMEs build AI-powered storefronts with Telegram integration and a virtual assistant that knows every product.",
+    "chatTitle": "Ask Coolhat - AI Product Discovery",
+    "chatDescription": "Search for products across all Coolhat SME stores using AI. Describe what you need and get instant, personalized recommendations with direct store links."
+  },
+  "common": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contact": "Contact",
+    "coolhat": "Coolhat"
+  },
+  "navbar": {
+    "tagline": "Virtual shop assistant for SMEs",
+    "why": "Why Coolhat",
+    "how": "How it works",
+    "pricing": "Pricing",
+    "askAi": "Ask Coolhat AI",
+    "viewPlans": "View plans",
+    "signIn": "Sign in",
+    "language": "Language",
+    "english": "English",
+    "khmer": "Khmer"
+  },
+  "chat": {
+    "title": "Ask Coolhat - AI Product Discovery",
+    "description": "Search for products across all Coolhat SME stores using AI. Describe what you need and get instant, personalized recommendations with direct store links.",
+    "askAnythingPlaceholder": "Ask anything about products..."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "welcomeBack": "Welcome back!",
+    "createYourAccount": "Create your account",
+    "continueWithAccount": "Enter your account details to continue",
+    "freeTrial": "Start your 14-day free trial - no credit card needed",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "remember30Days": "Remember for 30 days",
+    "forgotPassword": "Forgot password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "knowYourPassword": "Know your password?",
+    "ownerEmailPlaceholder": "owner@shop.com",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "namePlaceholder": "John Doe",
+    "resetCodePlaceholder": "6-digit code",
+    "forgotPasswordEyebrow": "Forgot Password",
+    "resetPasswordEyebrow": "Reset Password",
+    "resetYourPassword": "Reset your password",
+    "createNewPassword": "Create a new password",
+    "forgotPasswordHelp": "Enter your email address and we'll send you a 6-digit code to reset your password.",
+    "resetWithTokenHelp": "Enter a new password for your account.",
+    "resetWithCodeHelp": "Enter your email, reset code, and a new password.",
+    "sendResetCode": "Send Reset Code",
+    "sending": "Sending...",
+    "iHaveResetCode": "I have a reset code",
+    "verifyCodeAndReset": "Verify Code & Reset Password",
+    "resetPassword": "Reset Password",
+    "resetting": "Resetting...",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "createAccount": "Create account",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "successResetSent": "Check your email for a 6-digit reset code.",
+    "successPasswordReset": "Password reset successfully!",
+    "successAccountCreated": "Account created. Check your email verification link, then sign in.",
+    "errors": {
+      "unableSignIn": "Unable to sign in",
+      "unableSignUp": "Unable to sign up",
+      "failedSendReset": "Failed to send reset email",
+      "failedResetPassword": "Failed to reset password",
+      "emailRequired": "Email is required",
+      "resetCodeRequired": "Reset code is required",
+      "passwordMismatch": "Passwords do not match",
+      "passwordMin": "Password must be at least 8 characters"
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "orders": "Orders",
+      "inventory": "Inventory",
+      "telegram": "Telegram",
+      "settings": "Settings",
+      "ownerWorkspace": "Owner workspace",
+      "ownerTitle": "Coolhat Owner"
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your profile, store details, and account security.",
+      "tabsAria": "Settings sections",
+      "profileTab": "Profile & Account",
+      "storeTab": "Store Management",
+      "dangerTab": "Danger Zone"
+    },
+    "recentOrders": {
+      "tableAria": "Recent orders table",
+      "orderNo": "Order #",
+      "customer": "Customer",
+      "amount": "Amount",
+      "status": "Status",
+      "payment": "Payment",
+      "date": "Date",
+      "loading": "Loading...",
+      "empty": "No orders found",
+      "naPhone": "N/A"
+    },
+    "telegramGuide": {
+      "ready": "Ready to go!",
+      "connected": "Your store is successfully connected to the Telegram bot.",
+      "connectedDetail": "You can now manage your orders and products directly from Telegram."
+    },
+    "overview": {
+      "subtitle": "Welcome back! Here's your store overview.",
+      "visitStore": "Visit your store",
+      "keyMetrics": "Key Metrics",
+      "revenue": "Revenue (USD)",
+      "orders": "Orders",
+      "lowStockAlert": "Low Stock Alert",
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "recentOrders": "Recent Orders",
+      "inventoryStatus": "Inventory Status"
+    },
+    "inventoryPage": {
+      "title": "Inventory Manager",
+      "subtitle": "Monitor and update your store stock levels",
+      "updateStockFailed": "Failed to update stock. Please try again."
+    },
+    "ordersPage": {
+      "title": "Order Manager",
+      "subtitle": "Manage your orders",
+      "confirmCancel": "Are you sure you want to cancel this order?"
+    },
+    "telegramPage": {
+      "title": "Telegram Manager",
+      "subtitle": "Connect your store to the Telegram ecosystem",
+      "info": "Linking your Telegram allows you to receive instant order notifications, manage inventory, and create products using AI directly from your phone."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "tryAgain": "Try again"
+    },
+    "lowStockWidget": {
+      "title": "Low Stock Items",
+      "belowThreshold": "{count} items below threshold",
+      "allHealthy": "All inventory levels are healthy",
+      "stockLine": "Stock: {stock} / {threshold}",
+      "restock": "Restock"
+    },
+    "dateRangeFilter": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    }
+  },
+  "orders": {
+    "tableAria": "Order history table",
+    "actionsAria": "Order actions",
+    "searchPlaceholder": "Search by order # or customer...",
+    "empty": "No orders found",
+    "orderNo": "Order #",
+    "customer": "Customer",
+    "date": "Date",
+    "total": "Total",
+    "status": "Status",
+    "payment": "Payment",
+    "actions": "Actions",
+    "noPhone": "No phone",
+    "viewDetails": "View Details",
+    "cancelOrder": "Cancel Order"
+  },
+  "inventory": {
+    "tableAria": "Inventory Table",
+    "searchPlaceholder": "Search by name or category...",
+    "status": "Status",
+    "tableColumnsAria": "Table Columns",
+    "healthy": "Healthy",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "totalItems": "Total {count} items",
+    "rowsPerPage": "Rows per page:",
+    "item": "ITEM",
+    "stock": "STOCK",
+    "statusHeader": "STATUS",
+    "actions": "ACTIONS",
+    "empty": "No items found",
+    "threshold": "Threshold: {value}",
+    "quickUpdate": "Quick Update",
+    "updateStockLevel": "Update Stock Level",
+    "currentStock": "Current stock: {value}",
+    "newQuantity": "New Quantity",
+    "enterStockAmount": "Enter stock amount",
+    "cancel": "Cancel",
+    "updateStock": "Update Stock",
+    "defaultVariant": "Default Variant",
+    "generalCategory": "General"
+  },
+  "settings": {
+    "profile": {
+      "personalInfo": "Personal Information",
+      "personalInfoDesc": "Update your name and contact details.",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "emailAddress": "Email Address",
+      "saveName": "Save Name",
+      "accountSecurity": "Account Security",
+      "accountSecurityDesc": "Manage email verification and password.",
+      "emailVerification": "Email Verification",
+      "emailVerified": "Your email is verified.",
+      "emailNotVerified": "Verify your email to secure your account.",
+      "sendLink": "Send Link",
+      "passwordReset": "Password Reset",
+      "passwordResetDesc": "Send a password reset link to your email.",
+      "requestReset": "Request Reset"
+    },
+    "store": {
+      "brandingTheme": "Branding & Theme",
+      "brandingThemeDesc": "Customize how your store looks to buyers.",
+      "storefrontTheme": "Storefront Theme",
+      "storefrontThemeDesc": "Pick with a visual layout preview. The logo and cover spots below mirror your live storefront structure.",
+      "yourStore": "Your Store",
+      "storeLogo": "Store Logo",
+      "changeLogo": "Change Logo",
+      "uploading": "Uploading...",
+      "bannerImage": "Banner Image",
+      "uploadBanner": "Upload Banner",
+      "storeDetails": "Store Details",
+      "storeDetailsDesc": "Manage your business profile and location.",
+      "shopName": "Shop Name",
+      "businessCategory": "Business Category",
+      "publicSubdomain": "Public Subdomain",
+      "visitStore": "Visit Store",
+      "shopDescription": "Shop Description",
+      "updateStore": "Update Store",
+      "unableSaveTheme": "Unable to save storefront theme.",
+      "unableUpdateStore": "Unable to update store settings."
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "AI shop assistant for SMEs",
+      "title": "Your virtual shop assistant is here to help",
+      "description": "Coolhat is an AI-powered webstore front builder for SMEs. It gives every shop a virtual assistant that already knows all your products, helps customers find the right items, and connects orders straight into Telegram so owners can manage everything from their phone.",
+      "browseNow": "Browse Now",
+      "freeTrial": "Start 14-day free trial",
+      "seeHow": "See how Coolhat works",
+      "noCard": "No credit card for trial",
+      "highlights": "Live Telegram assistant ? Product-aware AI ? Storefront in days",
+      "liveStoreChat": "Live store chat",
+      "assistantChannel": "Coolhat assistant ? Telegram",
+      "online": "Online",
+      "question": "Do you have something for sensitive skin under $20?",
+      "answerIntro": "I've found 3 products that match: all fragrance-free, made for sensitive skin and in your budget.",
+      "item1": "Gentle Rice Cleanser - $14.50",
+      "item2": "Calming Toner Mist - $11.90",
+      "item3": "Soothing Night Cream - $19.80",
+      "answerOutro": "Reply with the product number and I'll create a checkout link for you.",
+      "footer": "Powered by your real product catalog, checkout flow, and Telegram Mini App - not a generic chatbot."
+    },
+    "features": {
+      "eyebrow": "Why Coolhat",
+      "title": "One assistant for your customers and your team.",
+      "description": "Coolhat combines an AI product expert, storefront builder, and Telegram Mini App into one simple flow, so small shops can sell online with the same experience as bigger brands.",
+      "items": {
+        "ai": {
+          "title": "AI that knows your products",
+          "description": "Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing."
+        },
+        "telegram": {
+          "title": "Built for Telegram first",
+          "description": "SME owners live in Telegram. Coolhat sends orders, updates, and customer chats straight to your phone so you don't need to learn a new dashboard."
+        },
+        "storefront": {
+          "title": "From idea to storefront in days",
+          "description": "Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team."
+        }
+      }
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "From product idea to AI-assisted storefront in three steps.",
+      "steps": {
+        "one": {
+          "title": "Describe your shop",
+          "description": "Tell Coolhat about your products, pricing, and customers. It turns that into a ready-to-share storefront and product catalog.",
+          "b1": "AI-generated product descriptions",
+          "b2": "Instant storefront preview",
+          "b3": "Easy edits at any time"
+        },
+        "two": {
+          "title": "Connect your Telegram",
+          "description": "Link the channel you already use every day. New orders, buyer questions, and updates land right there.",
+          "b1": "No new dashboard to learn",
+          "b2": "Real-time order notifications",
+          "b3": "Works with existing groups"
+        },
+        "three": {
+          "title": "Let the AI handle it",
+          "description": "Your AI assistant answers product questions, recommends items, and generates clean checkout links for buyers.",
+          "b1": "24/7 customer responses",
+          "b2": "Smart product recommendations",
+          "b3": "One-tap checkout links"
+        }
+      }
+    },
+    "pricing": {
+      "tag": "Pricing",
+      "title": "Simple plans for growing SMEs.",
+      "description": "Start free for 14 days. No credit card required. Scale as your business grows.",
+      "freeTrial": "Free Trial",
+      "starter": "Starter",
+      "growth": "Growth",
+      "freePrice": "Free",
+      "freePriceNote": "14 days ? No credit card required",
+      "growthPriceNote": "Optional commission cap ~$30/mo",
+      "zeroCommission": "0% commission",
+      "oneCommission": "1% commission per order",
+      "riskDesc": "Try Coolhat with no risk",
+      "starterDesc": "Designed for growing SMEs",
+      "growthDesc": "For serious scaling businesses",
+      "startTrialCta": "Start Free Trial",
+      "getStarterCta": "Get Starter",
+      "getGrowthCta": "Get Growth",
+      "features": {
+        "free1": "Up to 50 products",
+        "free2": "AI Sales Assistant (Fair Usage)",
+        "free3": "Telegram Business Control",
+        "free4": "ABA Pay + COD checkout",
+        "free5": "CoolHat Branding",
+        "free6": "Standard support",
+        "starter1": "Up to 50 products",
+        "starter2": "AI Sales Assistant (Optimized)",
+        "starter3": "Telegram Integration",
+        "starter4": "ABA Pay + COD checkout",
+        "starter5": "Order Management",
+        "starter6": "Basic Analytics",
+        "starter7": "\"Powered by CoolHat\" branding",
+        "growth1": "Unlimited products",
+        "growth2": "AI Sales Assistant (Higher Priority)",
+        "growth3": "Telegram Integration",
+        "growth4": "ABA Pay + COD checkout",
+        "growth5": "Advanced Analytics",
+        "growth6": "Branding removed",
+        "growth7": "Priority support"
+      }
+    },
+    "footer": {
+      "copyright": "Helping SMEs sell with an AI shop assistant.",
+      "why": "Why Coolhat",
+      "pricing": "Pricing"
+    }
+  },
+  "products": {
+    "title": "Product Manager",
+    "subtitle": "Manage your product catalog and inventory",
+    "addProduct": "Add Product",
+    "loadFailed": "Failed to load products",
+    "searchAria": "Search products by name or category",
+    "searchPlaceholder": "Search products...",
+    "showInactive": "Show Inactive",
+    "toggleInactiveAria": "Toggle inactive products",
+    "loadingProducts": "Loading products...",
+    "tableAria": "Products table",
+    "perVariant": "Per variant",
+    "lowStock": "Low Stock",
+    "variant": "variant",
+    "variants": "variants",
+    "active": "Active",
+    "inactive": "Inactive",
+    "table": {
+      "product": "Product",
+      "category": "Category",
+      "pricing": "Pricing",
+      "stock": "Stock",
+      "variants": "Variants",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No products yet",
+      "subtitle": "Create your first product to get started"
+    },
+    "actions": {
+      "openVariantManager": "Open Variant Manager",
+      "editProductDetails": "Edit product details",
+      "manageVariants": "Manage Variants",
+      "manageVariantsFor": "Manage variants for",
+      "edit": "Edit",
+      "moreOptionsFor": "More options for",
+      "confirmDeactivate": "Deactivate this product?",
+      "variantsDesc": "Add, edit or remove variants",
+      "syncDesc": "Sync with AI Assistant indexing",
+      "syncToAi": "Sync to AI",
+      "markInactive": "Mark as inactive",
+      "markActive": "Mark as active",
+      "deactivate": "Deactivate",
+      "restore": "Restore"
+    },
+    "alerts": {
+      "deactivateFailed": "Failed to deactivate product",
+      "restoreFailed": "Failed to restore product",
+      "syncSuccess": "Product synced to AI assistant successfully!",
+      "syncFailed": "Failed to sync product"
+    },
+    "dialog": {
+      "editTitle": "Edit Product",
+      "createTitle": "Create Product",
+      "editSubtitle": "Update your product details and inventory",
+      "createSubtitle": "Add a new product with AI assistance",
+      "cancel": "Cancel",
+      "startAiReview": "Start AI Review",
+      "save": "Save",
+      "continue": "Continue",
+      "confirm": "Confirm"
+    },
+    "form": {
+      "general": {
+        "productName": "Product Name",
+        "productNameAria": "Product name",
+        "productNamePlaceholder": "e.g. Classic White T-Shirt",
+        "category": "Category",
+        "categoryAria": "Category",
+        "categoryPlaceholder": "e.g. Apparel",
+        "description": "Description",
+        "descriptionAria": "Description",
+        "descriptionPlaceholder": "Provide a detailed product description...",
+        "priceUsd": "Price (USD)",
+        "priceUsdAria": "Price in USD",
+        "priceKhr": "Price (KHR)",
+        "priceKhrAria": "Price in KHR"
+      },
+      "inventory": {
+        "enableTrackingAria": "Enable inventory tracking",
+        "trackInventory": "Track Inventory",
+        "trackInventoryHelp": "Enable inventory tracking to monitor stock levels and receive low-stock alerts.",
+        "currentStock": "Current Stock",
+        "currentStockAria": "Current stock",
+        "lowStockThreshold": "Low Stock Threshold",
+        "lowStockThresholdAria": "Low stock threshold"
+      },
+      "media": {
+        "maxImages": "You can upload a maximum of {count} images",
+        "productImages": "Product Images",
+        "uploadCta": "Click to upload or drag and drop",
+        "uploadHint": "PNG, JPG, GIF up to 10MB",
+        "uploadAria": "Upload product image",
+        "uploadedImages": "Uploaded images:",
+        "removeImageAria": "Remove image",
+        "guidelinePrefix": "Upload high-quality, square images (1:1 aspect ratio) for best results. You can upload up to",
+        "guidelineCount": "{count} images",
+        "guidelineSuffix": "Additional images can be added after saving.",
+        "existingImagesKept": "Existing images will be kept if no new images are uploaded.",
+        "atLeastOneImage": "At least one image is required."
+      },
+      "variants": {
+        "hasVariantsAria": "Product has variants",
+        "hasVariants": "Product has variants",
+        "hasVariantsHelp": "Enable this if your product comes in different colors, sizes, or other options.",
+        "manageVariants": "Manage Variants",
+        "addVariant": "Add Variant",
+        "tableAria": "Product variants table",
+        "columns": {
+          "variant": "VARIANT",
+          "priceUsd": "PRICE (USD)",
+          "stock": "STOCK",
+          "actions": "ACTIONS"
+        },
+        "standard": "Standard",
+        "basePrice": "Base Price",
+        "editVariant": "Edit variant",
+        "deleteVariant": "Delete variant",
+        "empty": "No variants added yet. Click \"Add Variant\" to begin.",
+        "infoTitle": "Variants",
+        "infoText": "Enable variants to add different colors, sizes, or other options. Each variant can have its own price and stock level.",
+        "editVariantTitle": "Edit Variant",
+        "addVariantTitle": "Add New Variant",
+        "size": "Size",
+        "sizePlaceholder": "e.g. M, L, XL",
+        "color": "Color",
+        "colorPlaceholder": "e.g. Red, Blue",
+        "priceUsd": "Price (USD)",
+        "priceKhr": "Price (KHR)",
+        "overrideBasePrice": "Override base price",
+        "initialStock": "Initial Stock",
+        "cancel": "Cancel",
+        "update": "Update",
+        "add": "Add"
+      },
+      "ai": {
+        "title": "AI-Powered Product Review",
+        "description": "Answer a few quick questions to help our AI system optimize your product listing for better visibility and sales.",
+        "answerPlaceholder": "Type your answer here...",
+        "answerAria": "Answer to AI question",
+        "processing": "Processing your product...",
+        "processingHint": "This may take a few moments...",
+        "answerRequired": "Please answer the question to continue."
+      }
+    }
+  }
+}

@@ -8,7 +8,12 @@ type SearchInputProps = {
   onSubmit: (text: string) => void;
 };
 
-export function SearchInput({ input, setInput, isLoading, onSubmit }: SearchInputProps) {
+export function SearchInput({
+  input,
+  setInput,
+  isLoading,
+  onSubmit,
+}: SearchInputProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {

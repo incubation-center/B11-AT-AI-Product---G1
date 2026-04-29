@@ -169,7 +169,10 @@ export async function verifyResetCode(input: { email: string; code: string }) {
   return parseResponse<{ token: string }>(response);
 }
 
-export async function resetPassword(input: { token: string; password: string }) {
+export async function resetPassword(input: {
+  token: string;
+  password: string;
+}) {
   const response = await fetch(`${API_URL}/api/auth/reset-password`, {
     method: 'POST',
     credentials: 'include',
@@ -235,19 +238,25 @@ export async function generateTelegramLinkCode() {
 }
 
 export async function sendVerificationEmail() {
-  return protectedFetch<{ message: string }>('/api/auth/send-verification-email', {
-    method: 'POST',
-  });
+  return protectedFetch<{ message: string }>(
+    '/api/auth/send-verification-email',
+    {
+      method: 'POST',
+    },
+  );
 }
 
 export async function requestPasswordReset(email: string) {
-  return protectedFetch<{ message: string }>('/api/auth/request-password-reset', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  return protectedFetch<{ message: string }>(
+    '/api/auth/request-password-reset',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
     },
-    body: JSON.stringify({ email }),
-  });
+  );
 }
 
 export async function updateMyTenant(payload: UpdateTenantPayload) {

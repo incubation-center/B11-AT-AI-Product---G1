@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Button, 
-  Tooltip, 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
+import { useTranslations } from 'next-intl';
+import {
+  Button,
+  Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
   ModalFooter,
   Input,
-  useDisclosure
+  useDisclosure,
 } from '@heroui/react';
 import { Edit3, Package } from 'lucide-react';
 
@@ -20,8 +21,13 @@ interface InventoryActionsProps {
   onUpdate: (newStock: number) => void;
 }
 
-export function InventoryActions({ name, currentStock, onUpdate }: InventoryActionsProps) {
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+export function InventoryActions({
+  name,
+  currentStock,
+  onUpdate,
+}: InventoryActionsProps) {
+  const t = useTranslations('inventory');
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [newStock, setNewStock] = useState(String(currentStock));
 
   const handleUpdate = (onClose: () => void) => {
@@ -34,19 +40,14 @@ export function InventoryActions({ name, currentStock, onUpdate }: InventoryActi
 
   return (
     <div className="relative flex justify-end items-center gap-2">
-      <Tooltip content="Quick Update">
-        <Button 
-          isIconOnly 
-          size="sm" 
-          variant="light"
-          onPress={onOpen}
-        >
+      <Tooltip content={t('quickUpdate')}>
+        <Button isIconOnly size="sm" variant="light" onPress={onOpen}>
           <Edit3 size={18} className="text-default-400" />
         </Button>
       </Tooltip>
 
-      <Modal 
-        isOpen={isOpen} 
+      <Modal
+        isOpen={isOpen}
         onOpenChange={onOpenChange}
         placement="center"
         backdrop="blur"
@@ -55,7 +56,7 @@ export function InventoryActions({ name, currentStock, onUpdate }: InventoryActi
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Update Stock Level
+                {t('updateStockLevel')}
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-4 py-2">
@@ -65,13 +66,15 @@ export function InventoryActions({ name, currentStock, onUpdate }: InventoryActi
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{name}</p>
-                      <p className="text-xs text-default-500">Current stock: {currentStock}</p>
+                      <p className="text-xs text-default-500">
+                        {t('currentStock', { value: currentStock })}
+                      </p>
                     </div>
                   </div>
                   <Input
                     autoFocus
-                    label="New Quantity"
-                    placeholder="Enter stock amount"
+                    label={t('newQuantity')}
+                    placeholder={t('enterStockAmount')}
                     type="number"
                     variant="bordered"
                     value={newStock}
@@ -81,10 +84,10 @@ export function InventoryActions({ name, currentStock, onUpdate }: InventoryActi
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="flat" onPress={onClose}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button color="primary" onPress={() => handleUpdate(onClose)}>
-                  Update Stock
+                  {t('updateStock')}
                 </Button>
               </ModalFooter>
             </>

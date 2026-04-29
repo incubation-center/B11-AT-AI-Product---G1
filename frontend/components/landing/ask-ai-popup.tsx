@@ -48,13 +48,23 @@ export function AskAiPopup() {
                 <motion.div
                   className="absolute inset-y-0 w-16 -translate-x-20 rotate-12 bg-white/25 blur-sm"
                   animate={{ x: [0, 420] }}
-                  transition={{ repeat: Infinity, duration: 2.8, ease: 'linear' }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2.8,
+                    ease: 'linear',
+                  }}
                 />
                 <div className="relative flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-red-100">Instant Assistant</p>
-                    <h3 className="mt-1 text-lg font-semibold">Ask Coolhat AI</h3>
-                    <p className="mt-1 text-xs text-red-100">Get recommendations in seconds.</p>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-red-100">
+                      Instant Assistant
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold">
+                      Ask Coolhat AI
+                    </h3>
+                    <p className="mt-1 text-xs text-red-100">
+                      Get recommendations in seconds.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -106,7 +116,9 @@ export function AskAiPopup() {
               <Sparkles size={14} className="text-[#ffd250]" />
               <span className="text-base font-semibold">Ask Coolhat AI</span>
             </p>
-            <p className="mt-1 text-[13px] font-medium text-white/90">Get instant answers!</p>
+            <p className="mt-1 text-[13px] font-medium text-white/90">
+              Get instant answers!
+            </p>
             <p className="mt-1 flex items-center gap-1.5 text-[12px] text-[#8ef2a4]">
               <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
               Online - 24/7
@@ -115,59 +127,85 @@ export function AskAiPopup() {
         )}
 
         <div className="relative">
-        {!open && (
-          <>
-            <motion.span
-              className="absolute -inset-5 rounded-full bg-red-400/25"
-              animate={{ scale: [0.95, 1.08, 0.95], opacity: [0.35, 0.52, 0.35] }}
-              transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-            />
-            <motion.span
-              className="absolute inset-0 rounded-full border border-red-500/70"
-              animate={{ scale: [1, 1.65], opacity: [0.9, 0] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeOut' }}
-            />
-            <motion.span
-              className="absolute inset-0 rounded-full border border-red-300/80"
-              animate={{ scale: [1, 1.95], opacity: [0.75, 0] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeOut', delay: 0.35 }}
-            />
-          </>
-        )}
+          {!open && (
+            <>
+              <motion.span
+                className="absolute -inset-5 rounded-full bg-red-400/25"
+                animate={{
+                  scale: [0.95, 1.08, 0.95],
+                  opacity: [0.35, 0.52, 0.35],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.4,
+                  ease: 'easeInOut',
+                }}
+              />
+              <motion.span
+                className="absolute inset-0 rounded-full border border-red-500/70"
+                animate={{ scale: [1, 1.65], opacity: [0.9, 0] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.2,
+                  ease: 'easeOut',
+                }}
+              />
+              <motion.span
+                className="absolute inset-0 rounded-full border border-red-300/80"
+                animate={{ scale: [1, 1.95], opacity: [0.75, 0] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.2,
+                  ease: 'easeOut',
+                  delay: 0.35,
+                }}
+              />
+            </>
+          )}
 
-        <motion.button
-          type="button"
-          onClick={() => setOpen((prev) => !prev)}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.94 }}
-          animate={open ? {} : { y: [0, -7, 0] }}
-          transition={open ? {} : { repeat: Infinity, duration: 1.9, ease: 'easeInOut' }}
-          className="group relative inline-flex h-[70px] w-[70px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white shadow-[0_16px_35px_rgba(127,29,29,0.62)]"
-          aria-label="Toggle Ask Coolhat AI"
-        >
-          <span className="absolute inset-[5px] rounded-full border border-white/30" />
-
-          <motion.span
-            className="absolute inset-y-0 w-7 -translate-x-14 rotate-12 bg-white/30 blur-sm"
-            animate={{ x: [0, 140] }}
-            transition={{ repeat: Infinity, duration: 2.7, ease: 'linear' }}
-          />
-
-          <motion.div
-            animate={open ? { rotate: 90 } : { rotate: [0, 14, -10, 0] }}
-            transition={open ? { duration: 0.2 } : { repeat: Infinity, duration: 2.8, ease: 'easeInOut' }}
+          <motion.button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            animate={open ? {} : { y: [0, -7, 0] }}
+            transition={
+              open ? {} : { repeat: Infinity, duration: 1.9, ease: 'easeInOut' }
+            }
+            className="group relative inline-flex h-[70px] w-[70px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white shadow-[0_16px_35px_rgba(127,29,29,0.62)]"
+            aria-label="Toggle Ask Coolhat AI"
           >
-            {open ? <X size={24} /> : <Sparkles size={24} />}
-          </motion.div>
+            <span className="absolute inset-[5px] rounded-full border border-white/30" />
 
-          <motion.span
-            animate={{ rotate: [0, 12, -8, 0] }}
-            transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-            className="absolute -right-1 -top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow"
-          >
-            <MessageCircle size={11} />
-          </motion.span>
-        </motion.button>
+            <motion.span
+              className="absolute inset-y-0 w-7 -translate-x-14 rotate-12 bg-white/30 blur-sm"
+              animate={{ x: [0, 140] }}
+              transition={{ repeat: Infinity, duration: 2.7, ease: 'linear' }}
+            />
+
+            <motion.div
+              animate={open ? { rotate: 90 } : { rotate: [0, 14, -10, 0] }}
+              transition={
+                open
+                  ? { duration: 0.2 }
+                  : { repeat: Infinity, duration: 2.8, ease: 'easeInOut' }
+              }
+            >
+              {open ? <X size={24} /> : <Sparkles size={24} />}
+            </motion.div>
+
+            <motion.span
+              animate={{ rotate: [0, 12, -8, 0] }}
+              transition={{
+                repeat: Infinity,
+                duration: 2.2,
+                ease: 'easeInOut',
+              }}
+              className="absolute -right-1 -top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow"
+            >
+              <MessageCircle size={11} />
+            </motion.span>
+          </motion.button>
         </div>
       </div>
     </div>

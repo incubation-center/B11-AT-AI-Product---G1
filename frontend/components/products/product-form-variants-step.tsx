@@ -1,15 +1,16 @@
 // Feature component — Product Form Variants Step
 'use client';
 
-import { 
-  Checkbox, 
-  Button, 
-  Input, 
-  Table, 
-  TableHeader, 
-  TableColumn, 
-  TableBody, 
-  TableRow, 
+import { useTranslations } from 'next-intl';
+import {
+  Checkbox,
+  Button,
+  Input,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
   TableCell,
   Tooltip,
   Modal,
@@ -38,9 +39,11 @@ export function ProductFormVariantsStep({
   onVariantsChange,
   isLoading,
 }: ProductFormVariantsStepProps) {
+  const t = useTranslations('products.form.variants');
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [editingVariant, setEditingVariant] = useState<Partial<ProductVariant> | null>(null);
-  
+  const [editingVariant, setEditingVariant] =
+    useState<Partial<ProductVariant> | null>(null);
+
   // Local form state for new/editing variant
   const [size, setSize] = useState('');
   const [color, setColor] = useState('');
@@ -80,7 +83,9 @@ export function ProductFormVariantsStep({
     };
 
     if (editingVariant) {
-      onVariantsChange(variants.map(v => v === editingVariant ? newVariant : v));
+      onVariantsChange(
+        variants.map((v) => (v === editingVariant ? newVariant : v)),
+      );
     } else {
       onVariantsChange([...variants, newVariant]);
     }
@@ -88,7 +93,7 @@ export function ProductFormVariantsStep({
   };
 
   const handleDeleteVariant = (variant: Partial<ProductVariant>) => {
-    onVariantsChange(variants.filter(v => v !== variant));
+    onVariantsChange(variants.filter((v) => v !== variant));
   };
 
   return (
@@ -96,7 +101,7 @@ export function ProductFormVariantsStep({
       <div className="bg-default-50 rounded-lg p-5 border border-default-200">
         <div className="flex items-start space-x-3">
           <Checkbox
-            aria-label="Product has variants"
+            aria-label={t('hasVariantsAria')}
             isSelected={hasVariants}
             onValueChange={onHasVariantsChange}
             isDisabled={isLoading}
@@ -106,12 +111,9 @@ export function ProductFormVariantsStep({
           />
           <div className="space-y-1 flex-1">
             <p className="text-sm font-semibold text-default-900">
-              Product has variants
+              {t('hasVariants')}
             </p>
-            <p className="text-xs text-default-500">
-              Enable this if your product comes in different colors, sizes, or
-              other options.
-            </p>
+            <p className="text-xs text-default-500">{t('hasVariantsHelp')}</p>
           </div>
         </div>
       </div>
@@ -119,26 +121,28 @@ export function ProductFormVariantsStep({
       {hasVariants && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-default-900">Manage Variants</h3>
-            <Button 
-              size="sm" 
-              color="primary" 
-              variant="flat" 
+            <h3 className="text-sm font-semibold text-default-900">
+              {t('manageVariants')}
+            </h3>
+            <Button
+              size="sm"
+              color="primary"
+              variant="flat"
               startContent={<Plus className="h-4 w-4" />}
               onPress={handleAddClick}
               isDisabled={isLoading}
             >
-              Add Variant
+              {t('addVariant')}
             </Button>
           </div>
 
           {variants.length > 0 ? (
-            <Table aria-label="Product variants table" removeWrapper>
+            <Table aria-label={t('tableAria')} removeWrapper>
               <TableHeader>
-                <TableColumn>VARIANT</TableColumn>
-                <TableColumn>PRICE (USD)</TableColumn>
-                <TableColumn>STOCK</TableColumn>
-                <TableColumn align="end">ACTIONS</TableColumn>
+                <TableColumn>{t('columns.variant')}</TableColumn>
+                <TableColumn>{t('columns.priceUsd')}</TableColumn>
+                <TableColumn>{t('columns.stock')}</TableColumn>
+                <TableColumn align="end">{t('columns.actions')}</TableColumn>
               </TableHeader>
               <TableBody>
                 {variants.map((v, i) => (
@@ -146,31 +150,34 @@ export function ProductFormVariantsStep({
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">
-                          {[v.size, v.color].filter(Boolean).join(' / ') || 'Standard'}
+                          {[v.size, v.color].filter(Boolean).join(' / ') ||
+                            t('standard')}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {v.price_override_usd ? `$${v.price_override_usd}` : 'Base Price'}
+                      {v.price_override_usd
+                        ? `$${v.price_override_usd}`
+                        : t('basePrice')}
                     </TableCell>
                     <TableCell>{v.stock_qty ?? 0}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-2">
-                        <Tooltip content="Edit variant">
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            variant="light" 
+                        <Tooltip content={t('editVariant')}>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
                             onPress={() => handleEditClick(v)}
                           >
                             <Edit className="h-4 w-4 text-default-400" />
                           </Button>
                         </Tooltip>
-                        <Tooltip color="danger" content="Delete variant">
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            variant="light" 
+                        <Tooltip color="danger" content={t('deleteVariant')}>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
                             onPress={() => handleDeleteVariant(v)}
                           >
                             <Trash2 className="h-4 w-4 text-danger" />
@@ -184,7 +191,7 @@ export function ProductFormVariantsStep({
             </Table>
           ) : (
             <div className="text-center py-8 bg-default-50 rounded-lg border border-dashed border-default-300">
-              <p className="text-xs text-default-400">No variants added yet. Click &quot;Add Variant&quot; to begin.</p>
+              <p className="text-xs text-default-400">{t('empty')}</p>
             </div>
           )}
         </div>
@@ -195,11 +202,10 @@ export function ProductFormVariantsStep({
         <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-200">
           <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-blue-900">Variants</p>
-            <p className="text-xs text-blue-700 mt-1">
-              Enable variants to add different colors, sizes, or other options. 
-              Each variant can have its own price and stock level.
+            <p className="text-sm font-medium text-blue-900">
+              {t('infoTitle')}
             </p>
+            <p className="text-xs text-blue-700 mt-1">{t('infoText')}</p>
           </div>
         </div>
       )}
@@ -210,20 +216,20 @@ export function ProductFormVariantsStep({
           {(onClose) => (
             <>
               <ModalHeader>
-                {editingVariant ? 'Edit Variant' : 'Add New Variant'}
+                {editingVariant ? t('editVariantTitle') : t('addVariantTitle')}
               </ModalHeader>
               <ModalBody className="gap-4">
                 <div className="grid grid-cols-2 gap-3">
                   <Input
-                    label="Size"
-                    placeholder="e.g. M, L, XL"
+                    label={t('size')}
+                    placeholder={t('sizePlaceholder')}
                     value={size}
                     onValueChange={setSize}
                     variant="bordered"
                   />
                   <Input
-                    label="Color"
-                    placeholder="e.g. Red, Blue"
+                    label={t('color')}
+                    placeholder={t('colorPlaceholder')}
                     value={color}
                     onValueChange={setColor}
                     variant="bordered"
@@ -231,17 +237,19 @@ export function ProductFormVariantsStep({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
-                    label="Price (USD)"
-                    placeholder="Override base price"
+                    label={t('priceUsd')}
+                    placeholder={t('overrideBasePrice')}
                     value={priceUsd}
                     onValueChange={setPriceUsd}
                     type="number"
                     variant="bordered"
-                    startContent={<span className="text-default-400 text-small">$</span>}
+                    startContent={
+                      <span className="text-default-400 text-small">$</span>
+                    }
                   />
-                   <Input
-                    label="Price (KHR)"
-                    placeholder="Override base price"
+                  <Input
+                    label={t('priceKhr')}
+                    placeholder={t('overrideBasePrice')}
                     value={priceKhr}
                     onValueChange={setPriceKhr}
                     type="number"
@@ -249,7 +257,7 @@ export function ProductFormVariantsStep({
                   />
                 </div>
                 <Input
-                  label="Initial Stock"
+                  label={t('initialStock')}
                   value={stock}
                   onValueChange={setStock}
                   type="number"
@@ -258,10 +266,10 @@ export function ProductFormVariantsStep({
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button color="primary" onPress={handleSaveVariant}>
-                  {editingVariant ? 'Update' : 'Add'}
+                  {editingVariant ? t('update') : t('add')}
                 </Button>
               </ModalFooter>
             </>

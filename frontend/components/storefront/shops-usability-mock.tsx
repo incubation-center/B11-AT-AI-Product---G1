@@ -89,7 +89,12 @@ function sanitizeFavoriteKeysFromEntries(raw: unknown) {
       const item = value as Record<string, unknown>;
       return typeof item.id === 'string' && typeof item.subdomain === 'string';
     })
-    .map((value) => buildFavoriteKey({ id: value.id, subdomain: value.subdomain } as DirectoryProduct));
+    .map((value) =>
+      buildFavoriteKey({
+        id: value.id,
+        subdomain: value.subdomain,
+      } as DirectoryProduct),
+    );
   return new Set(keys);
 }
 
@@ -139,8 +144,11 @@ export function ShopsUsabilityMock({
   const [showAllShops, setShowAllShops] = useState(false);
   const [queryText, setQueryText] = useState('');
   const [queryOpen, setQueryOpen] = useState(false);
-  const [isGlobalAssistantSending, setIsGlobalAssistantSending] = useState(false);
-  const [globalAssistantMessages, setGlobalAssistantMessages] = useState<GlobalAssistantMessage[]>([
+  const [isGlobalAssistantSending, setIsGlobalAssistantSending] =
+    useState(false);
+  const [globalAssistantMessages, setGlobalAssistantMessages] = useState<
+    GlobalAssistantMessage[]
+  >([
     {
       id: 'global-assistant-welcome',
       role: 'assistant',
@@ -148,15 +156,21 @@ export function ShopsUsabilityMock({
     },
   ]);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(new Set<string>());
+  const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(
+    new Set<string>(),
+  );
   const [cartEntries, setCartEntries] = useState<MockCartEntry[]>([]);
   const [hasHydratedStorage, setHasHydratedStorage] = useState(false);
 
   useEffect(() => {
     try {
-      const entryRaw = window.localStorage.getItem(FAVORITES_STORAGE_ENTRIES_KEY);
+      const entryRaw = window.localStorage.getItem(
+        FAVORITES_STORAGE_ENTRIES_KEY,
+      );
       if (entryRaw) {
-        const fromEntries = sanitizeFavoriteKeysFromEntries(JSON.parse(entryRaw));
+        const fromEntries = sanitizeFavoriteKeysFromEntries(
+          JSON.parse(entryRaw),
+        );
         if (fromEntries.size > 0) {
           setFavoriteKeys(fromEntries);
         } else {
@@ -179,7 +193,10 @@ export function ShopsUsabilityMock({
 
   useEffect(() => {
     if (!hasHydratedStorage) return;
-    window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(favoriteKeys)));
+    window.localStorage.setItem(
+      FAVORITES_STORAGE_KEY,
+      JSON.stringify(Array.from(favoriteKeys)),
+    );
   }, [favoriteKeys, hasHydratedStorage]);
 
   const favoriteEntriesForStorage = useMemo(
@@ -191,7 +208,9 @@ export function ShopsUsabilityMock({
           subdomain: product.subdomain,
           shopName: product.shopName,
           name: product.name,
-          price: product.basePriceUsd ? `$${Number(product.basePriceUsd).toFixed(2)}` : '$0.00',
+          price: product.basePriceUsd
+            ? `$${Number(product.basePriceUsd).toFixed(2)}`
+            : '$0.00',
           imageUrl: product.imageUrls[0] ?? '',
           description: '',
         })),
@@ -208,17 +227,20 @@ export function ShopsUsabilityMock({
 
   useEffect(() => {
     if (!hasHydratedStorage) return;
-    window.localStorage.setItem(CART_STORAGE_ENTRIES_KEY, JSON.stringify(cartEntries));
+    window.localStorage.setItem(
+      CART_STORAGE_ENTRIES_KEY,
+      JSON.stringify(cartEntries),
+    );
   }, [cartEntries, hasHydratedStorage]);
 
   const mockFavorites = useMemo(
-    () => allProducts.filter((product) => favoriteKeys.has(buildFavoriteKey(product))),
+    () =>
+      allProducts.filter((product) =>
+        favoriteKeys.has(buildFavoriteKey(product)),
+      ),
     [allProducts, favoriteKeys],
   );
-  const mockCart = useMemo(
-    () => cartEntries,
-    [cartEntries],
-  );
+  const mockCart = useMemo(() => cartEntries, [cartEntries]);
 
   const shopTiles = useMemo(
     () =>
@@ -262,7 +284,9 @@ export function ShopsUsabilityMock({
       : '$0.00';
 
     setCartEntries((prev) => {
-      const index = prev.findIndex((item) => `${item.subdomain}:${item.id}` === key);
+      const index = prev.findIndex(
+        (item) => `${item.subdomain}:${item.id}` === key,
+      );
       if (index === -1) {
         return [
           {
@@ -312,7 +336,9 @@ export function ShopsUsabilityMock({
       };
 
       if (!response.ok) {
-        throw new Error(payload.message || 'Unable to get assistant response right now.');
+        throw new Error(
+          payload.message || 'Unable to get assistant response right now.',
+        );
       }
 
       const answer =
@@ -330,10 +356,15 @@ export function ShopsUsabilityMock({
         },
       ]);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unable to reach assistant.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unable to reach assistant.';
       setGlobalAssistantMessages((prev) => [
         ...prev,
-        { id: `assistant-error-${Date.now()}`, role: 'assistant', content: errorMessage },
+        {
+          id: `assistant-error-${Date.now()}`,
+          role: 'assistant',
+          content: errorMessage,
+        },
       ]);
     } finally {
       setIsGlobalAssistantSending(false);
@@ -411,54 +442,59 @@ export function ShopsUsabilityMock({
               </div>
 
               <div className="mt-6 border-t border-slate-200 pt-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
-                    {sidebarOpen ? 'Shops' : 'S'}
-                  </p>
-                  <div className={cn('mt-3 grid gap-2', sidebarOpen ? 'grid-cols-2' : 'grid-cols-1')}>
-                    {visibleShops.map((shop) => (
-                      <Link
-                        key={shop.id}
-                        href={`/shops/${shop.subdomain}`}
-                        title={`Visit ${shop.name}`}
-                        className={cn(
-                          'group relative overflow-hidden rounded-lg border border-slate-200',
-                          sidebarOpen ? 'h-16' : 'h-14',
-                        )}
-                      >
-                        {shop.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={shop.imageUrl}
-                            alt={shop.name}
-                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-[linear-gradient(120deg,#e9f1ff,#fff4df)]" />
-                        )}
-                        <div className="absolute inset-0 bg-black/35" />
-                        {sidebarOpen ? (
-                          <div className="absolute inset-x-2 bottom-2">
-                            <p className="line-clamp-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
-                              {shop.name}
-                            </p>
-                            <p className="line-clamp-1 text-[10px] text-white/85">
-                              Category: {shop.category}
-                            </p>
-                          </div>
-                        ) : null}
-                      </Link>
-                    ))}
-                  </div>
-                  {totalShops > 4 && sidebarOpen ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllShops((value) => !value)}
-                      className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#002e6b] hover:bg-[#002e6b]/5"
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                  {sidebarOpen ? 'Shops' : 'S'}
+                </p>
+                <div
+                  className={cn(
+                    'mt-3 grid gap-2',
+                    sidebarOpen ? 'grid-cols-2' : 'grid-cols-1',
+                  )}
+                >
+                  {visibleShops.map((shop) => (
+                    <Link
+                      key={shop.id}
+                      href={`/shops/${shop.subdomain}`}
+                      title={`Visit ${shop.name}`}
+                      className={cn(
+                        'group relative overflow-hidden rounded-lg border border-slate-200',
+                        sidebarOpen ? 'h-16' : 'h-14',
+                      )}
                     >
-                      {showAllShops ? 'Show less shops' : 'Show more shops'}
-                    </button>
-                  ) : null}
+                      {shop.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={shop.imageUrl}
+                          alt={shop.name}
+                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-[linear-gradient(120deg,#e9f1ff,#fff4df)]" />
+                      )}
+                      <div className="absolute inset-0 bg-black/35" />
+                      {sidebarOpen ? (
+                        <div className="absolute inset-x-2 bottom-2">
+                          <p className="line-clamp-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                            {shop.name}
+                          </p>
+                          <p className="line-clamp-1 text-[10px] text-white/85">
+                            Category: {shop.category}
+                          </p>
+                        </div>
+                      ) : null}
+                    </Link>
+                  ))}
                 </div>
+                {totalShops > 4 && sidebarOpen ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllShops((value) => !value)}
+                    className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#002e6b] hover:bg-[#002e6b]/5"
+                  >
+                    {showAllShops ? 'Show less shops' : 'Show more shops'}
+                  </button>
+                ) : null}
+              </div>
             </div>
           </SidebarBody>
         </Sidebar>
@@ -471,7 +507,13 @@ export function ShopsUsabilityMock({
               : 'max-h-[calc(100dvh-1.5rem)] overflow-y-auto',
           )}
         >
-          <div className={cn('relative', activeTab !== 'assistant' && 'pb-28', activeTab === 'assistant' && 'h-full')}>
+          <div
+            className={cn(
+              'relative',
+              activeTab !== 'assistant' && 'pb-28',
+              activeTab === 'assistant' && 'h-full',
+            )}
+          >
             {activeTab === 'explore' ? (
               <ExploreView
                 stores={stores}
@@ -496,7 +538,13 @@ export function ShopsUsabilityMock({
               <CartView
                 mockCart={mockCart}
                 mockSubtotal={mockSubtotal}
-                onRemoveItem={(itemKey) => setCartEntries((prev) => prev.filter((item) => `${item.subdomain}:${item.id}` !== itemKey))}
+                onRemoveItem={(itemKey) =>
+                  setCartEntries((prev) =>
+                    prev.filter(
+                      (item) => `${item.subdomain}:${item.id}` !== itemKey,
+                    ),
+                  )
+                }
                 onClearCart={() => setCartEntries([])}
               />
             ) : null}
@@ -538,7 +586,8 @@ export function ShopsUsabilityMock({
 
           <div className="space-y-4 py-6">
             <p className="text-sm text-slate-600">
-              Sign in to access an existing store or create a new one. Start selling with Coolhat today!
+              Sign in to access an existing store or create a new one. Start
+              selling with Coolhat today!
             </p>
 
             <div className="grid gap-3">
@@ -609,10 +658,16 @@ function GlobalAssistantWorkspace({
             <p className="inline-flex items-center gap-1 rounded-full border border-[#bfd6ff] bg-[#f3f8ff] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#3f69a5]">
               <Sparkles className="size-3" /> Global Assistant
             </p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#002e6b]">CoolHat AI Workspace</h2>
-            <p className="mt-1 text-sm text-slate-600">Find products from every shop in one chat.</p>
+            <h2 className="mt-2 text-2xl font-semibold text-[#002e6b]">
+              CoolHat AI Workspace
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Find products from every shop in one chat.
+            </p>
           </div>
-          <p className="rounded-full border border-[#d7e5ff] bg-white px-3 py-1 text-xs font-semibold text-[#2f5a98]">Live suggestions</p>
+          <p className="rounded-full border border-[#d7e5ff] bg-white px-3 py-1 text-xs font-semibold text-[#2f5a98]">
+            Live suggestions
+          </p>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -648,13 +703,23 @@ function GlobalAssistantWorkspace({
                     : 'border border-slate-200 bg-white text-slate-700 shadow-[0_8px_22px_rgba(15,23,42,0.06)]',
                 )}
               >
-                <p className={cn('mb-1 text-[11px] font-semibold uppercase tracking-[0.08em]', message.role === 'user' ? 'text-white/75' : 'text-[#4f6e9e]')}>
+                <p
+                  className={cn(
+                    'mb-1 text-[11px] font-semibold uppercase tracking-[0.08em]',
+                    message.role === 'user'
+                      ? 'text-white/75'
+                      : 'text-[#4f6e9e]',
+                  )}
+                >
                   {message.role === 'user' ? 'You' : 'CoolHat AI'}
                 </p>
                 {message.content}
-                {message.role === 'assistant' && (message.suggestedShops?.length ?? 0) > 0 ? (
+                {message.role === 'assistant' &&
+                (message.suggestedShops?.length ?? 0) > 0 ? (
                   <div className="mt-3 space-y-2 rounded-xl border border-[#d9e7ff] bg-[#f7fbff] p-2.5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Suggested Shops</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      Suggested Shops
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {message.suggestedShops?.map((shop) => (
                         <Link
@@ -787,13 +852,25 @@ function QueryChatWidget({
                   <div className="rounded-2xl border border-[#d6e5ff] bg-[linear-gradient(140deg,#ffffff,#f3f8ff)] p-3 shadow-sm animate-[pulse_2.8s_ease-in-out_infinite]">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#4d73a8]"><Sparkles className="size-3" /> Quick AI Guide</p>
-                        <p className="mt-1 text-sm font-semibold text-[#103b72]">Try one prompt to start</p>
-                        <p className="mt-1 text-xs text-slate-600">Ask, refine, and open suggested shops in one flow.</p>
+                        <p className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#4d73a8]">
+                          <Sparkles className="size-3" /> Quick AI Guide
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[#103b72]">
+                          Try one prompt to start
+                        </p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          Ask, refine, and open suggested shops in one flow.
+                        </p>
                         <div className="mt-2 flex flex-wrap gap-1">
-                          <span className="rounded-full border border-[#d8e6ff] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#285287]">1. Ask</span>
-                          <span className="rounded-full border border-[#d8e6ff] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#285287]">2. Refine</span>
-                          <span className="rounded-full border border-[#d8e6ff] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#285287]">3. Visit Shop</span>
+                          <span className="rounded-full border border-[#d8e6ff] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#285287]">
+                            1. Ask
+                          </span>
+                          <span className="rounded-full border border-[#d8e6ff] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#285287]">
+                            2. Refine
+                          </span>
+                          <span className="rounded-full border border-[#d8e6ff] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#285287]">
+                            3. Visit Shop
+                          </span>
                         </div>
                       </div>
                       <button
@@ -830,9 +907,12 @@ function QueryChatWidget({
                     )}
                   >
                     {message.content}
-                    {message.role === 'assistant' && (message.suggestedShops?.length ?? 0) > 0 ? (
+                    {message.role === 'assistant' &&
+                    (message.suggestedShops?.length ?? 0) > 0 ? (
                       <div className="mt-3 space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Suggested Shops</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                          Suggested Shops
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {message.suggestedShops?.map((shop) => (
                             <Link
@@ -854,27 +934,27 @@ function QueryChatWidget({
             <div className="border-t border-slate-200 bg-white px-3 py-4">
               <div className="rounded-2xl border border-[#cfdaea] bg-[#f8fafc] p-2.5">
                 <div className="flex items-center gap-2 rounded-xl bg-transparent px-2">
-                <input
-                  value={value}
-                  onChange={(event) => onChange(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      onSend();
-                    }
-                  }}
-                  placeholder="Ask about this product..."
-                  className="h-11 w-full bg-transparent text-[15px] text-slate-700 outline-none placeholder:text-slate-400"
-                />
-                <button
-                  type="button"
-                  onClick={onSend}
-                  disabled={!value.trim() || isSending}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#7b96bb] text-white transition hover:bg-[#6584ad]"
-                  aria-label="Send product query"
-                >
-                  <ArrowRight className="size-4" />
-                </button>
+                  <input
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        onSend();
+                      }
+                    }}
+                    placeholder="Ask about this product..."
+                    className="h-11 w-full bg-transparent text-[15px] text-slate-700 outline-none placeholder:text-slate-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={onSend}
+                    disabled={!value.trim() || isSending}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#7b96bb] text-white transition hover:bg-[#6584ad]"
+                    aria-label="Send product query"
+                  >
+                    <ArrowRight className="size-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -928,7 +1008,8 @@ function ExploreView({
   const heroTilesBase = stores
     .map((store) => {
       const productImage = allProducts.find(
-        (product) => product.subdomain === store.subdomain && product.imageUrls[0],
+        (product) =>
+          product.subdomain === store.subdomain && product.imageUrls[0],
       )?.imageUrls[0];
 
       return {
@@ -949,12 +1030,16 @@ function ExploreView({
 
   const mergedTiles = [...heroTilesBase, ...productTiles, ...fallbackHeroTiles];
   const uniqueTiles = mergedTiles.filter(
-    (tile, index) => mergedTiles.findIndex((item) => item.imageUrl === tile.imageUrl) === index,
+    (tile, index) =>
+      mergedTiles.findIndex((item) => item.imageUrl === tile.imageUrl) ===
+      index,
   );
   const heroTiles = uniqueTiles.slice(0, 15);
   const floatingTiles = heroTiles.slice(0, 15);
   const [showAllProducts, setShowAllProducts] = useState(false);
-  const visibleProducts = showAllProducts ? allProducts : allProducts.slice(0, 8);
+  const visibleProducts = showAllProducts
+    ? allProducts
+    : allProducts.slice(0, 8);
   const totalProducts = allProducts.length;
 
   return (
@@ -1048,33 +1133,75 @@ function ExploreView({
 
       <style jsx>{`
         @keyframes slide-popup-1 {
-          0% { transform: translate3d(50px, 0, 0) rotate(0deg) scale(1); opacity: 0.88; }
-          50% { transform: translate3d(-24px, -8px, 0) rotate(-1deg) scale(1.01); opacity: 1; }
-          100% { transform: translate3d(-95px, -2px, 0) rotate(0deg) scale(1); opacity: 0.9; }
+          0% {
+            transform: translate3d(50px, 0, 0) rotate(0deg) scale(1);
+            opacity: 0.88;
+          }
+          50% {
+            transform: translate3d(-24px, -8px, 0) rotate(-1deg) scale(1.01);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(-95px, -2px, 0) rotate(0deg) scale(1);
+            opacity: 0.9;
+          }
         }
 
         @keyframes slide-popup-2 {
-          0% { transform: translate3d(56px, 0, 0) rotate(0deg) scale(1); opacity: 0.86; }
-          50% { transform: translate3d(-20px, -5px, 0) rotate(1deg) scale(1.01); opacity: 1; }
-          100% { transform: translate3d(-102px, -1px, 0) rotate(0deg) scale(1); opacity: 0.9; }
+          0% {
+            transform: translate3d(56px, 0, 0) rotate(0deg) scale(1);
+            opacity: 0.86;
+          }
+          50% {
+            transform: translate3d(-20px, -5px, 0) rotate(1deg) scale(1.01);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(-102px, -1px, 0) rotate(0deg) scale(1);
+            opacity: 0.9;
+          }
         }
 
         @keyframes slide-popup-3 {
-          0% { transform: translate3d(44px, 0, 0) rotate(0deg) scale(1); opacity: 0.9; }
-          50% { transform: translate3d(-26px, -9px, 0) rotate(-1deg) scale(1.01); opacity: 1; }
-          100% { transform: translate3d(-88px, -3px, 0) rotate(0deg) scale(1); opacity: 0.88; }
+          0% {
+            transform: translate3d(44px, 0, 0) rotate(0deg) scale(1);
+            opacity: 0.9;
+          }
+          50% {
+            transform: translate3d(-26px, -9px, 0) rotate(-1deg) scale(1.01);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(-88px, -3px, 0) rotate(0deg) scale(1);
+            opacity: 0.88;
+          }
         }
 
         @keyframes slide-popup-4 {
-          0% { transform: translate3d(60px, 0, 0) rotate(0deg) scale(1); opacity: 0.9; }
-          50% { transform: translate3d(-18px, -6px, 0) rotate(1deg) scale(1.01); opacity: 1; }
-          100% { transform: translate3d(-110px, -2px, 0) rotate(0deg) scale(1); opacity: 0.87; }
+          0% {
+            transform: translate3d(60px, 0, 0) rotate(0deg) scale(1);
+            opacity: 0.9;
+          }
+          50% {
+            transform: translate3d(-18px, -6px, 0) rotate(1deg) scale(1.01);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(-110px, -2px, 0) rotate(0deg) scale(1);
+            opacity: 0.87;
+          }
         }
 
         @keyframes hero-breathe {
-          0% { transform: translate3d(0, 0, 0) scale(1); }
-          50% { transform: translate3d(0, -2px, 0) scale(1.01); }
-          100% { transform: translate3d(0, 0, 0) scale(1); }
+          0% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          50% {
+            transform: translate3d(0, -2px, 0) scale(1.01);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
         }
       `}</style>
 
@@ -1135,7 +1262,9 @@ function ExploreView({
                 </div>
                 <div className="space-y-3 p-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{store.shopName}</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {store.shopName}
+                    </h3>
                     <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
                       {store.shopType.replaceAll('_', ' ')}
                     </p>
@@ -1147,7 +1276,9 @@ function ExploreView({
                   </p>
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-2">
-                    <span className="text-xs text-slate-500">{store.subdomain}</span>
+                    <span className="text-xs text-slate-500">
+                      {store.subdomain}
+                    </span>
                     <Link
                       href={`/shops/${store.subdomain}`}
                       className="inline-flex items-center gap-2 rounded-full bg-[#002e6b] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#003d8f]"
@@ -1229,9 +1360,12 @@ function FavoritesView({
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
               <Heart className="size-6" />
             </div>
-            <h3 className="text-3xl font-semibold text-slate-900">No favorites yet</h3>
+            <h3 className="text-3xl font-semibold text-slate-900">
+              No favorites yet
+            </h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-              Start browsing products and click the heart icon to save your favorites.
+              Start browsing products and click the heart icon to save your
+              favorites.
             </p>
             <button
               type="button"
@@ -1270,9 +1404,7 @@ function FavoritesView({
         </div>
         <div>
           <p className="text-2xl font-semibold text-slate-900">Visited Shops</p>
-          <p className="text-xs text-slate-500">
-            {followedShops.length} shops
-          </p>
+          <p className="text-xs text-slate-500">{followedShops.length} shops</p>
         </div>
       </div>
 
@@ -1295,8 +1427,12 @@ function FavoritesView({
               )}
             </div>
             <div className="space-y-2 p-3">
-              <p className="text-sm font-semibold text-slate-900">{shop.shopName}</p>
-              <p className="text-xs text-slate-500">{shop.shopType.replaceAll('_', ' ')}</p>
+              <p className="text-sm font-semibold text-slate-900">
+                {shop.shopName}
+              </p>
+              <p className="text-xs text-slate-500">
+                {shop.shopType.replaceAll('_', ' ')}
+              </p>
               <Link
                 href={`/shops/${shop.subdomain}`}
                 className="inline-flex rounded-full bg-[#002e6b] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#003d8f]"
@@ -1314,7 +1450,9 @@ function FavoritesView({
         </div>
         <div>
           <p className="text-2xl font-semibold text-slate-900">Saved Items</p>
-          <p className="text-xs text-slate-500">{mockFavorites.length} items you love</p>
+          <p className="text-xs text-slate-500">
+            {mockFavorites.length} items you love
+          </p>
         </div>
       </div>
 
@@ -1346,23 +1484,34 @@ function CartView({
   const [phoneNumber, setPhoneNumber] = useState('+855');
   const [deliveryLocation, setDeliveryLocation] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'aba' | 'cod'>('aba');
-  const [placedOrders, setPlacedOrders] = useState<Array<{ shopName: string; orderNo?: string; total: number }>>([]);
+  const [placedOrders, setPlacedOrders] = useState<
+    Array<{ shopName: string; orderNo?: string; total: number }>
+  >([]);
 
-  const byShop = mockCart.reduce<Record<string, MockCartEntry[]>>((acc, item) => {
-    if (!acc[item.shopName]) acc[item.shopName] = [];
-    acc[item.shopName].push(item);
-    return acc;
-  }, {});
+  const byShop = mockCart.reduce<Record<string, MockCartEntry[]>>(
+    (acc, item) => {
+      if (!acc[item.shopName]) acc[item.shopName] = [];
+      acc[item.shopName].push(item);
+      return acc;
+    },
+    {},
+  );
 
   const totalItems = mockCart.reduce((sum, item) => sum + item.qty, 0);
   const shipping = 2;
 
   const onCheckout = async () => {
-    if (!customerName.trim() || !phoneNumber.trim() || !deliveryLocation.trim()) return;
+    if (!customerName.trim() || !phoneNumber.trim() || !deliveryLocation.trim())
+      return;
 
     setIsPlacingOrder(true);
     try {
-      const results: Array<{ shopName: string; orderNo?: string; total: number; success: boolean }> = [];
+      const results: Array<{
+        shopName: string;
+        orderNo?: string;
+        total: number;
+        success: boolean;
+      }> = [];
 
       for (const [shopName, entries] of Object.entries(byShop)) {
         const subdomain = entries[0]?.subdomain;
@@ -1379,11 +1528,15 @@ function CartView({
           address_text: deliveryLocation.trim(),
           payment_method: paymentMethod === 'aba' ? 'aba_transfer' : 'cod',
           currency: 'USD',
-          items: entries.map((item) => ({ product_id: item.id, qty: item.qty })),
+          items: entries.map((item) => ({
+            product_id: item.id,
+            qty: item.qty,
+          })),
         };
 
         try {
-          const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+          const apiBase =
+            process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
           const response = await fetch(buildCheckoutUrl(apiBase, subdomain), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1435,9 +1588,16 @@ function CartView({
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-[#cfe0ff] bg-white shadow-sm">
             <ShoppingCart className="size-7 text-[#002e6b]" />
           </div>
-          <h2 className="mt-5 font-[family:var(--font-dashboard-display)] text-3xl font-semibold text-slate-900">Your cart is empty</h2>
-          <p className="mt-2 text-sm text-slate-600">Products from all shops will appear here in one unified checkout.</p>
-          <Link href="/shops" className="mt-7 inline-flex items-center justify-center rounded-xl bg-[#002e6b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#003d8f]">
+          <h2 className="mt-5 font-[family:var(--font-dashboard-display)] text-3xl font-semibold text-slate-900">
+            Your cart is empty
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Products from all shops will appear here in one unified checkout.
+          </p>
+          <Link
+            href="/shops"
+            className="mt-7 inline-flex items-center justify-center rounded-xl bg-[#002e6b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#003d8f]"
+          >
             Explore all shops
           </Link>
         </div>
@@ -1448,8 +1608,12 @@ function CartView({
   return (
     <>
       <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_10px_26px_rgba(0,46,107,0.08)]">
-        <h1 className="font-[family:var(--font-dashboard-display)] text-2xl font-semibold text-[#002e6b]">Cart</h1>
-        <p className="mt-1 text-xs text-slate-500">One checkout for products from one or many stores.</p>
+        <h1 className="font-[family:var(--font-dashboard-display)] text-2xl font-semibold text-[#002e6b]">
+          Cart
+        </h1>
+        <p className="mt-1 text-xs text-slate-500">
+          One checkout for products from one or many stores.
+        </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.18fr_0.82fr]">
@@ -1460,38 +1624,77 @@ function CartView({
               return sum + price * item.qty;
             }, 0);
             return (
-              <article key={shopName} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(0,46,107,0.08)]">
+              <article
+                key={shopName}
+                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(0,46,107,0.08)]"
+              >
                 <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">{shopName}</p>
-                    <p className="text-xs text-slate-500">{entries.length} item{entries.length > 1 ? 's' : ''}</p>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {shopName}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {entries.length} item{entries.length > 1 ? 's' : ''}
+                    </p>
                   </div>
-                  <Link href={`/shops/${entries[0].subdomain}`} className="text-xs font-semibold text-[#002e6b] hover:underline">View Store</Link>
+                  <Link
+                    href={`/shops/${entries[0].subdomain}`}
+                    className="text-xs font-semibold text-[#002e6b] hover:underline"
+                  >
+                    View Store
+                  </Link>
                 </div>
 
                 <div className="space-y-3">
                   {entries.map((item) => (
-                    <div key={`${item.subdomain}:${item.id}`} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                    <div
+                      key={`${item.subdomain}:${item.id}`}
+                      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3"
+                    >
                       <div className="h-14 w-14 overflow-hidden rounded-lg border border-slate-200 bg-white">
                         {item.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="h-full w-full object-cover"
+                          />
                         ) : null}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="line-clamp-1 text-sm font-semibold text-slate-900">{item.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">{item.price} each • Qty {item.qty}</p>
+                        <p className="line-clamp-1 text-sm font-semibold text-slate-900">
+                          {item.name}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {item.price} each • Qty {item.qty}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-[#002e6b]">${((Number(item.price.replace('$', '')) || 0) * item.qty).toFixed(2)}</p>
-                        <button type="button" onClick={() => onRemoveItem(`${item.subdomain}:${item.id}`)} className="mt-1 text-xs font-semibold text-[#c61c2f] hover:underline">Remove</button>
+                        <p className="text-sm font-semibold text-[#002e6b]">
+                          $
+                          {(
+                            (Number(item.price.replace('$', '')) || 0) *
+                            item.qty
+                          ).toFixed(2)}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onRemoveItem(`${item.subdomain}:${item.id}`)
+                          }
+                          className="mt-1 text-xs font-semibold text-[#c61c2f] hover:underline"
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-3 border-t border-slate-100 pt-3 text-right">
-                  <span className="text-sm font-semibold text-[#002e6b]">Store Total: ${shopSubtotal.toFixed(2)}</span>
+                  <span className="text-sm font-semibold text-[#002e6b]">
+                    Store Total: ${shopSubtotal.toFixed(2)}
+                  </span>
                 </div>
               </article>
             );
@@ -1502,19 +1705,50 @@ function CartView({
           <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[#dce9ff] blur-3xl" />
           <div className="relative">
             <div className="flex items-center justify-between">
-              <p className="text-xl font-semibold text-slate-900">Order Summary</p>
-              <span className="rounded-full bg-[#ecf4ff] px-2.5 py-1 text-xs font-semibold text-[#002e6b]">{totalItems} items</span>
+              <p className="text-xl font-semibold text-slate-900">
+                Order Summary
+              </p>
+              <span className="rounded-full bg-[#ecf4ff] px-2.5 py-1 text-xs font-semibold text-[#002e6b]">
+                {totalItems} items
+              </span>
             </div>
-            <p className="mt-2 text-xs text-slate-500">From {Object.keys(byShop).length} store{Object.keys(byShop).length > 1 ? 's' : ''}</p>
+            <p className="mt-2 text-xs text-slate-500">
+              From {Object.keys(byShop).length} store
+              {Object.keys(byShop).length > 1 ? 's' : ''}
+            </p>
 
             <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-              <div className="flex items-center justify-between"><span>Subtotal</span><span className="font-semibold text-slate-900">${mockSubtotal.toFixed(2)}</span></div>
-              <div className="flex items-center justify-between"><span>Shipping</span><span className="font-semibold text-slate-900">${shipping.toFixed(2)}</span></div>
-              <div className="flex items-center justify-between"><span>Tax</span><span className="font-semibold text-slate-900">At checkout</span></div>
-              <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-lg font-semibold text-[#002e6b]"><span>Total</span><span>${(mockSubtotal + shipping).toFixed(2)}</span></div>
+              <div className="flex items-center justify-between">
+                <span>Subtotal</span>
+                <span className="font-semibold text-slate-900">
+                  ${mockSubtotal.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Shipping</span>
+                <span className="font-semibold text-slate-900">
+                  ${shipping.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Tax</span>
+                <span className="font-semibold text-slate-900">
+                  At checkout
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-lg font-semibold text-[#002e6b]">
+                <span>Total</span>
+                <span>${(mockSubtotal + shipping).toFixed(2)}</span>
+              </div>
             </div>
 
-            <button type="button" onClick={() => setIsCheckoutOpen(true)} className="mt-4 w-full rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#003d8f]">Proceed to Checkout</button>
+            <button
+              type="button"
+              onClick={() => setIsCheckoutOpen(true)}
+              className="mt-4 w-full rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#003d8f]"
+            >
+              Proceed to Checkout
+            </button>
           </div>
         </aside>
       </div>
@@ -1522,17 +1756,30 @@ function CartView({
       {isCheckoutOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
           <div className="relative w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.25)]">
-            <button type="button" onClick={() => setIsCheckoutOpen(false)} className="absolute right-5 top-5 text-slate-400 transition hover:text-slate-600" aria-label="Close checkout" title="Close checkout">
+            <button
+              type="button"
+              onClick={() => setIsCheckoutOpen(false)}
+              className="absolute right-5 top-5 text-slate-400 transition hover:text-slate-600"
+              aria-label="Close checkout"
+              title="Close checkout"
+            >
               <X className="size-5" />
             </button>
 
             <div className="p-6 sm:p-8">
-              <h2 className="font-[family:var(--font-dashboard-display)] text-3xl font-semibold text-slate-900">Complete Your Orders</h2>
-              <p className="mt-2 text-sm text-slate-500">Single checkout for {Object.keys(byShop).length} store{Object.keys(byShop).length > 1 ? 's' : ''}.</p>
+              <h2 className="font-[family:var(--font-dashboard-display)] text-3xl font-semibold text-slate-900">
+                Complete Your Orders
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Single checkout for {Object.keys(byShop).length} store
+                {Object.keys(byShop).length > 1 ? 's' : ''}.
+              </p>
 
               <div className="mt-4 space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">Full Name <span className="text-[#c61c2f]">*</span></label>
+                  <label className="mb-2 block text-sm font-semibold text-slate-900">
+                    Full Name <span className="text-[#c61c2f]">*</span>
+                  </label>
                   <input
                     type="text"
                     value={customerName}
@@ -1543,35 +1790,90 @@ function CartView({
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">Phone Number <span className="text-[#c61c2f]">*</span></label>
+                  <label className="mb-2 block text-sm font-semibold text-slate-900">
+                    Phone Number <span className="text-[#c61c2f]">*</span>
+                  </label>
                   <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 focus-within:border-[#002e6b] focus-within:bg-white transition">
                     <Phone className="size-4 text-slate-400" />
-                    <input type="tel" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} placeholder="+855 12 345 678" className="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none" />
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(event) => setPhoneNumber(event.target.value)}
+                      placeholder="+855 12 345 678"
+                      className="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">Delivery Location <span className="text-[#c61c2f]">*</span></label>
+                  <label className="mb-2 block text-sm font-semibold text-slate-900">
+                    Delivery Location <span className="text-[#c61c2f]">*</span>
+                  </label>
                   <div className="flex items-start gap-2 rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 focus-within:border-[#002e6b] focus-within:bg-white transition">
                     <MapPin className="mt-1 size-4 text-slate-400" />
-                    <textarea value={deliveryLocation} onChange={(event) => setDeliveryLocation(event.target.value)} placeholder="Enter your delivery address or Google Maps link" className="h-20 w-full resize-none bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none" />
+                    <textarea
+                      value={deliveryLocation}
+                      onChange={(event) =>
+                        setDeliveryLocation(event.target.value)
+                      }
+                      placeholder="Enter your delivery address or Google Maps link"
+                      className="h-20 w-full resize-none bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">Payment Method <span className="text-[#c61c2f]">*</span></label>
+                  <label className="mb-2 block text-sm font-semibold text-slate-900">
+                    Payment Method <span className="text-[#c61c2f]">*</span>
+                  </label>
                   <div className="grid grid-cols-2 gap-3">
-                    <button type="button" onClick={() => setPaymentMethod('aba')} className={cn('rounded-xl border p-3 text-left transition', paymentMethod === 'aba' ? 'border-[#002e6b] bg-[#ecf4ff]' : 'border-slate-200 bg-white hover:bg-slate-50')}>
-                      <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"><Wallet className="size-4" /> ABA Bank</p>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('aba')}
+                      className={cn(
+                        'rounded-xl border p-3 text-left transition',
+                        paymentMethod === 'aba'
+                          ? 'border-[#002e6b] bg-[#ecf4ff]'
+                          : 'border-slate-200 bg-white hover:bg-slate-50',
+                      )}
+                    >
+                      <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <Wallet className="size-4" /> ABA Bank
+                      </p>
                     </button>
-                    <button type="button" onClick={() => setPaymentMethod('cod')} className={cn('rounded-xl border p-3 text-left transition', paymentMethod === 'cod' ? 'border-[#002e6b] bg-[#ecf4ff]' : 'border-slate-200 bg-white hover:bg-slate-50')}>
-                      <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"><CreditCard className="size-4" /> Cash on Delivery</p>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cod')}
+                      className={cn(
+                        'rounded-xl border p-3 text-left transition',
+                        paymentMethod === 'cod'
+                          ? 'border-[#002e6b] bg-[#ecf4ff]'
+                          : 'border-slate-200 bg-white hover:bg-slate-50',
+                      )}
+                    >
+                      <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <CreditCard className="size-4" /> Cash on Delivery
+                      </p>
                     </button>
                   </div>
                 </div>
 
-                <button type="button" onClick={onCheckout} disabled={!customerName.trim() || !phoneNumber.trim() || !deliveryLocation.trim() || isPlacingOrder} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#003d8f] disabled:cursor-not-allowed disabled:opacity-50">
-                  {isPlacingOrder ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <ShoppingCart className="size-4" />}
+                <button
+                  type="button"
+                  onClick={onCheckout}
+                  disabled={
+                    !customerName.trim() ||
+                    !phoneNumber.trim() ||
+                    !deliveryLocation.trim() ||
+                    isPlacingOrder
+                  }
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#003d8f] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isPlacingOrder ? (
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <ShoppingCart className="size-4" />
+                  )}
                   {isPlacingOrder ? 'Placing Orders...' : 'Place Orders'}
                 </button>
               </div>
@@ -1586,23 +1888,44 @@ function CartView({
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#ecf4ff]">
               <CheckCircle2 className="size-8 text-[#002e6b]" />
             </div>
-            <h3 className="mt-4 text-center font-[family:var(--font-dashboard-display)] text-2xl font-semibold text-slate-900">Orders placed successfully</h3>
-            <p className="mt-2 text-center text-sm text-slate-500">Your global checkout is complete. Sellers will contact you soon.</p>
+            <h3 className="mt-4 text-center font-[family:var(--font-dashboard-display)] text-2xl font-semibold text-slate-900">
+              Orders placed successfully
+            </h3>
+            <p className="mt-2 text-center text-sm text-slate-500">
+              Your global checkout is complete. Sellers will contact you soon.
+            </p>
             <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Created Orders</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                Created Orders
+              </p>
               <div className="mt-2 space-y-2">
                 {placedOrders.map((order) => (
-                  <div key={`${order.shopName}-${order.orderNo ?? 'na'}`} className="flex items-center justify-between text-sm">
+                  <div
+                    key={`${order.shopName}-${order.orderNo ?? 'na'}`}
+                    className="flex items-center justify-between text-sm"
+                  >
                     <div>
-                      <p className="font-semibold text-slate-900">{order.shopName}</p>
-                      {order.orderNo ? <p className="text-xs text-slate-500">{order.orderNo}</p> : null}
+                      <p className="font-semibold text-slate-900">
+                        {order.shopName}
+                      </p>
+                      {order.orderNo ? (
+                        <p className="text-xs text-slate-500">
+                          {order.orderNo}
+                        </p>
+                      ) : null}
                     </div>
-                    <p className="font-semibold text-[#002e6b]">${order.total.toFixed(2)}</p>
+                    <p className="font-semibold text-[#002e6b]">
+                      ${order.total.toFixed(2)}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
-            <button type="button" onClick={() => setIsSuccessOpen(false)} className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#003d8f]">
+            <button
+              type="button"
+              onClick={() => setIsSuccessOpen(false)}
+              className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#003d8f]"
+            >
               Continue shopping
             </button>
           </div>
@@ -1654,9 +1977,13 @@ function ProductGrid({
                       ? 'border-rose-200 bg-rose-50 text-rose-600'
                       : 'border-white/80 bg-white/90 text-slate-600 hover:bg-white'
                   }`}
-                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-label={
+                    isFavorite ? 'Remove from favorites' : 'Add to favorites'
+                  }
                 >
-                  <Heart className={`size-4 ${isFavorite ? 'fill-current' : ''}`} />
+                  <Heart
+                    className={`size-4 ${isFavorite ? 'fill-current' : ''}`}
+                  />
                 </button>
               ) : null}
               <Link
@@ -1687,7 +2014,9 @@ function ProductGrid({
                     : 'General'}
                 </span>
               </div>
-              <h3 className="line-clamp-1 text-sm font-semibold text-slate-900">{product.name}</h3>
+              <h3 className="line-clamp-1 text-sm font-semibold text-slate-900">
+                {product.name}
+              </h3>
               <p className="text-sm font-semibold text-[#002e6b]">
                 {product.basePriceUsd
                   ? `$${Number(product.basePriceUsd).toFixed(2)}`

@@ -162,14 +162,18 @@ type BackendLowStockResponse = {
 
 export const ordersApi = {
   getAll: async () => {
-    const response = await protectedFetch<{ orders: BackendOrder[] }>('/orders');
+    const response = await protectedFetch<{ orders: BackendOrder[] }>(
+      '/orders',
+    );
     return {
       orders: (response.orders ?? []).map(normalizeOrder),
     };
   },
 
   getById: async (id: string) => {
-    const response = await protectedFetch<BackendOrderResponse>(`/orders/${id}`);
+    const response = await protectedFetch<BackendOrderResponse>(
+      `/orders/${id}`,
+    );
     return normalizeOrder(unwrapOrderPayload(response));
   },
 

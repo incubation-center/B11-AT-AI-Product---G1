@@ -1,30 +1,36 @@
 'use client';
 
 import React from 'react';
-import { 
-  Tabs, 
-  Tab,
-} from '@heroui/react';
-import { 
-  User, 
-  Store, 
-  ShieldAlert, 
-} from 'lucide-react';
-import { useProfile, useUpdateProfile, useSendVerificationEmail, useRequestPasswordReset, useDeactivateAccount } from '@/hooks/use-profile-queries';
-import { useTenantStatus, useUpdateTenant, useDeactivateTenant, useUploadTenantAsset } from '@/hooks/use-tenant-queries';
+import { useTranslations } from 'next-intl';
+import { Tabs, Tab } from '@heroui/react';
+import { User, Store, ShieldAlert } from 'lucide-react';
+import {
+  useProfile,
+  useUpdateProfile,
+  useSendVerificationEmail,
+  useRequestPasswordReset,
+  useDeactivateAccount,
+} from '@/hooks/use-profile-queries';
+import {
+  useTenantStatus,
+  useUpdateTenant,
+  useDeactivateTenant,
+  useUploadTenantAsset,
+} from '@/hooks/use-tenant-queries';
 import { ProfileSettings } from '@/components/settings/profile-settings';
 import { StoreSettings } from '@/components/settings/store-settings';
 import { DangerZone } from '@/components/settings/danger-zone';
 
 export default function SettingsPage() {
+  const t = useTranslations('dashboard.settings');
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: tenantData, isLoading: tenantLoading } = useTenantStatus();
-  
+
   const updateProfileMutation = useUpdateProfile();
   const sendVerificationMutation = useSendVerificationEmail();
   const resetPasswordMutation = useRequestPasswordReset();
   const deactivateAccountMutation = useDeactivateAccount();
-  
+
   const updateTenantMutation = useUpdateTenant();
   const deactivateTenantMutation = useDeactivateTenant();
   const uploadAssetMutation = useUploadTenantAsset();
@@ -35,7 +41,7 @@ export default function SettingsPage() {
       updateTenantMutation.mutate(
         type === 'logo'
           ? { logo_url: result.upload.publicUrl }
-          : { banner_url: result.upload.publicUrl }
+          : { banner_url: result.upload.publicUrl },
       );
     }
   };
@@ -56,18 +62,19 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-[#002e6b]">Settings</h1>
-        <p className="text-default-500 font-medium">Manage your profile, store details, and account security.</p>
+        <h1 className="text-3xl font-bold text-[#002e6b]">{t('title')}</h1>
+        <p className="text-default-500 font-medium">{t('subtitle')}</p>
       </div>
 
-      <Tabs 
-        aria-label="Settings sections" 
+      <Tabs
+        aria-label={t('tabsAria')}
         variant="underlined"
         classNames={{
-          tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-          cursor: "w-full bg-[#002e6b]",
-          tab: "max-w-fit px-0 h-12",
-          tabContent: "group-data-[selected=true]:text-[#002e6b] font-semibold"
+          tabList:
+            'gap-6 w-full relative rounded-none p-0 border-b border-divider',
+          cursor: 'w-full bg-[#002e6b]',
+          tab: 'max-w-fit px-0 h-12',
+          tabContent: 'group-data-[selected=true]:text-[#002e6b] font-semibold',
         }}
       >
         <Tab
@@ -75,19 +82,21 @@ export default function SettingsPage() {
           title={
             <div className="flex items-center space-x-2">
               <User size={18} />
-              <span>Profile & Account</span>
+              <span>{t('profileTab')}</span>
             </div>
           }
         >
           <div className="mt-6">
-            <ProfileSettings 
+            <ProfileSettings
               key={profile?.id}
               profile={profile}
               onUpdateName={(name) => updateProfileMutation.mutate(name)}
               isUpdatingName={updateProfileMutation.isPending}
               onSendVerification={() => sendVerificationMutation.mutate()}
               isSendingVerification={sendVerificationMutation.isPending}
-              onRequestPasswordReset={(email) => resetPasswordMutation.mutate(email)}
+              onRequestPasswordReset={(email) =>
+                resetPasswordMutation.mutate(email)
+              }
               isRequestingReset={resetPasswordMutation.isPending}
             />
           </div>
@@ -98,15 +107,17 @@ export default function SettingsPage() {
           title={
             <div className="flex items-center space-x-2">
               <Store size={18} />
-              <span>Store Management</span>
+              <span>{t('storeTab')}</span>
             </div>
           }
         >
           <div className="mt-6">
-            <StoreSettings 
+            <StoreSettings
               key={`${tenantData?.tenant?.id ?? 'no-tenant'}:${tenantData?.tenant?.storefrontTemplate ?? 'no-template'}:${tenantData?.tenant?.shopName ?? ''}:${tenantData?.tenant?.shopType ?? ''}`}
               tenant={tenantData?.tenant || null}
-              onUpdateStore={(payload) => updateTenantMutation.mutateAsync(payload)}
+              onUpdateStore={(payload) =>
+                updateTenantMutation.mutateAsync(payload)
+              }
               isUpdatingStore={updateTenantMutation.isPending}
               onUploadAsset={handleAssetUpload}
               isUploadingAsset={uploadAssetMutation.isPending}
@@ -119,12 +130,12 @@ export default function SettingsPage() {
           title={
             <div className="flex items-center space-x-2 text-danger">
               <ShieldAlert size={18} />
-              <span>Danger Zone</span>
+              <span>{t('dangerTab')}</span>
             </div>
           }
         >
           <div className="mt-6">
-            <DangerZone 
+            <DangerZone
               onDeactivateStore={() => deactivateTenantMutation.mutate()}
               isDeactivatingStore={deactivateTenantMutation.isPending}
               onDeactivateAccount={() => deactivateAccountMutation.mutate()}

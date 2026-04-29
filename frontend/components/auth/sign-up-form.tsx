@@ -1,12 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 
 import { AnimatedSignUp } from '@/components/ui/animated-auth';
 import { signUpWithEmail } from '@/lib/auth';
 
 export function SignUpForm() {
+  const t = useTranslations('auth');
   const router = useRouter();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -24,15 +26,13 @@ export function SignUpForm() {
           callbackURL: `${window.location.origin}/dashboard`,
           rememberMe: true,
         });
-        setSuccess(
-          'Account created. Check your email verification link, then sign in.',
-        );
+        setSuccess(t('successAccountCreated'));
         router.push('/sign-in');
       } catch (submitError) {
         setError(
           submitError instanceof Error
             ? submitError.message
-            : 'Unable to sign up',
+            : t('errors.unableSignUp'),
         );
       }
     });

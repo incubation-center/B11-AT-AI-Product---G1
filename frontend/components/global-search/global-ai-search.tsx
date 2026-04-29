@@ -29,7 +29,11 @@ export function GlobalAiSearch() {
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: text };
+    const userMsg: Message = {
+      id: `u-${Date.now()}`,
+      role: 'user',
+      content: text,
+    };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
@@ -81,7 +85,9 @@ export function GlobalAiSearch() {
       ]);
     } catch (err) {
       const content =
-        err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong. Please try again.';
       setMessages((prev) => [
         ...prev,
         { id: `err-${Date.now()}`, role: 'assistant', content },

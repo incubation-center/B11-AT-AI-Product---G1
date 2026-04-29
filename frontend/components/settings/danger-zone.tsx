@@ -1,17 +1,17 @@
 'use client';
 
 import React from 'react';
-import { 
-  Card, 
-  CardBody, 
-  Button, 
-  Divider, 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter, 
-  useDisclosure 
+import {
+  Card,
+  CardBody,
+  Button,
+  Divider,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
 } from '@heroui/react';
 import { LogOut, Trash2 } from 'lucide-react';
 
@@ -26,18 +26,18 @@ export function DangerZone({
   onDeactivateStore,
   isDeactivatingStore,
   onDeactivateAccount,
-  isDeactivatingAccount
+  isDeactivatingAccount,
 }: DangerZoneProps) {
-  const { 
-    isOpen: isDeactivateStoreOpen, 
-    onOpen: onDeactivateStoreOpen, 
-    onOpenChange: onDeactivateStoreChange 
+  const {
+    isOpen: isDeactivateStoreOpen,
+    onOpen: onDeactivateStoreOpen,
+    onOpenChange: onDeactivateStoreChange,
   } = useDisclosure();
-  
-  const { 
-    isOpen: isDeactivateAccountOpen, 
-    onOpen: onDeactivateAccountOpen, 
-    onOpenChange: onDeactivateAccountChange 
+
+  const {
+    isOpen: isDeactivateAccountOpen,
+    onOpen: onDeactivateAccountOpen,
+    onOpenChange: onDeactivateAccountChange,
   } = useDisclosure();
 
   return (
@@ -46,14 +46,17 @@ export function DangerZone({
         <CardBody className="gap-6 p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <p className="text-md font-bold text-danger-600">Deactivate Store</p>
+              <p className="text-md font-bold text-danger-600">
+                Deactivate Store
+              </p>
               <p className="text-small text-default-500 max-w-lg">
-                Public visitors will no longer be able to see your store or products. You can reactivate it later.
+                Public visitors will no longer be able to see your store or
+                products. You can reactivate it later.
               </p>
             </div>
-            <Button 
-              color="danger" 
-              variant="flat" 
+            <Button
+              color="danger"
+              variant="flat"
               startContent={<LogOut size={18} />}
               onPress={onDeactivateStoreOpen}
             >
@@ -63,14 +66,17 @@ export function DangerZone({
           <Divider className="bg-danger-100" />
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <p className="text-md font-bold text-danger-700">Delete Account</p>
+              <p className="text-md font-bold text-danger-700">
+                Delete Account
+              </p>
               <p className="text-small text-default-500 max-w-lg">
-                This will permanently deactivate your account and access to all stores. This action is irreversible.
+                This will permanently deactivate your account and access to all
+                stores. This action is irreversible.
               </p>
             </div>
-            <Button 
-              color="danger" 
-              variant="solid" 
+            <Button
+              color="danger"
+              variant="solid"
               startContent={<Trash2 size={18} />}
               onPress={onDeactivateAccountOpen}
               isDisabled={isDeactivatingAccount}
@@ -82,19 +88,27 @@ export function DangerZone({
       </Card>
 
       {/* Confirmation Modals */}
-      <Modal isOpen={isDeactivateStoreOpen} onOpenChange={onDeactivateStoreChange} placement="center">
+      <Modal
+        isOpen={isDeactivateStoreOpen}
+        onOpenChange={onDeactivateStoreChange}
+        placement="center"
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>Confirm Deactivation</ModalHeader>
               <ModalBody>
-                Are you sure you want to deactivate your store? This will make your storefront inaccessible to public buyers until you reactivate it.
+                Are you sure you want to deactivate your store? This will make
+                your storefront inaccessible to public buyers until you
+                reactivate it.
               </ModalBody>
               <ModalFooter>
-                <Button variant="light" onPress={onClose}>Cancel</Button>
-                <Button 
-                  color="danger" 
-                  variant="flat" 
+                <Button variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color="danger"
+                  variant="flat"
                   onPress={() => {
                     onDeactivateStore();
                     onClose();
@@ -109,18 +123,25 @@ export function DangerZone({
         </ModalContent>
       </Modal>
 
-      <Modal isOpen={isDeactivateAccountOpen} onOpenChange={onDeactivateAccountChange} placement="center">
+      <Modal
+        isOpen={isDeactivateAccountOpen}
+        onOpenChange={onDeactivateAccountChange}
+        placement="center"
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>Account Deletion Request</ModalHeader>
               <ModalBody>
-                This action is irreversible. You will lose access to your owner dashboard and all associated stores. Are you absolutely certain?
+                This action is irreversible. You will lose access to your owner
+                dashboard and all associated stores. Are you absolutely certain?
               </ModalBody>
               <ModalFooter>
-                <Button variant="light" onPress={onClose}>Wait, I&apos;ll stay</Button>
-                <Button 
-                  color="danger" 
+                <Button variant="light" onPress={onClose}>
+                  Wait, I&apos;ll stay
+                </Button>
+                <Button
+                  color="danger"
                   onPress={() => {
                     onDeactivateAccount();
                     // Closing might not be needed if it redirects, but let's keep it safe

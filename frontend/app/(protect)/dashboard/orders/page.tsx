@@ -1,18 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useOrders, useOrder, useCancelOrder } from '@/hooks/use-orders-queries';
+import { useTranslations } from 'next-intl';
+import {
+  useOrders,
+  useOrder,
+  useCancelOrder,
+} from '@/hooks/use-orders-queries';
 import { OrderTable } from '@/components/orders/order-table';
 import { OrderDetailsDrawer } from '@/components/orders/order-details-drawer';
 import type { Order } from '@/types/orders';
 
 export default function OrdersPage() {
+  const t = useTranslations('dashboard.ordersPage');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [selectedOrderSnapshot, setSelectedOrderSnapshot] = useState<Order | null>(
-    null,
-  );
+  const [selectedOrderSnapshot, setSelectedOrderSnapshot] =
+    useState<Order | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  
+
   const { data: orders = [], isLoading } = useOrders();
   const { data: orderDetail, isLoading: isOrderDetailLoading } =
     useOrder(selectedOrderId);
@@ -26,34 +31,30 @@ export default function OrdersPage() {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (confirm('Are you sure you want to cancel this order?')) {
+    if (confirm(t('confirmCancel'))) {
       await cancelOrder.mutateAsync(orderId);
     }
   };
 
   return (
     <div className="flex flex-col gap-6">
-        <div>
-          <h1>Order Manager</h1>
-          <p className="text-default-500 mt-1">
-            Manage your orders
-          </p>
-        </div>
+      <div>
+        <h1>{t('title')}</h1>
+        <p className="text-default-500 mt-1">{t('subtitle')}</p>
+      </div>
 
+      <OrderTable
+        orders={orders}
+        isLoading={isLoading}
+        onViewOrder={handleViewOrder}
+        onCancelOrder={handleCancelOrder}
+      />
 
-          <OrderTable 
-            orders={orders} 
-            isLoading={isLoading} 
-            onViewOrder={handleViewOrder}
-            onCancelOrder={handleCancelOrder}
-          />
-
-
-      <OrderDetailsDrawer 
-        order={orderDetail || selectedOrderSnapshot} 
+      <OrderDetailsDrawer
+        order={orderDetail || selectedOrderSnapshot}
         isRefreshing={isOrderDetailLoading}
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
       />
     </div>
   );

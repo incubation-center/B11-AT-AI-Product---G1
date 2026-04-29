@@ -2,14 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardBody,
-  Button,
-  Input,
-  Spinner,
-  Switch,
-} from '@heroui/react';
+import { useTranslations } from 'next-intl';
+import { Card, CardBody, Button, Input, Spinner, Switch } from '@heroui/react';
 import { Plus, Search } from 'lucide-react';
 import type { Product } from '@/lib/products';
 import {
@@ -23,6 +17,7 @@ import { ProductFormDialog } from './ProductFormDialog';
 import { ProductVariantDrawer } from './ProductVariantDrawer';
 
 export default function ProductManager() {
+  const t = useTranslations('products');
   // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -80,7 +75,7 @@ export default function ProductManager() {
       refetch?.();
     } catch (err: unknown) {
       const error = err as Error;
-      alert('Failed to deactivate product: ' + error.message);
+      alert(`${t('alerts.deactivateFailed')}: ${error.message}`);
     }
   };
 
@@ -90,17 +85,17 @@ export default function ProductManager() {
       refetch?.();
     } catch (err: unknown) {
       const error = err as Error;
-      alert('Failed to restore product: ' + error.message);
+      alert(`${t('alerts.restoreFailed')}: ${error.message}`);
     }
   };
 
   const handleSync = async (id: string) => {
     try {
       await syncMutation.mutateAsync(id);
-      alert('Product synced to AI assistant successfully!');
+      alert(t('alerts.syncSuccess'));
     } catch (err: unknown) {
       const error = err as Error;
-      alert('Failed to sync product: ' + error.message);
+      alert(`${t('alerts.syncFailed')}: ${error.message}`);
     }
   };
 
@@ -121,10 +116,8 @@ export default function ProductManager() {
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1>Product Manager</h1>
-          <p className="text-default-500 mt-1">
-            Manage your product catalog and inventory
-          </p>
+          <h1>{t('title')}</h1>
+          <p className="text-default-500 mt-1">{t('subtitle')}</p>
         </div>
         <Button
           color="primary"
@@ -132,7 +125,7 @@ export default function ProductManager() {
           onPress={handleCreateNew}
           className="w-full sm:w-auto"
         >
-          Add Product
+          {t('addProduct')}
         </Button>
       </div>
 
@@ -141,9 +134,7 @@ export default function ProductManager() {
         <Card shadow="sm" className="bg-danger-50 border border-danger-200">
           <CardBody>
             <p className="text-sm text-danger-700">
-              {error instanceof Error
-                ? error.message
-                : 'Failed to load products'}
+              {error instanceof Error ? error.message : t('loadFailed')}
             </p>
           </CardBody>
         </Card>
@@ -154,8 +145,8 @@ export default function ProductManager() {
         <div className="w-full sm:max-w-md">
           <Input
             isClearable
-            aria-label="Search products by name or category"
-            placeholder="Search products..."
+            aria-label={t('searchAria')}
+            placeholder={t('searchPlaceholder')}
             startContent={<Search size={18} className="text-default-400" />}
             value={searchQuery}
             onValueChange={setSearchQuery}
@@ -166,7 +157,7 @@ export default function ProductManager() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-default-500">Show Inactive</span>
+          <span className="text-sm text-default-500">{t('showInactive')}</span>
           <Switch
             size="sm"
             isSelected={showInactive}
@@ -174,7 +165,7 @@ export default function ProductManager() {
               setShowInactive(val);
               setPage(1);
             }}
-            aria-label="Toggle inactive products"
+            aria-label={t('toggleInactiveAria')}
           />
         </div>
       </div>
@@ -182,7 +173,7 @@ export default function ProductManager() {
       {/* Products Table */}
       {isLoading && !products.length ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <Spinner color="primary" label="Loading products..." />
+          <Spinner color="primary" label={t('loadingProducts')} />
         </div>
       ) : (
         <div className="space-y-4">

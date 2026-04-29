@@ -26,7 +26,8 @@ function sanitizeCartItems(input: unknown): StorefrontCartItem[] {
       variantId?: string | null;
     };
 
-    if (!value.product || typeof value.qty !== 'number' || value.qty <= 0) continue;
+    if (!value.product || typeof value.qty !== 'number' || value.qty <= 0)
+      continue;
 
     result.push({
       product: value.product,
@@ -45,7 +46,9 @@ export function useStorefrontCart(storeSubdomain: string) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      const raw = window.localStorage.getItem(getCartStorageKey(storeSubdomain));
+      const raw = window.localStorage.getItem(
+        getCartStorageKey(storeSubdomain),
+      );
       const parsed = raw ? JSON.parse(raw) : [];
       setCartItems(sanitizeCartItems(parsed));
     } catch {
@@ -57,7 +60,10 @@ export function useStorefrontCart(storeSubdomain: string) {
 
   useEffect(() => {
     if (!isReady || typeof window === 'undefined') return;
-    window.localStorage.setItem(getCartStorageKey(storeSubdomain), JSON.stringify(cartItems));
+    window.localStorage.setItem(
+      getCartStorageKey(storeSubdomain),
+      JSON.stringify(cartItems),
+    );
   }, [cartItems, isReady, storeSubdomain]);
 
   const totalItems = useMemo(
@@ -65,7 +71,11 @@ export function useStorefrontCart(storeSubdomain: string) {
     [cartItems],
   );
 
-  function addToCart(product: StorefrontProduct, qty: number, variantId?: string | null) {
+  function addToCart(
+    product: StorefrontProduct,
+    qty: number,
+    variantId?: string | null,
+  ) {
     setCartItems((prev) => {
       const existingIndex = prev.findIndex(
         (item) =>
@@ -86,7 +96,11 @@ export function useStorefrontCart(storeSubdomain: string) {
     });
   }
 
-  function updateQty(productId: string, qty: number, variantId?: string | null) {
+  function updateQty(
+    productId: string,
+    qty: number,
+    variantId?: string | null,
+  ) {
     setCartItems((prev) =>
       prev
         .map((item) => {

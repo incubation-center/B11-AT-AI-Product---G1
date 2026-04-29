@@ -25,7 +25,8 @@ const MOCK_STORES: PublicStoreSummary[] = [
     id: 'mock-1',
     shopName: 'May Store',
     shopType: 'fashion',
-    description: 'Streetwear drops, everyday essentials, and curated accessories.',
+    description:
+      'Streetwear drops, everyday essentials, and curated accessories.',
     logoUrl: '/Lacoste-logo.png',
     bannerUrl: '/shop5.jpg',
     subdomain: 'may-store',
@@ -47,7 +48,8 @@ const MOCK_STORES: PublicStoreSummary[] = [
     id: 'mock-3',
     shopName: 'Weyoung Lab',
     shopType: 'lifestyle',
-    description: 'Modern lifestyle products with playful colors and clean forms.',
+    description:
+      'Modern lifestyle products with playful colors and clean forms.',
     logoUrl: '/weyoung.jpg',
     bannerUrl: '/Bare.jpg',
     subdomain: 'weyoung-lab',
@@ -164,7 +166,14 @@ const MOCK_PRODUCTS: DirectoryProduct[] = [
   },
 ];
 
-const MOCK_CATEGORIES = ['fashion', 'beauty', 'lifestyle', 'home', 'electronics', 'grocery'];
+const MOCK_CATEGORIES = [
+  'fashion',
+  'beauty',
+  'lifestyle',
+  'home',
+  'electronics',
+  'grocery',
+];
 
 function normalizeCategory(value: string | null | undefined) {
   return (value ?? 'general').replaceAll('_', ' ');
@@ -183,26 +192,30 @@ export async function getShopsDirectoryData(): Promise<ShopsDirectoryData> {
   }
 
   const storefrontDetails = await Promise.all(
-    stores.slice(0, 10).map((store) => getStorefrontBySubdomain(store.subdomain)),
+    stores
+      .slice(0, 10)
+      .map((store) => getStorefrontBySubdomain(store.subdomain)),
   );
 
-  const liveProducts: DirectoryProduct[] = storefrontDetails.flatMap((storefront) => {
-    if (!storefront?.store) {
-      return [];
-    }
+  const liveProducts: DirectoryProduct[] = storefrontDetails.flatMap(
+    (storefront) => {
+      if (!storefront?.store) {
+        return [];
+      }
 
-    return storefront.products
-      .filter((product) => product.isActive)
-      .map((product) => ({
-        id: product.id,
-        name: product.name,
-        imageUrls: product.imageUrls,
-        basePriceUsd: product.basePriceUsd,
-        shopName: storefront.store.shopName,
-        subdomain: storefront.store.subdomain,
-        category: product.category ?? storefront.store.shopType,
-      }));
-  });
+      return storefront.products
+        .filter((product) => product.isActive)
+        .map((product) => ({
+          id: product.id,
+          name: product.name,
+          imageUrls: product.imageUrls,
+          basePriceUsd: product.basePriceUsd,
+          shopName: storefront.store.shopName,
+          subdomain: storefront.store.subdomain,
+          category: product.category ?? storefront.store.shopType,
+        }));
+    },
+  );
 
   const categories = Array.from(
     new Set(stores.map((store) => normalizeCategory(store.shopType))),

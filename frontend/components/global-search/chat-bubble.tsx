@@ -2,7 +2,13 @@ import { Bot, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MessageContent } from './message-content';
 
-export function ChatBubble({ role, content }: { role: 'user' | 'assistant'; content: string }) {
+export function ChatBubble({
+  role,
+  content,
+}: {
+  role: 'user' | 'assistant';
+  content: string;
+}) {
   const isUser = role === 'user';
   return (
     <motion.div

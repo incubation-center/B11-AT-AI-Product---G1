@@ -11,7 +11,9 @@ type StorefrontCartPageProps = {
 };
 
 export function StorefrontCartPage({ store }: StorefrontCartPageProps) {
-  const { cartItems, totalItems, updateQty, removeItem } = useStorefrontCart(store.subdomain);
+  const { cartItems, totalItems, updateQty, removeItem } = useStorefrontCart(
+    store.subdomain,
+  );
 
   const total = cartItems.reduce((sum, item) => {
     const rawPrice = Number(item.product.basePriceUsd ?? 0);
@@ -38,8 +40,12 @@ export function StorefrontCartPage({ store }: StorefrontCartPageProps) {
 
         {!cartItems.length ? (
           <section className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="text-lg font-semibold text-slate-900">Your cart is empty.</p>
-            <p className="mt-2 text-sm text-slate-600">Add products from the storefront first.</p>
+            <p className="text-lg font-semibold text-slate-900">
+              Your cart is empty.
+            </p>
+            <p className="mt-2 text-sm text-slate-600">
+              Add products from the storefront first.
+            </p>
             <Link
               href="/"
               className="mt-4 inline-flex rounded-xl bg-[#002e6b] px-4 py-2 text-sm font-semibold text-white"
@@ -56,8 +62,12 @@ export function StorefrontCartPage({ store }: StorefrontCartPageProps) {
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-slate-900">{item.product.name}</p>
-                    <p className="text-sm text-slate-600">{formatStorePrice(item.product)}</p>
+                    <p className="font-semibold text-slate-900">
+                      {item.product.name}
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      {formatStorePrice(item.product)}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -71,15 +81,21 @@ export function StorefrontCartPage({ store }: StorefrontCartPageProps) {
                 <div className="mt-3 flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => updateQty(item.product.id, item.qty - 1, item.variantId)}
+                    onClick={() =>
+                      updateQty(item.product.id, item.qty - 1, item.variantId)
+                    }
                     className="h-8 w-8 rounded border border-slate-300 text-sm"
                   >
                     -
                   </button>
-                  <span className="min-w-8 text-center font-semibold">{item.qty}</span>
+                  <span className="min-w-8 text-center font-semibold">
+                    {item.qty}
+                  </span>
                   <button
                     type="button"
-                    onClick={() => updateQty(item.product.id, item.qty + 1, item.variantId)}
+                    onClick={() =>
+                      updateQty(item.product.id, item.qty + 1, item.variantId)
+                    }
                     className="h-8 w-8 rounded border border-slate-300 text-sm"
                   >
                     +
@@ -92,7 +108,9 @@ export function StorefrontCartPage({ store }: StorefrontCartPageProps) {
               <p className="text-sm text-slate-600">
                 {totalItems} item{totalItems > 1 ? 's' : ''}
               </p>
-              <p className="text-lg font-semibold text-[#002e6b]">Estimated ${total.toFixed(2)}</p>
+              <p className="text-lg font-semibold text-[#002e6b]">
+                Estimated ${total.toFixed(2)}
+              </p>
             </div>
 
             <Link

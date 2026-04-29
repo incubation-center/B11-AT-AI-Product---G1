@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Divider } from '@heroui/react';
 import {
   AlertTriangle,
@@ -23,6 +24,7 @@ import { getTenantStatus } from '@/lib/auth';
 import type { Order } from '@/types/orders';
 
 export default function DashboardContent() {
+  const t = useTranslations('dashboard.overview');
   const metrics = useDashboardMetrics();
   const orders = useDashboardOrders();
   const lowStock = useLowStockItems();
@@ -62,9 +64,7 @@ export default function DashboardContent() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1>Dashboard</h1>
-          <p className="text-default-500 mt-1">
-            Welcome back! Here&apos;s your store overview.
-          </p>
+          <p className="text-default-500 mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           {storeUrl && (
@@ -77,7 +77,7 @@ export default function DashboardContent() {
               href={storeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              title="Visit your store"
+              title={t('visitStore')}
             >
               <ExternalLink className="h-5 w-5" />
             </Button>
@@ -96,7 +96,7 @@ export default function DashboardContent() {
       {/* Metrics */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-xl font-semibold">Key Metrics</h2>
+          <h2 className="text-xl font-semibold">{t('keyMetrics')}</h2>
           <DateRangeFilter
             selectedRange={metrics.dateRange}
             onRangeChange={metrics.setDateRange}
@@ -106,7 +106,7 @@ export default function DashboardContent() {
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <MetricCard
             icon={<BarChart3 className="h-5 w-5 text-primary" />}
-            label={`Revenue (USD) - ${metrics.dateRange === 'daily' ? 'Today' : metrics.dateRange === 'weekly' ? 'This Week' : 'This Month'}`}
+            label={`${t('revenue')} - ${metrics.dateRange === 'daily' ? t('today') : metrics.dateRange === 'weekly' ? t('thisWeek') : t('thisMonth')}`}
             value={`$${(metrics.metrics?.totalRevenue.usd || 0).toLocaleString(
               'en-US',
               {
@@ -119,14 +119,14 @@ export default function DashboardContent() {
 
           <MetricCard
             icon={<ShoppingCart className="h-5 w-5 text-secondary" />}
-            label={`Orders - ${metrics.dateRange === 'daily' ? 'Today' : metrics.dateRange === 'weekly' ? 'This Week' : 'This Month'}`}
+            label={`${t('orders')} - ${metrics.dateRange === 'daily' ? t('today') : metrics.dateRange === 'weekly' ? t('thisWeek') : t('thisMonth')}`}
             value={metrics.metrics?.orderCount || 0}
             isLoading={metrics.isLoading}
           />
 
           <MetricCard
             icon={<AlertTriangle className="h-5 w-5 text-warning" />}
-            label="Low Stock Alert"
+            label={t('lowStockAlert')}
             value={metrics.metrics?.lowStockCount || 0}
             isLoading={metrics.isLoading}
           />
@@ -139,7 +139,7 @@ export default function DashboardContent() {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Recent Orders - Takes 2 columns on large screens */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <h2 className="text-xl font-semibold">Recent Orders</h2>
+          <h2 className="text-xl font-semibold">{t('recentOrders')}</h2>
           <RecentOrdersTable
             orders={orders.orders}
             isLoading={orders.isLoading}
@@ -149,7 +149,7 @@ export default function DashboardContent() {
 
         {/* Low Stock Items - Takes 1 column */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold">Inventory Status</h2>
+          <h2 className="text-xl font-semibold">{t('inventoryStatus')}</h2>
           <LowStockProducts
             items={lowStock.items}
             isLoading={lowStock.isLoading}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Table,
   TableHeader,
@@ -36,41 +37,57 @@ export type InventoryItem = {
 interface InventoryTableProps {
   products: Product[];
   isLoading: boolean;
-  onUpdateStock: (id: string, type: 'product' | 'variant', newStock: number) => Promise<void>;
+  onUpdateStock: (
+    id: string,
+    type: 'product' | 'variant',
+    newStock: number,
+  ) => Promise<void>;
 }
 
-export function InventoryTable({ products, isLoading, onUpdateStock }: InventoryTableProps) {
-  const [filterValue, setFilterValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Selection>("all");
+export function InventoryTable({
+  products,
+  isLoading,
+  onUpdateStock,
+}: InventoryTableProps) {
+  const t = useTranslations('inventory');
+  const [filterValue, setFilterValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState<Selection>('all');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: "stock",
-    direction: "ascending",
+    column: 'stock',
+    direction: 'ascending',
   });
   const [page, setPage] = useState(1);
 
   // Flatten products and variants into a single inventory list
   const inventoryItems = useMemo(() => {
     const items: InventoryItem[] = [];
-    
-    products.forEach(product => {
+
+    products.forEach((product) => {
       if (!product.has_variants || product.track_inventory) {
-         items.push({
-           id: product.id,
-           name: product.name,
-           category: product.category || "General",
-           stock: product.stock_qty,
-           threshold: product.low_stock_threshold,
-           type: 'product',
-           image: product.image_urls[0],
-           isActive: product.is_active
-         });
+        items.push({
+          id: product.id,
+          name: product.name,
+          category: product.category || t('generalCategory'),
+          stock: product.stock_qty,
+          threshold: product.low_stock_threshold,
+          type: 'product',
+          image: product.image_urls[0],
+          isActive: product.is_active,
+        });
       }
-      
+
       if (product.has_variants && product.variants) {
-        product.variants.forEach(variant => {
-          const labelParts = [variant.variant_name, variant.size, variant.color].filter(Boolean);
-          const variantLabel = labelParts.length > 0 ? labelParts.join(' / ') : 'Default Variant';
+        product.variants.forEach((variant) => {
+          const labelParts = [
+            variant.variant_name,
+            variant.size,
+            variant.color,
+          ].filter(Boolean);
+          const variantLabel =
+            labelParts.length > 0
+              ? labelParts.join(' / ')
+              : t('defaultVariant');
 
           items.push({
             id: variant.id,
@@ -81,14 +98,14 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
             type: 'variant',
             productId: product.id,
             image: variant.image_url || product.image_urls[0],
-            isActive: variant.is_active
+            isActive: variant.is_active,
           });
         });
       }
     });
-    
+
     return items;
-  }, [products]);
+  }, [products, t]);
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -96,18 +113,24 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
     let filtered = [...inventoryItems];
 
     if (hasSearchFilter) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-        item.category.toLowerCase().includes(filterValue.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
+          item.category.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
-    
-    if (statusFilter !== "all") {
-       const filterSet = Array.from(statusFilter);
-       filtered = filtered.filter((item) => {
-         const status = item.stock <= 0 ? "out" : item.stock <= item.threshold ? "low" : "healthy";
-         return filterSet.includes(status);
-       });
+
+    if (statusFilter !== 'all') {
+      const filterSet = Array.from(statusFilter);
+      filtered = filtered.filter((item) => {
+        const status =
+          item.stock <= 0
+            ? 'out'
+            : item.stock <= item.threshold
+              ? 'low'
+              : 'healthy';
+        return filterSet.includes(status);
+      });
     }
 
     return filtered;
@@ -117,11 +140,15 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
 
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a: InventoryItem, b: InventoryItem) => {
-      const first = a[sortDescriptor.column as keyof InventoryItem] as number | string;
-      const second = b[sortDescriptor.column as keyof InventoryItem] as number | string;
+      const first = a[sortDescriptor.column as keyof InventoryItem] as
+        | number
+        | string;
+      const second = b[sortDescriptor.column as keyof InventoryItem] as
+        | number
+        | string;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      return sortDescriptor.direction === 'descending' ? -cmp : cmp;
     });
   }, [sortDescriptor, filteredItems]);
 
@@ -132,54 +159,79 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
     return sortedItems.slice(start, end);
   }, [page, sortedItems, rowsPerPage]);
 
-  const renderCell = React.useCallback((item: InventoryItem, columnKey: React.Key) => {
-    switch (columnKey) {
-      case "name":
-        return <InventoryItemCell name={item.name} category={item.category} image={item.image} />;
-      case "stock":
-        const isLow = item.stock <= item.threshold;
-        const isOut = item.stock <= 0;
-        return (
-          <div className="flex flex-col">
-            <p className={cn(
-              "text-bold text-sm",
-              isOut ? "text-danger" : isLow ? "text-warning" : "text-default-700"
-            )}>
-              {item.stock}
-            </p>
-            <p className="text-bold text-tiny text-default-400">
-              Threshold: {item.threshold}
-            </p>
-          </div>
-        );
-      case "status":
-        return <InventoryStatusChip stock={item.stock} threshold={item.threshold} />;
-      case "actions":
-        return (
-          <InventoryActions 
-            name={item.name} 
-            currentStock={item.stock} 
-            onUpdate={(newStock) => onUpdateStock(item.id, item.type, newStock)} 
-          />
-        );
-      default:
-        return item[columnKey as keyof InventoryItem] as React.ReactNode;
-    }
-  }, [onUpdateStock]);
+  const renderCell = React.useCallback(
+    (item: InventoryItem, columnKey: React.Key) => {
+      switch (columnKey) {
+        case 'name':
+          return (
+            <InventoryItemCell
+              name={item.name}
+              category={item.category}
+              image={item.image}
+            />
+          );
+        case 'stock':
+          const isLow = item.stock <= item.threshold;
+          const isOut = item.stock <= 0;
+          return (
+            <div className="flex flex-col">
+              <p
+                className={cn(
+                  'text-bold text-sm',
+                  isOut
+                    ? 'text-danger'
+                    : isLow
+                      ? 'text-warning'
+                      : 'text-default-700',
+                )}
+              >
+                {item.stock}
+              </p>
+              <p className="text-bold text-tiny text-default-400">
+                {t('threshold', { value: item.threshold })}
+              </p>
+            </div>
+          );
+        case 'status':
+          return (
+            <InventoryStatusChip
+              stock={item.stock}
+              threshold={item.threshold}
+            />
+          );
+        case 'actions':
+          return (
+            <InventoryActions
+              name={item.name}
+              currentStock={item.stock}
+              onUpdate={(newStock) =>
+                onUpdateStock(item.id, item.type, newStock)
+              }
+            />
+          );
+        default:
+          return item[columnKey as keyof InventoryItem] as React.ReactNode;
+      }
+    },
+    [onUpdateStock, t],
+  );
 
-  const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
+  const onRowsPerPageChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setRowsPerPage(Number(e.target.value));
+      setPage(1);
+    },
+    [],
+  );
 
   const onSearchChange = React.useCallback((value?: string) => {
-    setFilterValue(value || "");
+    setFilterValue(value || '');
     setPage(1);
   }, []);
 
   const topContent = useMemo(() => {
     return (
-      <InventoryTableHeader 
+      <InventoryTableHeader
         filterValue={filterValue}
         onFilterChange={onSearchChange}
         statusFilter={statusFilter}
@@ -188,7 +240,13 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
         onRowsPerPageChange={onRowsPerPageChange}
       />
     );
-  }, [filterValue, onSearchChange, statusFilter, inventoryItems.length, onRowsPerPageChange]);
+  }, [
+    filterValue,
+    onSearchChange,
+    statusFilter,
+    inventoryItems.length,
+    onRowsPerPageChange,
+  ]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -207,12 +265,12 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
 
   return (
     <Table
-      aria-label="Inventory Table"
+      aria-label={t('tableAria')}
       isHeaderSticky
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       classNames={{
-        wrapper: "max-h-[700px]",
+        wrapper: 'max-h-[700px]',
       }}
       sortDescriptor={sortDescriptor}
       topContent={topContent}
@@ -220,15 +278,25 @@ export function InventoryTable({ products, isLoading, onUpdateStock }: Inventory
       onSortChange={setSortDescriptor}
     >
       <TableHeader>
-        <TableColumn key="name" allowsSorting>ITEM</TableColumn>
-        <TableColumn key="stock" allowsSorting>STOCK</TableColumn>
-        <TableColumn key="status" allowsSorting>STATUS</TableColumn>
-        <TableColumn key="actions" align="end">ACTIONS</TableColumn>
+        <TableColumn key="name" allowsSorting>
+          {t('item')}
+        </TableColumn>
+        <TableColumn key="stock" allowsSorting>
+          {t('stock')}
+        </TableColumn>
+        <TableColumn key="status" allowsSorting>
+          {t('statusHeader')}
+        </TableColumn>
+        <TableColumn key="actions" align="end">
+          {t('actions')}
+        </TableColumn>
       </TableHeader>
-      <TableBody emptyContent={"No items found"} items={items} isLoading={isLoading}>
+      <TableBody emptyContent={t('empty')} items={items} isLoading={isLoading}>
         {(item: InventoryItem) => (
           <TableRow key={`${item.id}-${item.type}`}>
-            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey) => (
+              <TableCell>{renderCell(item, columnKey)}</TableCell>
+            )}
           </TableRow>
         )}
       </TableBody>

@@ -8,7 +8,11 @@ const SUGGESTIONS = [
   'What stores sell fashion accessories?',
 ];
 
-export function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) => void }) {
+export function EmptyState({
+  onSuggestionClick,
+}: {
+  onSuggestionClick: (text: string) => void;
+}) {
   return (
     <motion.div
       key="empty"
@@ -24,10 +28,12 @@ export function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: st
         >
           <Sparkles size={28} className="text-[#ffbd59]" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Ask Coolhat</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">
+          Ask Coolhat
+        </h1>
         <p className="max-w-xs text-sm leading-6 text-white/50">
-          Describe what you&apos;re looking for and I&apos;ll find the best products from
-          our SME stores.
+          Describe what you&apos;re looking for and I&apos;ll find the best
+          products from our SME stores.
         </p>
       </div>
 

@@ -8,8 +8,15 @@ const API_URL =
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
 
-  if (!body?.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
-    return NextResponse.json({ message: 'messages are required' }, { status: 400 });
+  if (
+    !body?.messages ||
+    !Array.isArray(body.messages) ||
+    body.messages.length === 0
+  ) {
+    return NextResponse.json(
+      { message: 'messages are required' },
+      { status: 400 },
+    );
   }
 
   const response = await fetch(`${API_URL}/global/chat`, {

@@ -13,10 +13,21 @@ import {
   Card,
   CardBody,
 } from '@heroui/react';
-import { MapPin, Phone, User, Calendar, ShoppingBag, AlertCircle, SlidersHorizontal } from 'lucide-react';
+import {
+  MapPin,
+  Phone,
+  User,
+  Calendar,
+  ShoppingBag,
+  AlertCircle,
+  SlidersHorizontal,
+} from 'lucide-react';
 import type { Order, OrderItem } from '@/types/orders';
 import { OrderStatusChip, PaymentStatusChip } from './order-status-chip';
-import { useUpdateOrderStatus, useUpdateOrderPayment } from '@/hooks/use-orders-queries';
+import {
+  useUpdateOrderStatus,
+  useUpdateOrderPayment,
+} from '@/hooks/use-orders-queries';
 
 interface OrderDetailsDrawerProps {
   order: Order | null;
@@ -59,16 +70,16 @@ export const OrderDetailsDrawer = ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size="2xl" 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="2xl"
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        base: "max-w-[800px]",
-        header: "border-b border-default-100",
-        footer: "border-t border-default-100",
+        base: 'max-w-[800px]',
+        header: 'border-b border-default-100',
+        footer: 'border-t border-default-100',
       }}
     >
       <ModalContent>
@@ -97,13 +108,13 @@ export const OrderDetailsDrawer = ({
                         <Phone size={14} /> {order.customer_phone || 'N/A'}
                       </p>
                       <p className="text-sm text-default-400 flex items-start gap-2 max-w-xs">
-                        <MapPin size={14} className="mt-1 flex-shrink-0" /> 
+                        <MapPin size={14} className="mt-1 flex-shrink-0" />
                         <span>{order.address_text}</span>
                       </p>
                       {order.google_map_url && (
-                        <a 
-                          href={order.google_map_url} 
-                          target="_blank" 
+                        <a
+                          href={order.google_map_url}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary text-xs flex items-center gap-1 hover:underline mt-1"
                         >
@@ -122,7 +133,10 @@ export const OrderDetailsDrawer = ({
                         Date: {new Date(order.created_at).toLocaleString()}
                       </p>
                       <p className="text-sm text-default-400">
-                        Method: <span className="uppercase">{order.payment_method.replace('_', ' ')}</span>
+                        Method:{' '}
+                        <span className="uppercase">
+                          {order.payment_method.replace('_', ' ')}
+                        </span>
                       </p>
                     </div>
                   </section>
@@ -139,10 +153,15 @@ export const OrderDetailsDrawer = ({
                         {order.status === 'cancelled' ? (
                           <p className="text-xs text-default-500 leading-relaxed">
                             This order was cancelled. You can set it back to{' '}
-                            <strong className="font-medium text-default-700">Pending</strong>{' '}
+                            <strong className="font-medium text-default-700">
+                              Pending
+                            </strong>{' '}
                             (back in queue, no stock change) or{' '}
-                            <strong className="font-medium text-default-700">Confirmed</strong>{' '}
-                            (reserves stock again). Other steps stay available after that.
+                            <strong className="font-medium text-default-700">
+                              Confirmed
+                            </strong>{' '}
+                            (reserves stock again). Other steps stay available
+                            after that.
                           </p>
                         ) : null}
                         <div className="flex flex-wrap gap-2">
@@ -209,23 +228,39 @@ export const OrderDetailsDrawer = ({
                 <div className="flex flex-col gap-6">
                   <section>
                     <h3 className="text-sm font-semibold text-default-500 mb-3 flex items-center gap-2">
-                      <ShoppingBag size={16} /> Items ({order.items?.length || 0})
+                      <ShoppingBag size={16} /> Items (
+                      {order.items?.length || 0})
                     </h3>
                     <ScrollShadow className="max-h-[300px]">
                       <div className="flex flex-col gap-3">
                         {order.items?.map((item: OrderItem) => (
-                          <Card key={item.id} shadow="none" className="bg-default-50">
+                          <Card
+                            key={item.id}
+                            shadow="none"
+                            className="bg-default-50"
+                          >
                             <CardBody className="py-2 px-3">
                               <div className="flex justify-between items-start gap-2">
                                 <div>
                                   <p className="text-sm font-medium leading-tight">
                                     {item.product_name_snapshot}
                                   </p>
-                                  {item.variant_snapshot && typeof item.variant_snapshot === 'object' && (Object.keys(item.variant_snapshot).length > 0) ? (
+                                  {item.variant_snapshot &&
+                                  typeof item.variant_snapshot === 'object' &&
+                                  Object.keys(item.variant_snapshot).length >
+                                    0 ? (
                                     <p className="text-xs text-default-400">
-                                      {Object.entries(item.variant_snapshot as Record<string, string>).map(([key, value]) => (
+                                      {Object.entries(
+                                        item.variant_snapshot as Record<
+                                          string,
+                                          string
+                                        >,
+                                      ).map(([key, value]) => (
                                         <span key={key} className="mr-2">
-                                          <span className="capitalize text-default-300">{key}:</span> {value}
+                                          <span className="capitalize text-default-300">
+                                            {key}:
+                                          </span>{' '}
+                                          {value}
                                         </span>
                                       ))}
                                     </p>
@@ -244,17 +279,21 @@ export const OrderDetailsDrawer = ({
                         ))}
                       </div>
                     </ScrollShadow>
-                    
+
                     <Divider className="my-4" />
-                    
+
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span className="text-default-400">Subtotal</span>
-                        <span>{order.total} {order.currency}</span>
+                        <span>
+                          {order.total} {order.currency}
+                        </span>
                       </div>
                       <div className="flex justify-between font-bold text-lg mt-2">
                         <span>Total</span>
-                        <span>{order.total} {order.currency}</span>
+                        <span>
+                          {order.total} {order.currency}
+                        </span>
                       </div>
                     </div>
                   </section>

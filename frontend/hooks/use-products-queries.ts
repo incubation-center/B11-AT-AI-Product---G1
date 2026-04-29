@@ -93,7 +93,8 @@ export function useUpdateProductStock() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, qty }: { id: string; qty: number }) => updateProductStock(id, qty),
+    mutationFn: ({ id, qty }: { id: string; qty: number }) =>
+      updateProductStock(id, qty),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
@@ -104,7 +105,8 @@ export function useUpdateVariantStock() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, qty }: { id: string; qty: number }) => updateVariantStock(id, qty),
+    mutationFn: ({ id, qty }: { id: string; qty: number }) =>
+      updateVariantStock(id, qty),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
     },

@@ -1,35 +1,34 @@
 ﻿'use client';
 
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 import { SectionIntro } from '@/components/ui/section-intro';
 import { LinkCard } from '@/components/ui/link-card';
 
-const items = [
-  {
-    title: 'AI that knows your products',
-    description:
-      'Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing.',
-    imageUrl: '/chatbot.svg',
-    href: '#why',
-  },
-  {
-    title: 'Built for Telegram first',
-    description:
-      "SME owners live in Telegram. Coolhat sends orders, updates, and customer chats straight to your phone so you don't need to learn a new dashboard.",
-    imageUrl: '/telegram.svg',
-    href: '#why',
-  },
-  {
-    title: 'From idea to storefront in days',
-    description:
-      'Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team.',
-    imageUrl: '/shops.svg',
-    href: '#why',
-  },
-];
-
 export function Features() {
+  const t = useTranslations('landing.features');
+  const items = [
+    {
+      title: t('items.ai.title'),
+      description: t('items.ai.description'),
+      imageUrl: '/chatbot.svg',
+      href: '#why',
+    },
+    {
+      title: t('items.telegram.title'),
+      description: t('items.telegram.description'),
+      imageUrl: '/telegram.svg',
+      href: '#why',
+    },
+    {
+      title: t('items.storefront.title'),
+      description: t('items.storefront.description'),
+      imageUrl: '/shops.svg',
+      href: '#why',
+    },
+  ];
+
   return (
     <motion.section
       id="why"
@@ -41,9 +40,9 @@ export function Features() {
     >
       <div className="mx-auto max-w-6xl px-4">
         <SectionIntro
-          eyebrow="Why Coolhat"
-          title="One assistant for your customers and your team."
-          description="Coolhat combines an AI product expert, storefront builder, and Telegram Mini App into one simple flow, so small shops can sell online with the same experience as bigger brands."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
           className="max-w-2xl"
           eyebrowClassName="text-[#c61c2f]"
           descriptionClassName="text-[#002e6b]"

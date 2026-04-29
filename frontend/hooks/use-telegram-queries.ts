@@ -1,8 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  getTelegramLinkStatus,
-  generateTelegramLinkCode,
-} from '@/lib/auth';
+import { getTelegramLinkStatus, generateTelegramLinkCode } from '@/lib/auth';
 
 export const telegramKeys = {
   all: ['telegram'] as const,

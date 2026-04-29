@@ -1,6 +1,5 @@
 @config "../tailwind.config.ts";
 @import 'tailwindcss';
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -52,6 +51,12 @@
 
   body {
     @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  .locale-km body {
+    font-family: var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.12em;
+    line-height: 1.75;
   }
 
   h1 {

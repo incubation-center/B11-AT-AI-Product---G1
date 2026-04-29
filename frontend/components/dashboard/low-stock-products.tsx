@@ -2,6 +2,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardBody,
@@ -20,6 +21,8 @@ interface LowStockProductsProps {
 }
 
 export function LowStockProducts({ items, isLoading }: LowStockProductsProps) {
+  const t = useTranslations('dashboard.lowStockWidget');
+
   if (isLoading) {
     return (
       <Card>
@@ -35,16 +38,16 @@ export function LowStockProducts({ items, isLoading }: LowStockProductsProps) {
       <CardHeader className="flex gap-3 px-6 py-5 border-b border-divider">
         <AlertTriangle className="h-5 w-5 text-warning" />
         <div className="flex flex-col">
-          <p className="text-lg font-semibold">Low Stock Items</p>
+          <p className="text-lg font-semibold">{t('title')}</p>
           <p className="text-small text-default-500">
-            {items.length} item{items.length !== 1 ? 's' : ''} below threshold
+            {t('belowThreshold', { count: items.length })}
           </p>
         </div>
       </CardHeader>
 
       {items.length === 0 ? (
         <CardBody className="py-8 text-center">
-          <p className="text-default-500">All inventory levels are healthy</p>
+          <p className="text-default-500">{t('allHealthy')}</p>
         </CardBody>
       ) : (
         <CardBody className="gap-0 p-0">
@@ -61,7 +64,10 @@ export function LowStockProducts({ items, isLoading }: LowStockProductsProps) {
                     </p>
                   )}
                   <p className="text-small text-warning mt-1">
-                    Stock: {item.stock_qty} / {item.low_stock_threshold}
+                    {t('stockLine', {
+                      stock: item.stock_qty,
+                      threshold: item.low_stock_threshold,
+                    })}
                   </p>
                 </div>
 
@@ -73,7 +79,7 @@ export function LowStockProducts({ items, isLoading }: LowStockProductsProps) {
                   size="sm"
                   className="flex-shrink-0"
                 >
-                  Restock
+                  {t('restock')}
                 </Button>
               </div>
               {index < items.length - 1 && <Divider className="m-0" />}
