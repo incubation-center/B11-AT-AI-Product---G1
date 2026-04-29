@@ -72,6 +72,15 @@ export const auth = betterAuth({
   },
   plugins: [bearer()],
   databaseHooks: {
+    verification: {
+      create: {
+        before: async (verification) => {
+          await db
+            .delete(authVerifications)
+            .where(eq(authVerifications.identifier, verification.identifier));
+        },
+      },
+    },
     user: {
       create: {
         after: async (authUser) => {

@@ -150,7 +150,7 @@ export const authVerifications = pgTable(
       .defaultNow(),
   },
   (t) => ({
-    valueUnique: uniqueIndex("auth_verification_value_unique").on(t.value),
+    valueIdx: index("auth_verification_value_idx").on(t.value),
     identifierIdx: index("auth_verification_identifier_idx").on(t.identifier),
     expiresAtIdx: index("auth_verification_expires_at_idx").on(t.expiresAt),
   })
