@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MessageCircle, Sparkles, X, ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const QUICK_PROMPTS = [
   'Find me gift ideas under $30',
@@ -12,6 +13,7 @@ const QUICK_PROMPTS = [
 ];
 
 export function AskAiPopup() {
+  const t = useTranslations('landing.askPopup');
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -57,18 +59,18 @@ export function AskAiPopup() {
                 <div className="relative flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-red-100">
-                      Instant Assistant
+                      {t('instantAssistant')}
                     </p>
                     <h3 className="mt-1 text-lg font-semibold">
-                      Ask Coolhat AI
+                      {t('title')}
                     </h3>
                     <p className="mt-1 text-xs text-red-100">
-                      Get recommendations in seconds.
+                      {t('recommendationsInSeconds')}
                     </p>
                   </div>
                   <button
                     type="button"
-                    aria-label="Close popup"
+                    aria-label={t('closePopup')}
                     onClick={() => setOpen(false)}
                     className="rounded-full bg-white/20 p-1.5 text-white transition hover:bg-white/30"
                   >
@@ -78,7 +80,7 @@ export function AskAiPopup() {
               </div>
 
               <div className="space-y-3 bg-gradient-to-b from-red-50 to-white px-5 py-4">
-                <p className="text-sm text-slate-700">Try one prompt:</p>
+                <p className="text-sm text-slate-700">{t('tryOnePrompt')}</p>
                 <div className="flex flex-wrap gap-2">
                   {QUICK_PROMPTS.map((prompt) => (
                     <span
@@ -94,7 +96,7 @@ export function AskAiPopup() {
                   href="/chat"
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:from-red-700 hover:to-red-800"
                 >
-                  Open Full AI Chat
+                  {t('openFullAiChat')}
                   <ArrowRight size={15} />
                 </Link>
               </div>
@@ -114,14 +116,14 @@ export function AskAiPopup() {
             <span className="absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 border-r border-b border-[#1f315f] bg-[#0d1731]" />
             <p className="flex items-center gap-2 text-sm leading-none">
               <Sparkles size={14} className="text-[#ffd250]" />
-              <span className="text-base font-semibold">Ask Coolhat AI</span>
+              <span className="text-base font-semibold">{t('title')}</span>
             </p>
             <p className="mt-1 text-[13px] font-medium text-white/90">
-              Get instant answers!
+              {t('instantAnswers')}
             </p>
             <p className="mt-1 flex items-center gap-1.5 text-[12px] text-[#8ef2a4]">
               <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
-              Online - 24/7
+              {t('online247')}
             </p>
           </motion.div>
         )}
@@ -173,7 +175,7 @@ export function AskAiPopup() {
               open ? {} : { repeat: Infinity, duration: 1.9, ease: 'easeInOut' }
             }
             className="group relative inline-flex h-[70px] w-[70px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-red-600 via-red-700 to-red-800 text-white shadow-[0_16px_35px_rgba(127,29,29,0.62)]"
-            aria-label="Toggle Ask Coolhat AI"
+            aria-label={t('toggleAskAi')}
           >
             <span className="absolute inset-[5px] rounded-full border border-white/30" />
 

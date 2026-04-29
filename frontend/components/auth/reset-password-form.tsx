@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ export function ResetPasswordForm({
   initialEmail,
 }: ResetPasswordFormProps) {
   const router = useRouter();
+  const t = useTranslations('auth');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -35,22 +37,22 @@ export function ResetPasswordForm({
     setSuccess('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('errors.passwordMismatch'));
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('errors.passwordMin'));
       return;
     }
 
     if (!token && !email.trim()) {
-      setError('Email is required');
+      setError(t('errors.emailRequired'));
       return;
     }
 
     if (!token && !code.trim()) {
-      setError('Reset code is required');
+      setError(t('errors.resetCodeRequired'));
       return;
     }
 
@@ -67,7 +69,7 @@ export function ResetPasswordForm({
         }
 
         await resetPassword({ token: resolvedToken, password });
-        setSuccess('Password reset successfully!');
+        setSuccess(t('successPasswordReset'));
         setTimeout(() => {
           router.push('/sign-in');
         }, 2000);
@@ -75,7 +77,7 @@ export function ResetPasswordForm({
         setError(
           submitError instanceof Error
             ? submitError.message
-            : 'Failed to reset password',
+            : t('errors.failedResetPassword'),
         );
       }
     });
@@ -93,15 +95,15 @@ export function ResetPasswordForm({
 
         <div className="mb-10 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#c61c2f]">
-            Reset Password
+            {t('resetPasswordEyebrow')}
           </p>
           <h1 className="mb-2 text-3xl font-bold tracking-tight text-[#002e6b]">
-            Create a new password
+            {t('createNewPassword')}
           </h1>
           <p className="text-sm text-black">
             {token
-              ? 'Enter a new password for your account.'
-              : 'Enter your email, reset code, and a new password.'}
+              ? t('resetWithTokenHelp')
+              : t('resetWithCodeHelp')}
           </p>
         </div>
 
@@ -113,12 +115,12 @@ export function ResetPasswordForm({
                   htmlFor="email"
                   className="py-2 text-md font-medium text-black"
                 >
-                  Email
+                  {t('email')}
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="owner@shop.com"
+                  placeholder={t('ownerEmailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required={!token}
@@ -131,13 +133,13 @@ export function ResetPasswordForm({
                   htmlFor="reset-code"
                   className="py-2 text-md font-medium text-black"
                 >
-                  Reset Code
+                  {t('resetCode')}
                 </Label>
                 <Input
                   id="reset-code"
                   type="text"
                   inputMode="numeric"
-                  placeholder="6-digit code"
+                  placeholder={t('resetCodePlaceholder')}
                   value={code}
                   onChange={(e) =>
                     setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
@@ -155,13 +157,13 @@ export function ResetPasswordForm({
               htmlFor="password"
               className="py-2 text-md font-medium text-black"
             >
-              New Password
+              {t('newPassword')}
             </Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="At least 8 characters"
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -170,7 +172,9 @@ export function ResetPasswordForm({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={
+                  showPassword ? t('hidePassword') : t('showPassword')
+                }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
               >
                 {showPassword ? (
@@ -187,13 +191,13 @@ export function ResetPasswordForm({
               htmlFor="confirm-password"
               className="py-2 text-md font-medium text-black"
             >
-              Confirm Password
+              {t('confirmPassword')}
             </Label>
             <div className="relative">
               <Input
                 id="confirm-password"
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm your password"
+                placeholder={t('confirmPasswordPlaceholder')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -203,7 +207,7 @@ export function ResetPasswordForm({
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 aria-label={
-                  showConfirmPassword ? 'Hide password' : 'Show password'
+                  showConfirmPassword ? t('hidePassword') : t('showPassword')
                 }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
               >
@@ -234,20 +238,20 @@ export function ResetPasswordForm({
             disabled={isPending}
           >
             {isPending
-              ? 'Resetting...'
+              ? t('resetting')
               : token
-                ? 'Reset Password'
-                : 'Verify Code & Reset Password'}
+                ? t('resetPassword')
+                : t('verifyCodeAndReset')}
           </Button>
         </form>
 
         <p className="mt-8 text-center text-sm text-black">
-          Know your password?{' '}
+          {t('knowYourPassword')}{' '}
           <Link
             href="/sign-in"
             className="font-semibold text-[#c61c2f] hover:underline"
           >
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
       </div>

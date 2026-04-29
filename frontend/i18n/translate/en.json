@@ -40,6 +40,7 @@
     "fullName": "Full name",
     "newPassword": "New Password",
     "confirmPassword": "Confirm Password",
+    "resetCode": "Reset Code",
     "remember30Days": "Remember for 30 days",
     "forgotPassword": "Forgot password?",
     "dontHaveAccount": "Don't have an account?",
@@ -358,6 +359,17 @@
       "copyright": "Helping SMEs sell with an AI shop assistant.",
       "why": "Why Coolhat",
       "pricing": "Pricing"
+    },
+    "askPopup": {
+      "title": "Ask Coolhat AI",
+      "instantAssistant": "Instant Assistant",
+      "recommendationsInSeconds": "Get recommendations in seconds.",
+      "tryOnePrompt": "Try one prompt:",
+      "openFullAiChat": "Open Full AI Chat",
+      "instantAnswers": "Get instant answers!",
+      "online247": "Online - 24/7",
+      "closePopup": "Close popup",
+      "toggleAskAi": "Toggle Ask Coolhat AI"
     }
   },
   "products": {
