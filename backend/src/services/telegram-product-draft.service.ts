@@ -334,6 +334,13 @@ export async function handleTelegramProductDraftReply(tenantId: string, telegram
         return "Track inventory must be yes or no.";
       }
       seedInput.track_inventory = parsed;
+
+      if (!parsed) {
+        delete seedInput.stock_qty;
+        delete seedInput.low_stock_threshold;
+        return moveToStage(tenantId, telegramUserId, session.draftId, lang, seedInput, "awaiting_has_variants");
+      }
+
       return moveToStage(tenantId, telegramUserId, session.draftId, lang, seedInput, "awaiting_stock_qty");
     }
     case "awaiting_stock_qty":

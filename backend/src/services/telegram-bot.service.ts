@@ -1,4 +1,4 @@
-import { downloadTelegramFileAsImage, sendTelegramMessage } from "../lib/telegram";
+import { answerTelegramCallbackQuery, downloadTelegramFileAsImage, sendTelegramMessage } from "../lib/telegram";
 import { env } from "../env";
 import { listLowStockItems } from "./inventory.service";
 import { getOwnerOrderById, listOwnerOrders } from "./order.service";
@@ -15,7 +15,7 @@ import {
   startTelegramProductDraft,
 } from "./telegram-product-draft.service";
 
-type TelegramBotResponseOptions = Parameters<typeof sendTelegramMessage>[2];
+type TelegramBotResponseOptions = NonNullable<Parameters<typeof sendTelegramMessage>[2]>;
 type TelegramBotResponse = { text: string; options?: TelegramBotResponseOptions };
 
 type TelegramPhotoSize = {
@@ -44,9 +44,24 @@ type TelegramMessage = {
   chat: { id: number; type: string };
 };
 
+type TelegramCallbackQuery = {
+  id: string;
+  from?: { id: number };
+  data?: string;
+  message?: {
+    chat: { id: number; type: string };
+  };
+};
+
 type TelegramUpdate = {
   update_id: number;
   message?: TelegramMessage;
+  callback_query?: TelegramCallbackQuery;
+};
+
+type TelegramInlineButton = {
+  text: string;
+  callback_data: string;
 };
 
 function normalizeCommand(text: string) {
@@ -56,6 +71,14 @@ function normalizeCommand(text: string) {
     command: rawCommand.toLowerCase().split("@")[0],
     args: rest,
   };
+}
+
+function isValidHttpsUrl(value: string): boolean {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function formatHelp() {
@@ -83,6 +106,45 @@ function formatHelp() {
   ].join("\n");
 }
 
+function buildMainMenuInlineKeyboard(): TelegramInlineButton[][] {
+  return [
+    [
+      { text: "📊 Dashboard", callback_data: "/dashboard" },
+      { text: "🛍 Products", callback_data: "/products" },
+    ],
+    [
+      { text: "📦 Orders", callback_data: "/orders" },
+      { text: "⚙️ Store", callback_data: "/store" },
+    ],
+    [
+      { text: "➕ Add Product", callback_data: "/addproduct" },
+      { text: "📉 Inventory", callback_data: "/inventory" },
+    ],
+    [{ text: "❓ Help", callback_data: "/help" }],
+  ];
+}
+
+function buildMainResponseInlineKeyboard(): TelegramInlineButton[][] {
+  return [
+    [
+      { text: "⬅️ Menu", callback_data: "/start" },
+      { text: "➕ Add Product", callback_data: "/addproduct" },
+    ],
+  ];
+}
+
+function buildDraftStepInlineKeyboard(): TelegramInlineButton[][] {
+  return [[{ text: "⏭ Skip", callback_data: "/skip" }, { text: "❌ Cancel", callback_data: "/cancel" }]];
+}
+
+function buildDraftReadyInlineKeyboard(): TelegramInlineButton[][] {
+  return [[{ text: "✅ Confirm", callback_data: "/confirm" }, { text: "❌ Cancel", callback_data: "/cancel" }]];
+}
+
+function buildAiQuestionInlineKeyboard(): TelegramInlineButton[][] {
+  return buildDraftReadyInlineKeyboard();
+}
+
 function getTelegramMiniAppUrl(screen?: "dashboard" | "store" | "products" | "orders") {
   const base = env.TELEGRAM_MINI_APP_URL ?? `${env.PUBLIC_URL.replace(/\/$/, "")}/telegram`;
   if (!screen) {
@@ -92,30 +154,161 @@ function getTelegramMiniAppUrl(screen?: "dashboard" | "store" | "products" | "or
   return `${base}${separator}screen=${screen}`;
 }
 
+function mergeInlineKeyboard(
+  current: TelegramBotResponseOptions["replyMarkup"],
+  rows: TelegramInlineButton[][]
+) {
+  if (current && "inline_keyboard" in current) {
+    return {
+      inline_keyboard: [...current.inline_keyboard, ...rows],
+    };
+  }
+
+  return {
+    inline_keyboard: rows,
+  };
+}
+
+function withInlineRows(response: TelegramBotResponse, rows: TelegramInlineButton[][]): TelegramBotResponse {
+  return {
+    ...response,
+    options: {
+      ...response.options,
+      replyMarkup: mergeInlineKeyboard(response.options?.replyMarkup, rows),
+    },
+  };
+}
+
+function buildStartResponse(): TelegramBotResponse {
+  return {
+    text: ["<b>CoolHat owner console</b>", "", "Manage your store directly from Telegram."].join("\n"),
+    options: {
+      parseMode: "HTML",
+      replyMarkup: {
+        inline_keyboard: buildMainMenuInlineKeyboard(),
+      },
+    },
+  };
+}
+
+function isDraftReadyText(text: string): boolean {
+  const normalized = text.trim().toLowerCase();
+  return (
+    normalized.startsWith("draft is ready.") ||
+    normalized.startsWith("product draft is ready.") ||
+    normalized.startsWith("draft is already ready.")
+  );
+}
+
+function isDraftQuestionText(text: string): boolean {
+  const normalized = text.trim();
+  if (!normalized) {
+    return false;
+  }
+
+  const lower = normalized.toLowerCase();
+  // Seed-step prompts from telegram-product-draft.service should never be rendered as AI follow-up questions.
+  if (lower.startsWith("send up to ")) return false;
+  if (lower.startsWith("send the ")) return false;
+  if (lower.startsWith("track inventory?")) return false;
+  if (lower.startsWith("does this product have variants?")) return false;
+  if (lower.startsWith("starting telegram product draft.")) return false;
+  if (lower.includes("this collects the same core fields")) return false;
+  if (lower.includes("use /skip for optional fields")) return false;
+  if (lower.includes("must be")) return false;
+  if (lower.includes("telegram product draft cancelled")) return false;
+  if (lower.includes("product created successfully")) return false;
+  if (lower.includes("no telegram product draft is in progress")) return false;
+  if (lower.includes("this step cannot be skipped")) return false;
+  if (lower.includes("draft not found")) return false;
+  if (lower.includes("draft is not ready yet")) return false;
+
+  return true;
+}
+
+function formatAiQuestionMessage(text: string): string {
+  const stripped = text
+    .replace(/\n\nReply with your answer\..*$/is, "")
+    .replace(/^Product draft is in progress\..*$/i, "Please continue with the current question in this chat.")
+    .trim();
+
+  return ["🤖 <b>AI Question</b>", "", stripped, "", "Please type your answer below."].join("\n");
+}
+
+function formatReadyMessage(): string {
+  return ["✅ <b>Draft is ready</b>", "", "You can now create the product."].join("\n");
+}
+
+function isAiFollowupPrompt(text: string): boolean {
+  return /\n\nReply with your answer\./i.test(text);
+}
+
+function enhanceDraftResponse(
+  response: TelegramBotResponse,
+  origin: "addproduct" | "skip" | "confirm" | "cancel" | "draft-reply" | "draft-status" | "draft-image"
+): TelegramBotResponse {
+  const text = response.text.trim();
+  const lower = text.toLowerCase();
+
+  if (isDraftReadyText(text)) {
+    return {
+      text: formatReadyMessage(),
+      options: {
+        parseMode: "HTML",
+        replyMarkup: {
+          inline_keyboard: buildDraftReadyInlineKeyboard(),
+        },
+      },
+    };
+  }
+
+  if (isAiFollowupPrompt(text) || (origin === "draft-reply" && isDraftQuestionText(text))) {
+    return {
+      text: formatAiQuestionMessage(text),
+      options: {
+        parseMode: "HTML",
+        replyMarkup: {
+          inline_keyboard: buildAiQuestionInlineKeyboard(),
+        },
+      },
+    };
+  }
+
+  if (lower.startsWith("product created successfully") || lower.includes("telegram product draft cancelled")) {
+    return withInlineRows(
+      {
+        ...response,
+        options: {
+          ...response.options,
+          parseMode: response.options?.parseMode,
+        },
+      },
+      buildMainResponseInlineKeyboard()
+    );
+  }
+
+  if (lower.includes("no telegram product draft is in progress")) {
+    return withInlineRows(response, buildMainResponseInlineKeyboard());
+  }
+
+  return withInlineRows(response, buildDraftStepInlineKeyboard());
+}
+
+function enhanceMainResponse(response: TelegramBotResponse): TelegramBotResponse {
+  return withInlineRows(response, buildMainResponseInlineKeyboard());
+}
+
 function buildDashboardMessage(
   title: string,
   lines: string[],
-  screen: "dashboard" | "store" | "products" | "orders"
+  _screen: "dashboard" | "store" | "products" | "orders"
 ): TelegramBotResponse {
   return {
     text: [`<b>${title}</b>`, "", ...lines].join("\n"),
     options: {
       parseMode: "HTML" as const,
       replyMarkup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Open Dashboard",
-              web_app: { url: getTelegramMiniAppUrl(screen) },
-            },
-          ],
-          [
-            {
-              text: "Open in Browser",
-              url: getTelegramMiniAppUrl(screen),
-            },
-          ],
-        ],
+        inline_keyboard: buildMainResponseInlineKeyboard(),
       },
     },
   };
@@ -379,15 +572,23 @@ function pickTelegramImageFile(message: TelegramMessage) {
 }
 
 export async function handleTelegramWebhook(update: TelegramUpdate): Promise<void> {
-  const message = update.message;
-  if (!message?.from?.id) {
+  const callbackQuery = update.callback_query;
+  const message = update.message ?? callbackQuery?.message;
+  if (!message) {
     return;
   }
 
-  const telegramUserId = message.from.id;
+  const telegramUserId = update.message?.from?.id ?? callbackQuery?.from?.id;
+  if (!telegramUserId) {
+    if (callbackQuery?.id) {
+      await answerTelegramCallbackQuery(callbackQuery.id);
+    }
+    return;
+  }
+
   const chatId = message.chat.id;
-  const text = message.text?.trim();
-  const imageFile = pickTelegramImageFile(message);
+  const text = update.message?.text?.trim() ?? callbackQuery?.data?.trim();
+  const imageFile = update.message ? pickTelegramImageFile(update.message) : null;
 
   if (imageFile) {
     const linked = await resolveTenantId(telegramUserId);
@@ -403,11 +604,18 @@ export async function handleTelegramWebhook(update: TelegramUpdate): Promise<voi
           }
         })();
 
-    await sendTelegramMessage(chatId, responseText);
+    const imageResponse = enhanceDraftResponse({ text: responseText, options: undefined }, "draft-image");
+    await sendTelegramMessage(chatId, imageResponse.text, imageResponse.options);
+    if (callbackQuery?.id) {
+      await answerTelegramCallbackQuery(callbackQuery.id);
+    }
     return;
   }
 
   if (!text) {
+    if (callbackQuery?.id) {
+      await answerTelegramCallbackQuery(callbackQuery.id);
+    }
     return;
   }
 
@@ -416,49 +624,51 @@ export async function handleTelegramWebhook(update: TelegramUpdate): Promise<voi
   let response: TelegramBotResponse;
   switch (command) {
     case "/start":
+      response = buildStartResponse();
+      break;
     case "/help":
       response = {
         text: formatHelp(),
         options: {
           parseMode: "HTML",
           replyMarkup: {
-            inline_keyboard: [[{ text: "Open Dashboard", web_app: { url: getTelegramMiniAppUrl("dashboard") } }]],
+            inline_keyboard: buildMainResponseInlineKeyboard(),
           },
         },
       };
       break;
     case "/connect":
-      response = await handleConnect(telegramUserId, args);
+      response = enhanceMainResponse(await handleConnect(telegramUserId, args));
       break;
     case "/dashboard":
-      response = formatDashboardLaunch((await resolveTenantId(telegramUserId)).tenantId);
+      response = enhanceMainResponse(formatDashboardLaunch((await resolveTenantId(telegramUserId)).tenantId));
       break;
     case "/products":
-      response = await handleProducts(telegramUserId);
+      response = enhanceMainResponse(await handleProducts(telegramUserId));
       break;
     case "/addproduct":
-      response = await handleAddProduct(telegramUserId);
+      response = enhanceDraftResponse(await handleAddProduct(telegramUserId), "addproduct");
       break;
     case "/confirm":
-      response = await handleConfirm(telegramUserId);
+      response = enhanceDraftResponse(await handleConfirm(telegramUserId), "confirm");
       break;
     case "/cancel":
-      response = await handleCancel(telegramUserId);
+      response = enhanceDraftResponse(await handleCancel(telegramUserId), "cancel");
       break;
     case "/skip":
-      response = await handleSkip(telegramUserId);
+      response = enhanceDraftResponse(await handleSkip(telegramUserId), "skip");
       break;
     case "/store":
-      response = await handleStore(telegramUserId);
+      response = enhanceMainResponse(await handleStore(telegramUserId));
       break;
     case "/inventory":
-      response = await handleInventory(telegramUserId);
+      response = enhanceMainResponse(await handleInventory(telegramUserId));
       break;
     case "/orders":
-      response = await handleOrders(telegramUserId);
+      response = enhanceMainResponse(await handleOrders(telegramUserId));
       break;
     case "/order":
-      response = await handleOrder(telegramUserId, args);
+      response = enhanceMainResponse(await handleOrder(telegramUserId, args));
       break;
     default:
       if (!command.startsWith("/")) {
@@ -470,13 +680,13 @@ export async function handleTelegramWebhook(update: TelegramUpdate): Promise<voi
 
         const draftReply = await handleTelegramProductDraftReply(linked.tenantId, telegramUserId, text);
         if (draftReply) {
-          response = { text: draftReply, options: undefined };
+          response = enhanceDraftResponse({ text: draftReply, options: undefined }, "draft-reply");
           break;
         }
 
         const draftStatus = await getTelegramProductDraftStatus(linked.tenantId, telegramUserId);
         if (draftStatus) {
-          response = { text: draftStatus, options: undefined };
+          response = enhanceDraftResponse({ text: draftStatus, options: undefined }, "draft-status");
           break;
         }
       }
@@ -485,10 +695,28 @@ export async function handleTelegramWebhook(update: TelegramUpdate): Promise<voi
         text: `Unknown command.\n\n${formatHelp()}`,
         options: {
           parseMode: "HTML",
+          replyMarkup: {
+            inline_keyboard: buildMainResponseInlineKeyboard(),
+          },
         },
       };
       break;
   }
 
-  await sendTelegramMessage(chatId, response.text, response.options);
+  try {
+    await sendTelegramMessage(chatId, response.text, response.options);
+    if (callbackQuery?.id) {
+      await answerTelegramCallbackQuery(callbackQuery.id);
+    }
+  } catch (error) {
+    if (response.options?.replyMarkup) {
+      await sendTelegramMessage(chatId, response.text);
+      if (callbackQuery?.id) {
+        await answerTelegramCallbackQuery(callbackQuery.id);
+      }
+      return;
+    }
+
+    throw error;
+  }
 }

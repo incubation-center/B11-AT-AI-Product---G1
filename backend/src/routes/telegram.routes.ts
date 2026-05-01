@@ -69,16 +69,18 @@ telegramRoutes.post("/telegram/link-code", requireBearer, async (c) => {
 });
 
 telegramRoutes.post("/telegram/webhook", async (c) => {
-  if (env.TELEGRAM_WEBHOOK_SECRET) {
-    const secret = c.req.header("x-telegram-bot-api-secret-token");
-    if (secret !== env.TELEGRAM_WEBHOOK_SECRET) {
-      return c.json({ message: "Forbidden" }, 403);
-    }
+  const configuredSecret = env.TELEGRAM_WEBHOOK_SECRET?.trim();
+  const requestSecret = c.req.header("x-telegram-bot-api-secret-token")?.trim();
+
+  // Development-only bypass: enforce webhook secret only in production.
+  if (configuredSecret && env.NODE_ENV === "production" && requestSecret !== configuredSecret) {
+    console.warn("[telegram] webhook secret mismatch");
+    return c.json({ ok: false, message: "Forbidden" }, 200);
   }
 
   const update = await c.req.json().catch(() => null);
   if (!update) {
-    return c.json({ message: "Invalid Telegram update" }, 400);
+    return c.json({ ok: false, message: "Invalid Telegram update" }, 200);
   }
 
   try {
@@ -86,7 +88,7 @@ telegramRoutes.post("/telegram/webhook", async (c) => {
     return c.json({ ok: true });
   } catch (error) {
     console.error("[telegram] webhook handler failed", { error });
-    return c.json({ ok: false }, 500);
+    return c.json({ ok: false }, 200);
   }
 });
 

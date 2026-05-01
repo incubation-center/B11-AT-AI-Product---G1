@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, Sparkles, X, ArrowRight } from 'lucide-react';
+import { Sparkles, X, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 const QUICK_PROMPTS = [
@@ -47,15 +47,6 @@ export function AskAiPopup() {
               className="pointer-events-auto relative w-[min(92vw,24rem)] overflow-hidden rounded-3xl border border-red-200/70 bg-white shadow-[0_18px_45px_rgba(127,29,29,0.28)]"
             >
               <div className="relative overflow-hidden bg-gradient-to-r from-red-600 to-red-800 px-5 py-4 text-white">
-                <motion.div
-                  className="absolute inset-y-0 w-16 -translate-x-20 rotate-12 bg-white/25 blur-sm"
-                  animate={{ x: [0, 420] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2.8,
-                    ease: 'linear',
-                  }}
-                />
                 <div className="relative flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-red-100">
@@ -179,12 +170,6 @@ export function AskAiPopup() {
           >
             <span className="absolute inset-[5px] rounded-full border border-white/30" />
 
-            <motion.span
-              className="absolute inset-y-0 w-7 -translate-x-14 rotate-12 bg-white/30 blur-sm"
-              animate={{ x: [0, 140] }}
-              transition={{ repeat: Infinity, duration: 2.7, ease: 'linear' }}
-            />
-
             <motion.div
               animate={open ? { rotate: 90 } : { rotate: [0, 14, -10, 0] }}
               transition={
@@ -196,17 +181,6 @@ export function AskAiPopup() {
               {open ? <X size={24} /> : <Sparkles size={24} />}
             </motion.div>
 
-            <motion.span
-              animate={{ rotate: [0, 12, -8, 0] }}
-              transition={{
-                repeat: Infinity,
-                duration: 2.2,
-                ease: 'easeInOut',
-              }}
-              className="absolute -right-1 -top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow"
-            >
-              <MessageCircle size={11} />
-            </motion.span>
           </motion.button>
         </div>
       </div>
