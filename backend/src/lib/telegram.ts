@@ -4,13 +4,37 @@ type TelegramInlineKeyboardButton = {
   text: string;
   url?: string;
   web_app?: { url: string };
+  callback_data?: string;
 };
+
+type TelegramReplyKeyboardButton = {
+  text: string;
+};
+
+type TelegramReplyMarkup =
+  | {
+      inline_keyboard: TelegramInlineKeyboardButton[][];
+    }
+  | {
+      keyboard: TelegramReplyKeyboardButton[][];
+      resize_keyboard?: boolean;
+      one_time_keyboard?: boolean;
+      input_field_placeholder?: string;
+      selective?: boolean;
+    }
+  | {
+      remove_keyboard: true;
+      selective?: boolean;
+    }
+  | {
+      force_reply: true;
+      input_field_placeholder?: string;
+      selective?: boolean;
+    };
 
 type TelegramSendMessageOptions = {
   parseMode?: "HTML" | "MarkdownV2";
-  replyMarkup?: {
-    inline_keyboard: TelegramInlineKeyboardButton[][];
-  };
+  replyMarkup?: TelegramReplyMarkup;
   disableWebPagePreview?: boolean;
 };
 
@@ -40,6 +64,27 @@ export async function sendTelegramMessage(
   if (!response.ok) {
     const raw = await response.text();
     throw new Error(`Telegram sendMessage failed: ${raw}`);
+  }
+}
+
+export async function answerTelegramCallbackQuery(callbackQueryId: string): Promise<void> {
+  if (!env.TELEGRAM_BOT_TOKEN) {
+    return;
+  }
+
+  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      callback_query_id: callbackQueryId,
+    }),
+  });
+
+  if (!response.ok) {
+    const raw = await response.text();
+    throw new Error(`Telegram answerCallbackQuery failed: ${raw}`);
   }
 }
 
