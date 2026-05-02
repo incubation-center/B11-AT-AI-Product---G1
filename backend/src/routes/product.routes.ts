@@ -29,6 +29,10 @@ import {
   updateVariantStock,
 } from "../services/product.service";
 
+const AI_RATE_LIMIT_WINDOW_MS = 60_000;
+const AI_RATE_LIMIT_MAX_REQUESTS = 20;
+const aiRateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+
 function cleanText(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const cleaned = value.trim();
@@ -154,6 +158,50 @@ function validateVariantPricingAndInventory(body: any): {
   };
 }
 
+function getClientIp(c: Context): string {
+  const forwardedFor = c.req.header("x-forwarded-for");
+  if (forwardedFor) {
+    const first = forwardedFor.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return (
+    c.req.header("cf-connecting-ip") ??
+    c.req.header("x-real-ip") ??
+    c.req.header("x-client-ip") ??
+    "unknown"
+  );
+}
+
+function enforceAiRateLimit(c: Context, tenantId: string, requesterKey: string): Response | null {
+  const now = Date.now();
+  const bucketKey = `${tenantId}:${requesterKey}`;
+  const current = aiRateLimitBuckets.get(bucketKey);
+
+  if (!current || now >= current.resetAt) {
+    aiRateLimitBuckets.set(bucketKey, {
+      count: 1,
+      resetAt: now + AI_RATE_LIMIT_WINDOW_MS,
+    });
+    return null;
+  }
+
+  if (current.count >= AI_RATE_LIMIT_MAX_REQUESTS) {
+    const retryAfterSec = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
+    c.header("Retry-After", String(retryAfterSec));
+    return c.json(
+      {
+        message: "Too many AI requests. Please try again shortly.",
+        retry_after_seconds: retryAfterSec,
+      },
+      429
+    );
+  }
+
+  current.count += 1;
+  aiRateLimitBuckets.set(bucketKey, current);
+  return null;
+}
+
 async function getSessionUser(c: Context) {
   const session = await auth.api.getSession({
     headers: c.req.raw.headers,
@@ -161,14 +209,17 @@ async function getSessionUser(c: Context) {
   return session?.user ?? null;
 }
 
-async function resolveTenant(c: Context): Promise<{ tenantId: string | null; response: Response | null }> {
+async function resolveTenant(
+  c: Context
+): Promise<{ tenantId: string | null; requesterKey: string | null; response: Response | null }> {
   const sessionUser = await getSessionUser(c);
-  if (!sessionUser) return { tenantId: null, response: c.json({ message: "Unauthorized" }, 401) };
+  if (!sessionUser) return { tenantId: null, requesterKey: null, response: c.json({ message: "Unauthorized" }, 401) };
 
   const tenant = await getMyTenant(sessionUser);
-  if (!tenant) return { tenantId: null, response: c.json({ message: "Tenant not found" }, 404) };
+  if (!tenant) return { tenantId: null, requesterKey: null, response: c.json({ message: "Tenant not found" }, 404) };
 
-  return { tenantId: tenant.id, response: null };
+  const requesterKey = sessionUser.id || getClientIp(c);
+  return { tenantId: tenant.id, requesterKey, response: null };
 }
 
 function triggerAutoProductAiAnalysis(tenantId: string, productId: string, lang?: unknown) {
@@ -218,6 +269,9 @@ productRoutes.post("/products/ai/start", requireBearer, async (c) => {
   const resolved = await resolveTenant(c);
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
+  const requesterKey = resolved.requesterKey!;
+  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
+  if (rateLimited) return rateLimited;
 
   const body = await c.req.json().catch(() => null);
   const productId = cleanText(body?.product_id);
@@ -265,6 +319,9 @@ productRoutes.post("/products/ai/answer", requireBearer, async (c) => {
   const resolved = await resolveTenant(c);
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
+  const requesterKey = resolved.requesterKey!;
+  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
+  if (rateLimited) return rateLimited;
 
   const body = await c.req.json().catch(() => null);
   const draftId = cleanText(body?.draft_id);
@@ -298,6 +355,9 @@ productRoutes.post("/products/ai/confirm", requireBearer, async (c) => {
   const resolved = await resolveTenant(c);
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
+  const requesterKey = resolved.requesterKey!;
+  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
+  if (rateLimited) return rateLimited;
 
   const body = await c.req.json().catch(() => null);
   const draftId = cleanText(body?.draft_id);

@@ -26,6 +26,9 @@ import {
 } from "../services/telegram-miniapp.service";
 
 export const telegramRoutes = new Hono();
+const TELEGRAM_WEBHOOK_RATE_LIMIT_WINDOW_MS = 60_000;
+const TELEGRAM_WEBHOOK_RATE_LIMIT_MAX_REQUESTS = 30;
+const telegramWebhookRateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
 async function getSessionUser(headers: Headers) {
   const session = await auth.api.getSession({
@@ -33,6 +36,42 @@ async function getSessionUser(headers: Headers) {
   });
 
   return session?.user ?? null;
+}
+
+function getTelegramActorKey(update: any): string {
+  const userId =
+    update?.message?.from?.id ??
+    update?.callback_query?.from?.id ??
+    update?.edited_message?.from?.id ??
+    update?.channel_post?.from?.id ??
+    null;
+
+  return userId != null ? String(userId) : "unknown";
+}
+
+function isTelegramWebhookRateLimited(update: any): { limited: boolean; retryAfterSec: number } {
+  const now = Date.now();
+  const actorKey = getTelegramActorKey(update);
+  const current = telegramWebhookRateLimitBuckets.get(actorKey);
+
+  if (!current || now >= current.resetAt) {
+    telegramWebhookRateLimitBuckets.set(actorKey, {
+      count: 1,
+      resetAt: now + TELEGRAM_WEBHOOK_RATE_LIMIT_WINDOW_MS,
+    });
+    return { limited: false, retryAfterSec: 0 };
+  }
+
+  if (current.count >= TELEGRAM_WEBHOOK_RATE_LIMIT_MAX_REQUESTS) {
+    return {
+      limited: true,
+      retryAfterSec: Math.max(1, Math.ceil((current.resetAt - now) / 1000)),
+    };
+  }
+
+  current.count += 1;
+  telegramWebhookRateLimitBuckets.set(actorKey, current);
+  return { limited: false, retryAfterSec: 0 };
 }
 
 telegramRoutes.get("/telegram/link-status", requireBearer, async (c) => {
@@ -81,6 +120,15 @@ telegramRoutes.post("/telegram/webhook", async (c) => {
   const update = await c.req.json().catch(() => null);
   if (!update) {
     return c.json({ ok: false, message: "Invalid Telegram update" }, 200);
+  }
+
+  const limited = isTelegramWebhookRateLimited(update);
+  if (limited.limited) {
+    console.warn("[telegram] webhook rate limited", {
+      retryAfterSec: limited.retryAfterSec,
+      actor: getTelegramActorKey(update),
+    });
+    return c.json({ ok: false, message: "Rate limited" }, 200);
   }
 
   try {

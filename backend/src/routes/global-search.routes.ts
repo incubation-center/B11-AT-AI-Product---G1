@@ -1,9 +1,13 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import { streamText } from "hono/streaming";
 import { GLOBAL_SEARCH_SYSTEM_PROMPT, globalProductSearch } from "../services/global-search.service";
 import { env } from "../env";
 
 export const globalSearchRoutes = new Hono();
+const GLOBAL_CHAT_RATE_LIMIT_WINDOW_MS = 60_000;
+const GLOBAL_CHAT_RATE_LIMIT_MAX_REQUESTS = 20;
+const globalChatRateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
 function cleanMessage(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -11,7 +15,54 @@ function cleanMessage(value: unknown): string | null {
   return t.length > 0 ? t : null;
 }
 
+function getClientIp(c: Context): string {
+  const forwardedFor = c.req.header("x-forwarded-for");
+  if (forwardedFor) {
+    const first = forwardedFor.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return (
+    c.req.header("cf-connecting-ip") ??
+    c.req.header("x-real-ip") ??
+    c.req.header("x-client-ip") ??
+    "unknown"
+  );
+}
+
+function enforceGlobalChatRateLimit(c: Context): Response | null {
+  const now = Date.now();
+  const bucketKey = getClientIp(c);
+  const current = globalChatRateLimitBuckets.get(bucketKey);
+
+  if (!current || now >= current.resetAt) {
+    globalChatRateLimitBuckets.set(bucketKey, {
+      count: 1,
+      resetAt: now + GLOBAL_CHAT_RATE_LIMIT_WINDOW_MS,
+    });
+    return null;
+  }
+
+  if (current.count >= GLOBAL_CHAT_RATE_LIMIT_MAX_REQUESTS) {
+    const retryAfterSec = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
+    c.header("Retry-After", String(retryAfterSec));
+    return c.json(
+      {
+        message: "Too many AI requests. Please try again shortly.",
+        retry_after_seconds: retryAfterSec,
+      },
+      429
+    );
+  }
+
+  current.count += 1;
+  globalChatRateLimitBuckets.set(bucketKey, current);
+  return null;
+}
+
 globalSearchRoutes.post("/global/chat", async (c) => {
+  const rateLimited = enforceGlobalChatRateLimit(c);
+  if (rateLimited) return rateLimited;
+
   const body = await c.req.json().catch(() => null);
 
   // Accept Vercel AI SDK's `messages` array OR a simple `message` string
