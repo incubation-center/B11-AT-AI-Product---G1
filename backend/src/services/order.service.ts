@@ -223,6 +223,7 @@ export async function createCheckoutOrder(tenantId: string, input: CheckoutInput
           "New order received",
           `Order: ${result.orderNo}`,
           `Customer: ${input.customer_name.trim()}`,
+          ...(cleanText(input.customer_phone) ? [`Phone: ${cleanText(input.customer_phone)}`] : []),
           `Total: ${total} ${input.currency}`,
           `Payment: ${input.payment_method}`,
         ].join("\n")

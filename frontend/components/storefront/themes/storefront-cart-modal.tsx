@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Trash2, X } from 'lucide-react';
+import Link from 'next/link';
 
 import { formatStorePrice } from '@/components/storefront/themes/shared';
 import type { StorefrontCartItem } from '@/components/storefront/themes/use-storefront-cart';
@@ -154,6 +155,23 @@ export function StorefrontCartModal({
                     <span className="font-semibold text-[#002e6b]">
                       ${estimatedTotalUsd.toFixed(2)}
                     </span>
+                  </div>
+
+                  <div className="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Continue shopping
+                    </button>
+                    <Link
+                      href="/checkout"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center justify-center rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white hover:bg-[#00265a]"
+                    >
+                      Proceed to checkout
+                    </Link>
                   </div>
                 </div>
               ) : (

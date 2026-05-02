@@ -1,10 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { useStorefrontCart } from '@/components/storefront/themes/use-storefront-cart';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import type { StorefrontStore } from '@/lib/storefront';
 
 type CheckoutResponse = {
@@ -96,13 +102,41 @@ function isPaywayPaymentFailed(payload: PaywayStatusResponse) {
   return action ? failedPaymentActions.has(action) : false;
 }
 
+function getDisplayPaywayStatusMessage(message: string) {
+  return message.trim().toLowerCase() === 'success!'
+    ? 'Pending payment'
+    : message;
+}
+
+function getPaywayExpirySeconds(expireInSec?: string) {
+  if (!expireInSec) return null;
+
+  const seconds = Number.parseInt(expireInSec, 10);
+
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+}
+
+function formatPaywayTimer(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
 export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
   const { cartItems, clearCart } = useStorefrontCart(store.subdomain);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<CheckoutResponse | null>(null);
   const [paywayInit, setPaywayInit] = useState<PaywayInitResponse | null>(null);
+  const [isPaywayDialogOpen, setIsPaywayDialogOpen] = useState(false);
   const [paywayStatusMessage, setPaywayStatusMessage] = useState('');
+  const [paywayExpiresAtMs, setPaywayExpiresAtMs] = useState<number | null>(
+    null,
+  );
+  const [paywayTimerSeconds, setPaywayTimerSeconds] = useState<number | null>(
+    null,
+  );
   const [submitLabel, setSubmitLabel] = useState('Place order');
 
   const [customerName, setCustomerName] = useState('');
@@ -127,9 +161,27 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
     }, 0);
   }, [cartItems, currency]);
 
+  useEffect(() => {
+    if (!isPaywayDialogOpen || !paywayExpiresAtMs) {
+      setPaywayTimerSeconds(null);
+      return;
+    }
+
+    const updateTimer = () => {
+      setPaywayTimerSeconds(
+        Math.max(0, Math.ceil((paywayExpiresAtMs - Date.now()) / 1000)),
+      );
+    };
+
+    updateTimer();
+    const timerId = window.setInterval(updateTimer, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [isPaywayDialogOpen, paywayExpiresAtMs]);
+
   async function submitCheckout() {
-    if (!customerName.trim() || !addressText.trim()) {
-      setError('Customer name and address are required.');
+    if (!customerName.trim() || !customerPhone.trim() || !addressText.trim()) {
+      setError('Customer name, phone, and address are required.');
       return;
     }
 
@@ -140,7 +192,10 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
 
     setError('');
     setPaywayInit(null);
+    setIsPaywayDialogOpen(false);
     setPaywayStatusMessage('');
+    setPaywayExpiresAtMs(null);
+    setPaywayTimerSeconds(null);
     setIsSubmitting(true);
     setSubmitLabel(
       paymentMethod === 'aba_transfer'
@@ -177,6 +232,14 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
         }
 
         setPaywayInit(paywayPayload);
+        setIsPaywayDialogOpen(true);
+        const expirySeconds = getPaywayExpirySeconds(
+          paywayPayload.expire_in_sec,
+        );
+        const expiresAtMs = expirySeconds
+          ? Date.now() + expirySeconds * 1000
+          : null;
+        setPaywayExpiresAtMs(expiresAtMs);
 
         if (
           !paywayPayload.client_id ||
@@ -186,6 +249,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
           setError(
             'ABA payment was initialized, but payment status data was missing. Please try again.',
           );
+          setIsPaywayDialogOpen(false);
+          setPaywayExpiresAtMs(null);
+          setPaywayTimerSeconds(null);
           return;
         }
 
@@ -195,7 +261,11 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
         const deviceId = generateDeviceId();
         let paymentSucceeded = false;
 
-        for (let attempt = 0; attempt < 100; attempt += 1) {
+        for (
+          let attempt = 0;
+          expiresAtMs ? Date.now() < expiresAtMs : attempt < 100;
+          attempt += 1
+        ) {
           const statusResponse = await fetch('/api/storefront/payway/status', {
             method: 'POST',
             headers: {
@@ -218,6 +288,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
               getPaywayStatusMessage(statusPayload) ||
                 'ABA payment status was rejected. Please initialize payment again.',
             );
+            setIsPaywayDialogOpen(false);
+            setPaywayExpiresAtMs(null);
+            setPaywayTimerSeconds(null);
             return;
           }
 
@@ -240,17 +313,31 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
                 getPaywayStatusMessage(statusPayload) ||
                   'ABA payment was not approved. Please try again.',
               );
+              setIsPaywayDialogOpen(false);
+              setPaywayExpiresAtMs(null);
+              setPaywayTimerSeconds(null);
               return;
             }
           }
 
-          await sleep(3000);
+          if (expiresAtMs) {
+            const remainingMs = expiresAtMs - Date.now();
+            if (remainingMs <= 0) break;
+            await sleep(Math.min(3000, remainingMs));
+          } else {
+            await sleep(3000);
+          }
         }
 
         if (!paymentSucceeded) {
           setError(
-            'ABA payment has not been confirmed yet. The order was not sent to the store owner.',
+            expiresAtMs
+              ? 'ABA payment expired before it was confirmed. Please initialize payment again.'
+              : 'ABA payment has not been confirmed yet. The order was not sent to the store owner.',
           );
+          setIsPaywayDialogOpen(false);
+          setPaywayExpiresAtMs(null);
+          setPaywayTimerSeconds(null);
           return;
         }
 
@@ -296,6 +383,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
       }
 
       setSuccess(payload);
+      setIsPaywayDialogOpen(false);
+      setPaywayExpiresAtMs(null);
+      setPaywayTimerSeconds(null);
       clearCart();
     } catch {
       setError('Unable to checkout right now. Please try again.');
@@ -354,7 +444,8 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
         />
         <input
           className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
-          placeholder="Phone"
+          placeholder="Phone *"
+          required
           value={customerPhone}
           onChange={(event) => setCustomerPhone(event.target.value)}
         />
@@ -415,40 +506,74 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
             Order placed: {success.order.orderNo ?? success.order.id}
           </div>
         ) : null}
-        {paywayInit ? (
-          <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">
-            <p className="font-semibold">ABA payment initialized</p>
-            {paywayInit.mobile_deep_link ? (
-              <a
-                href={paywayInit.mobile_deep_link}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex rounded-lg bg-[#002e6b] px-3 py-2 text-xs font-semibold text-white"
-              >
-                Open ABA Mobile App
-              </a>
+        <Dialog open={isPaywayDialogOpen} onOpenChange={setIsPaywayDialogOpen}>
+          <DialogContent className="max-w-md border-sky-100 bg-white p-0 text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.24)]">
+            <DialogHeader className="border-b border-slate-100 px-5 py-4 pr-12">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700">
+                ABA Transfer
+              </p>
+              <DialogTitle className="text-xl font-semibold text-slate-900">
+                ABA payment initialized
+              </DialogTitle>
+            </DialogHeader>
+            {paywayInit ? (
+              <div className="space-y-4 px-5 pb-5">
+                {paywayTimerSeconds !== null ? (
+                  <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                    <span className="font-medium">Payment timer</span>
+                    <span className="font-mono text-base font-semibold tabular-nums">
+                      {formatPaywayTimer(paywayTimerSeconds)}
+                    </span>
+                  </div>
+                ) : null}
+                {paywayQrImage ? (
+                  <div className="flex justify-center rounded-2xl border border-sky-100 bg-sky-50 p-5">
+                    <Image
+                      src={paywayQrImage}
+                      alt="ABA QR"
+                      width={288}
+                      height={288}
+                      className="h-72 w-72 rounded-lg border border-sky-200 bg-white p-2"
+                    />
+                  </div>
+                ) : null}
+                {paywayInit.mobile_deep_link ? (
+                  <a
+                    href={paywayInit.mobile_deep_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex w-full justify-center rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    Open ABA Mobile App
+                  </a>
+                ) : null}
+                {paywayStatusMessage ? (
+                  <p className="rounded-xl border border-sky-100 bg-sky-50 px-3 py-2 text-center text-sm font-medium text-sky-900">
+                    {getDisplayPaywayStatusMessage(paywayStatusMessage)}
+                  </p>
+                ) : null}
+              </div>
             ) : null}
-            {paywayQrImage ? (
-              <Image
-                src={paywayQrImage}
-                alt="ABA QR"
-                width={224}
-                height={224}
-                className="h-56 w-56 rounded-lg border border-sky-200 bg-white p-2"
-              />
-            ) : null}
-            {paywayStatusMessage ? <p>{paywayStatusMessage}</p> : null}
-          </div>
-        ) : null}
+          </DialogContent>
+        </Dialog>
 
-        <button
-          type="button"
-          onClick={submitCheckout}
-          disabled={isSubmitting || !cartItems.length}
-          className="w-full rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSubmitting ? submitLabel : 'Place order'}
-        </button>
+        {success?.order ? (
+          <Link
+            href="/"
+            className="inline-flex w-full justify-center rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white hover:bg-[#00265a]"
+          >
+            Continue shopping
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={submitCheckout}
+            disabled={isSubmitting || !cartItems.length}
+            className="w-full rounded-xl bg-[#002e6b] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? submitLabel : 'Place order'}
+          </button>
+        )}
       </div>
     </main>
   );
