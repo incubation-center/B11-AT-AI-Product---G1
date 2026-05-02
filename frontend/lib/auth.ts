@@ -27,6 +27,7 @@ export type TenantSummary = {
   googleMapUrl?: string | null;
   logoUrl?: string | null;
   bannerUrl?: string | null;
+  paywayLinkUrl?: string | null;
   storefrontTemplate?: string | null;
   subdomain: string;
   storeUrl: string;
@@ -61,6 +62,7 @@ export type CreateTenantPayload = {
   google_map_url?: string;
   logo_url?: string;
   banner_url?: string;
+  payway_link_url?: string;
 };
 
 export type UpdateTenantPayload = Partial<CreateTenantPayload> & {
@@ -72,9 +74,16 @@ type UnknownJson = Record<string, unknown>;
 
 async function parseResponse<T>(response: Response): Promise<T> {
   const text = await response.text();
-  const data = text
-    ? (JSON.parse(text) as T & { message?: string })
-    : ({} as T);
+  let data: (T & { message?: string }) | null = null;
+  if (text) {
+    try {
+      data = JSON.parse(text) as T & { message?: string };
+    } catch {
+      data = { message: text } as T & { message?: string };
+    }
+  } else {
+    data = {} as T & { message?: string };
+  }
 
   if (!response.ok) {
     const message =

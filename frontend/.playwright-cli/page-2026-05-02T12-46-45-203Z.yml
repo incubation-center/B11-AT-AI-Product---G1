@@ -1,0 +1,139 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - navigation [ref=e6]:
+          - link [ref=e381] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e8]: beauty_cosmetics
+            - generic [ref=e10]: May Store
+          - link [ref=e382] [cursor=pointer]:
+            - /url: /cart
+            - img [ref=e17]
+            - text: "1"
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - img [ref=e383]
+            - paragraph [ref=e26]: beauty_cosmetics
+          - generic [ref=e27]: Cart 1
+        - heading [level=1] [ref=e384]: Editorial / Lookbook
+        - paragraph [ref=e29]: My store description
+      - main [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e33]:
+            - paragraph [ref=e34]: Lookbook Story
+            - heading [level=2] [ref=e385]: Glowra Skin Serum
+            - paragraph [ref=e36]: Present your products as chapters while keeping clear buying actions visible in every section.
+          - img [ref=e386]
+        - generic [ref=e40]:
+          - article [ref=e41]:
+            - img [ref=e387]
+            - generic [ref=e44]:
+              - paragraph [ref=e45]: Skincare / Face Serum
+              - heading [level=3] [ref=e388]: Glowra Skin Serum
+              - paragraph [ref=e47]: $21.00
+              - generic [ref=e48]:
+                - button [ref=e389]: Details
+                - button [ref=e390]: Add to cart
+          - article [ref=e51]:
+            - img [ref=e391]
+            - generic [ref=e54]:
+              - paragraph [ref=e55]: Sunscreen
+              - heading [level=3] [ref=e392]: AquaShield Sunscreen SPF 50
+              - paragraph [ref=e57]: $30.00
+              - generic [ref=e58]:
+                - button [ref=e393]: Details
+                - button [ref=e394]: Add to cart
+          - article [ref=e61]:
+            - img [ref=e395]
+            - generic [ref=e64]:
+              - paragraph [ref=e65]: Night Cream
+              - heading [level=3] [ref=e396]: Rejuvenate Retinol Night Cream
+              - paragraph [ref=e67]: $10.00
+              - generic [ref=e68]:
+                - button [ref=e397]: Details
+                - button [ref=e398]: Add to cart
+        - generic [ref=e71]:
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: Lookbook Story
+            - heading [level=2] [ref=e399]: PureGlow Exfoliating Face Mask
+            - paragraph [ref=e76]: Alternate narratives and product strips so buyers can browse emotionally but still buy instantly.
+          - img [ref=e400]
+        - generic [ref=e80]:
+          - article [ref=e81]:
+            - img [ref=e401]
+            - generic [ref=e84]:
+              - paragraph [ref=e85]: Face Mask
+              - heading [level=3] [ref=e402]: PureGlow Exfoliating Face Mask
+              - paragraph [ref=e87]: $22.00
+              - generic [ref=e88]:
+                - button [ref=e403]: Details
+                - button [ref=e404]: Add to cart
+          - article [ref=e91]:
+            - img [ref=e405]
+            - generic [ref=e94]:
+              - paragraph [ref=e95]: Face Moisturizer
+              - heading [level=3] [ref=e406]: Hydraluxe Moisturizing Cream
+              - paragraph [ref=e97]: $28.00
+              - generic [ref=e98]:
+                - button [ref=e407]: Details
+                - button [ref=e408]: Add to cart
+          - article [ref=e101]:
+            - img [ref=e409]
+            - generic [ref=e104]:
+              - paragraph [ref=e105]: Facial Serum
+              - heading [level=3] [ref=e410]: GlowEssence Vitamin C Serum
+              - paragraph [ref=e107]: $35.00
+              - generic [ref=e108]:
+                - button [ref=e411]: Details
+                - button [ref=e412]: Add to cart
+        - generic [ref=e111]:
+          - generic [ref=e113]:
+            - paragraph [ref=e114]: Lookbook Story
+            - heading [level=2] [ref=e413]: Curated Finishing Picks
+            - paragraph [ref=e116]: Keep momentum with one-click add-to-cart throughout the final editorial chapter.
+          - img [ref=e414]
+      - button [ref=e415]:
+        - img [ref=e121]
+        - text: Cart (1)
+    - button [ref=e416]:
+      - img
+      - text: Ask This Store
+  - button [ref=e417] [cursor=pointer]:
+    - img [ref=e132]
+  - alert [ref=e135]
+  - dialog "Product details Glowra Skin Serum" [active] [ref=e420]:
+    - button "Dismiss" [ref=e422]
+    - button "Close" [ref=e423]:
+      - img [ref=e424]
+    - banner [ref=e426]:
+      - paragraph [ref=e427]: Product details
+      - heading "Glowra Skin Serum" [level=3] [ref=e428]
+    - generic [ref=e430]:
+      - img "Glowra Skin Serum" [ref=e432]
+      - generic [ref=e433]:
+        - generic [ref=e434]:
+          - generic [ref=e435]:
+            - paragraph [ref=e436]: Category
+            - paragraph [ref=e437]: Skincare / Face Serum
+          - generic [ref=e438]:
+            - paragraph [ref=e439]: Price
+            - paragraph [ref=e440]: $21.00
+          - generic [ref=e441]:
+            - paragraph [ref=e442]: Stock
+            - paragraph [ref=e443]: "10"
+          - generic [ref=e444]:
+            - paragraph [ref=e445]: Variants
+            - paragraph [ref=e446]: Required
+        - generic [ref=e447]:
+          - paragraph [ref=e448]: Description
+          - paragraph [ref=e449]: "Glowra Skin Serum is a lightweight hydrating formula designed to improve skin texture and restore natural glow. It absorbs quickly into the skin, leaving it soft, smooth, and refreshed without any greasy feeling. Suitable for daily use, both morning and night. Usage: Apply 2–3 drops onto clean skin. Gently pat until fully absorbed. Follow with moisturizer. Use daily for best results. Suitability: Suitable for all skin types. Specs/Ingredients: Hyaluronic Acid – helps retain moisture and keep skin hydrated; Niacinamide – improves skin tone and reduces dullness; Vitamin C – brightens and supports healthy-looking skin; Aloe Vera Extract – soothes and calms irritation. FAQs: Q1: What are the specific sizes available for Glowra Skin Serum? Q2: What colors or specific scents are available for the Glowra Skin Serum variants? Q3: What are the expected results or benefits that customers can expect from using the Glowra Skin Serum over time?"
+        - generic [ref=e450]:
+          - generic [ref=e451]:
+            - button "-" [ref=e452]
+            - generic [ref=e453]: "1"
+            - button "+" [ref=e454]
+          - button "Add to cart" [ref=e455]
+        - paragraph [ref=e456]: This product has variants. Variant-level selection is not available yet; the base item will be added to cart.
+    - button "Dismiss" [ref=e458]

@@ -3,6 +3,7 @@ import { db } from "../db";
 import { tenants, users } from "../db/schema";
 import { getOrCreateProfile } from "./profile.service";
 import { ragService } from "./rag.service";
+import { validatePaywayLinkUrl } from "@hezos/aba-payway-sdk";
 import type { SessionUser } from "../types/auth";
 import type { CreateTenantInput, TenantConflictResult, UpdateTenantInput } from "../types/tenant";
 
@@ -32,6 +33,28 @@ function normalizeStoreAssetRef(value: unknown): string | null {
   const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "store-assets";
   const rawPath = cleaned.replace(/^\/+/, "").replace(new RegExp(`^${bucket}/`), "");
   return `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/${bucket}/${rawPath}`;
+}
+
+async function validateTenantPaywayLink(value: unknown): Promise<string | null> {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const cleaned = cleanText(value);
+  if (!cleaned) {
+    return null;
+  }
+
+  if (!/^https:\/\//i.test(cleaned)) {
+    throw new Error("payway_link_url must be an https URL");
+  }
+
+  const result = await validatePaywayLinkUrl({ paywayLinkUrl: cleaned });
+  if (!result.valid) {
+    throw new Error("payway_link_url is invalid");
+  }
+
+  return cleaned;
 }
 
 function slugifyShopName(shopName: string): string {
@@ -147,6 +170,8 @@ export async function createMyTenant(authUser: SessionUser, input: CreateTenantI
     return { tenant: null, conflict };
   }
 
+  const paywayLinkUrl = await validateTenantPaywayLink(input.paywayLinkUrl);
+
   const inserted = await db
     .insert(tenants)
     .values({
@@ -158,6 +183,7 @@ export async function createMyTenant(authUser: SessionUser, input: CreateTenantI
       googleMapUrl: cleanText(input.googleMapUrl),
       logoUrl: normalizeStoreAssetRef(input.logoUrl),
       bannerUrl: normalizeStoreAssetRef(input.bannerUrl),
+      paywayLinkUrl,
       storefrontTemplate: cleanText(input.storefrontTemplate),
       subdomain: baseSubdomain,
       isActive: true,
@@ -214,6 +240,9 @@ export async function updateMyTenant(authUser: SessionUser, input: UpdateTenantI
   if (input.googleMapUrl !== undefined) patch.googleMapUrl = cleanText(input.googleMapUrl);
   if (input.logoUrl !== undefined) patch.logoUrl = normalizeStoreAssetRef(input.logoUrl);
   if (input.bannerUrl !== undefined) patch.bannerUrl = normalizeStoreAssetRef(input.bannerUrl);
+  if (input.paywayLinkUrl !== undefined) {
+    patch.paywayLinkUrl = await validateTenantPaywayLink(input.paywayLinkUrl);
+  }
   if (input.storefrontTemplate !== undefined) {
     patch.storefrontTemplate = cleanText(input.storefrontTemplate);
   }
@@ -283,6 +312,18 @@ export async function getStoreBySubdomain(subdomain: string) {
       isActive: true,
       createdAt: true,
       updatedAt: true,
+    },
+  });
+}
+
+export async function getTenantPaymentConfigBySubdomain(subdomain: string) {
+  return db.query.tenants.findFirst({
+    where: and(eq(tenants.subdomain, subdomain), eq(tenants.isActive, true)),
+    columns: {
+      id: true,
+      subdomain: true,
+      paywayLinkUrl: true,
+      isActive: true,
     },
   });
 }

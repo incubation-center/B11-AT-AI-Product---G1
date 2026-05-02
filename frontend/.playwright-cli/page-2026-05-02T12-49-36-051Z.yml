@@ -1,0 +1,105 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - navigation [ref=e6]:
+          - link "beauty_cosmetics May Store" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e8]: beauty_cosmetics
+            - generic [ref=e10]: May Store
+          - link "1" [ref=e131] [cursor=pointer]:
+            - /url: /cart
+            - img [ref=e13]
+            - text: "1"
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - img "May Store logo" [ref=e21]
+            - paragraph [ref=e22]: beauty_cosmetics
+          - generic [ref=e23]: Cart 1
+        - heading "Editorial / Lookbook" [level=1] [ref=e24]
+        - paragraph [ref=e25]: My store description
+      - main [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e29]:
+            - paragraph [ref=e30]: Lookbook Story
+            - heading "Glowra Skin Serum" [level=2] [ref=e31]
+            - paragraph [ref=e32]: Present your products as chapters while keeping clear buying actions visible in every section.
+          - img "Glowra Skin Serum" [ref=e35]
+        - generic [ref=e36]:
+          - article [ref=e37]:
+            - img "Glowra Skin Serum" [ref=e39]
+            - generic [ref=e40]:
+              - paragraph [ref=e41]: Skincare / Face Serum
+              - heading "Glowra Skin Serum" [level=3] [ref=e42]
+              - paragraph [ref=e43]: $21.00
+              - generic [ref=e44]:
+                - button "Details" [ref=e45]
+                - button "Add to cart" [ref=e46]
+          - article [ref=e47]:
+            - img "AquaShield Sunscreen SPF 50" [ref=e49]
+            - generic [ref=e50]:
+              - paragraph [ref=e51]: Sunscreen
+              - heading "AquaShield Sunscreen SPF 50" [level=3] [ref=e52]
+              - paragraph [ref=e53]: $30.00
+              - generic [ref=e54]:
+                - button "Details" [ref=e55]
+                - button "Add to cart" [ref=e56]
+          - article [ref=e57]:
+            - img "Rejuvenate Retinol Night Cream" [ref=e59]
+            - generic [ref=e60]:
+              - paragraph [ref=e61]: Night Cream
+              - heading "Rejuvenate Retinol Night Cream" [level=3] [ref=e62]
+              - paragraph [ref=e63]: $10.00
+              - generic [ref=e64]:
+                - button "Details" [ref=e65]
+                - button "Add to cart" [ref=e66]
+        - generic [ref=e67]:
+          - generic [ref=e69]:
+            - paragraph [ref=e70]: Lookbook Story
+            - heading "PureGlow Exfoliating Face Mask" [level=2] [ref=e71]
+            - paragraph [ref=e72]: Alternate narratives and product strips so buyers can browse emotionally but still buy instantly.
+          - img "PureGlow Exfoliating Face Mask" [ref=e75]
+        - generic [ref=e76]:
+          - article [ref=e77]:
+            - img "PureGlow Exfoliating Face Mask" [ref=e79]
+            - generic [ref=e80]:
+              - paragraph [ref=e81]: Face Mask
+              - heading "PureGlow Exfoliating Face Mask" [level=3] [ref=e82]
+              - paragraph [ref=e83]: $22.00
+              - generic [ref=e84]:
+                - button "Details" [ref=e85]
+                - button "Add to cart" [ref=e86]
+          - article [ref=e87]:
+            - img "Hydraluxe Moisturizing Cream" [ref=e89]
+            - generic [ref=e90]:
+              - paragraph [ref=e91]: Face Moisturizer
+              - heading "Hydraluxe Moisturizing Cream" [level=3] [ref=e92]
+              - paragraph [ref=e93]: $28.00
+              - generic [ref=e94]:
+                - button "Details" [ref=e95]
+                - button "Add to cart" [ref=e96]
+          - article [ref=e97]:
+            - img "GlowEssence Vitamin C Serum" [ref=e99]
+            - generic [ref=e100]:
+              - paragraph [ref=e101]: Facial Serum
+              - heading "GlowEssence Vitamin C Serum" [level=3] [ref=e102]
+              - paragraph [ref=e103]: $35.00
+              - generic [ref=e104]:
+                - button "Details" [ref=e105]
+                - button "Add to cart" [ref=e106]
+        - generic [ref=e107]:
+          - generic [ref=e109]:
+            - paragraph [ref=e110]: Lookbook Story
+            - heading "Curated Finishing Picks" [level=2] [ref=e111]
+            - paragraph [ref=e112]: Keep momentum with one-click add-to-cart throughout the final editorial chapter.
+          - img "Curated Finishing Picks" [ref=e115]
+      - button "Cart (1)" [ref=e132]:
+        - img [ref=e117]
+        - text: Cart (1)
+    - button "Ask This Store" [ref=e121]:
+      - img
+      - text: Ask This Store
+  - button "Open Next.js Dev Tools" [ref=e127] [cursor=pointer]:
+    - img [ref=e128]
+  - alert [ref=e161]

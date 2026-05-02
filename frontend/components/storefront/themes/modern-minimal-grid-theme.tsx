@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { StorefrontCartCheckout } from '@/components/storefront/themes/storefront-cart-checkout';
+import { StorefrontCartModal } from '@/components/storefront/themes/storefront-cart-modal';
 import { StorefrontNavbar } from '@/components/storefront/themes/storefront-navbar';
 import {
   ProductImage,
@@ -186,7 +186,7 @@ export function ModernMinimalGridTheme({
         onAddToCart={addToCart}
       />
 
-      <StorefrontCartCheckout
+      <StorefrontCartModal
         cartItems={cartItems}
         totalItems={totalItems}
         onUpdateQty={updateQty}

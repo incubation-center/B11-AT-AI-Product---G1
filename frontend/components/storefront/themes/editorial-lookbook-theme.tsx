@@ -8,7 +8,7 @@ import {
   ThemeLogo,
   formatStorePrice,
 } from '@/components/storefront/themes/shared';
-import { StorefrontCartCheckout } from '@/components/storefront/themes/storefront-cart-checkout';
+import { StorefrontCartModal } from '@/components/storefront/themes/storefront-cart-modal';
 import { StorefrontNavbar } from '@/components/storefront/themes/storefront-navbar';
 import { useStorefrontCart } from '@/components/storefront/themes/use-storefront-cart';
 import type { StorefrontThemeProps } from '@/components/storefront/themes/shared';
@@ -220,7 +220,7 @@ export function EditorialLookbookTheme({
         onAddToCart={addToCart}
       />
 
-      <StorefrontCartCheckout
+      <StorefrontCartModal
         cartItems={cartItems}
         totalItems={totalItems}
         onUpdateQty={updateQty}

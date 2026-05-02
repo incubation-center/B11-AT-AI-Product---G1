@@ -7,6 +7,7 @@ import { docsRoutes } from "./routes/docs.routes";
 import { globalSearchRoutes } from "./routes/global-search.routes";
 import { meRoutes } from "./routes/me.routes";
 import { orderRoutes } from "./routes/order.routes";
+import { paywayRoutes } from "./routes/payway.routes";
 import { productRoutes } from "./routes/product.routes";
 import { ragRoutes } from "./routes/rag.routes";
 import { rootRoutes } from "./routes/root.routes";
@@ -69,6 +70,7 @@ app.route("/", tenantRoutes);
 app.route("/", telegramRoutes);
 app.route("/", productRoutes);
 app.route("/", orderRoutes);
+app.route("/", paywayRoutes);
 app.route("/", ragRoutes);
 
 export default app;

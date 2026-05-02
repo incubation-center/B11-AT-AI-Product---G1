@@ -53,6 +53,7 @@ export function StoreSettings({
     tenant?.description || '',
   );
   const [shopType, setShopType] = useState(tenant?.shopType || '');
+  const [paywayLinkUrl, setPaywayLinkUrl] = useState(tenant?.paywayLinkUrl || '');
   const [selectedTemplate, setSelectedTemplate] = useState(
     normalizeStorefrontTheme(tenant?.storefrontTemplate),
   );
@@ -86,6 +87,7 @@ export function StoreSettings({
         description: shopDescription,
         shop_type: shopType,
         storefront_template: toStorefrontThemeApiValue(selectedTemplate),
+        payway_link_url: paywayLinkUrl.trim() || null,
       });
     } catch (error) {
       setThemeSaveError(
@@ -262,13 +264,23 @@ export function StoreSettings({
                 )
               }
             />
+
             <Input
               label={t('shopDescription')}
               variant="bordered"
               value={shopDescription}
               onValueChange={setShopDescription}
             />
+
+            <Input
+              label="ABA PayWay Link URL"
+              variant="bordered"
+              value={paywayLinkUrl}
+              onValueChange={setPaywayLinkUrl}
+              placeholder="https://link.payway.com.kh/ABAPAYW..."
+            />
           </div>
+
           <div className="flex justify-end mt-2">
             <Button
               color="primary"
@@ -284,3 +296,4 @@ export function StoreSettings({
     </div>
   );
 }
+

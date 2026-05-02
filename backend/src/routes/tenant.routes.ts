@@ -78,6 +78,7 @@ function parseCreateTenantInput(body: any): { input: CreateTenantInput | null; m
       googleMapUrl: body?.google_map_url ?? null,
       logoUrl: body?.logo_url ?? null,
       bannerUrl: body?.banner_url ?? null,
+      paywayLinkUrl: body?.payway_link_url ?? null,
       storefrontTemplate: storefrontTemplate.value ?? null,
     },
     message: null,
@@ -100,6 +101,7 @@ function parseUpdateTenantInput(body: any): { input: UpdateTenantInput | null; m
       googleMapUrl: body?.google_map_url,
       logoUrl: body?.logo_url,
       bannerUrl: body?.banner_url,
+      paywayLinkUrl: body?.payway_link_url,
       storefrontTemplate: storefrontTemplate.value,
       isActive: body?.is_active,
     },
@@ -121,7 +123,13 @@ async function handleTenantUpdate(c: Context, sessionUser: SessionUser) {
     return c.json({ message: parsed.message ?? "Invalid tenant payload" }, 400);
   }
 
-  const { tenant, conflict } = await updateMyTenant(sessionUser, parsed.input);
+  const result = await updateMyTenant(sessionUser, parsed.input).catch((error) => {
+    const message = error instanceof Error ? error.message : "Unable to update tenant";
+    return { error: message };
+  });
+  if ("error" in result) return c.json({ message: result.error }, 400);
+
+  const { tenant, conflict } = result;
   if (conflict) return c.json(conflict, 409);
   if (!tenant) return c.json({ message: "Tenant not found" }, 404);
 
@@ -149,7 +157,13 @@ tenantRoutes.post("/tenants", requireBearer, async (c) => {
   const parsed = parseCreateTenantInput(body);
   if (parsed.message || !parsed.input) return c.json({ message: parsed.message ?? "Invalid tenant payload" }, 400);
 
-  const { tenant, conflict } = await createMyTenant(sessionUser, parsed.input);
+  const result = await createMyTenant(sessionUser, parsed.input).catch((error) => {
+    const message = error instanceof Error ? error.message : "Unable to create tenant";
+    return { error: message };
+  });
+  if ("error" in result) return c.json({ message: result.error }, 400);
+
+  const { tenant, conflict } = result;
 
   if (conflict) {
     return c.json(conflict, 409);

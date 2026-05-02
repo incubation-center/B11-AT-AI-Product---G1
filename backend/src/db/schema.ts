@@ -196,6 +196,7 @@ export const users = pgTable(
       logoUrl: text("logo_url"),
       bannerUrl: text("banner_url"),
       storefrontTemplate: text("storefront_template"),
+      paywayLinkUrl: text("payway_link_url"),
       subdomain: text("subdomain").notNull(),
       isActive: boolean("is_active").notNull().default(true),
       createdAt: timestamp("created_at", { withTimezone: true })

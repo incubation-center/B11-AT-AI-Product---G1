@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
+import { checkPaymentStatus, PayWayHttpError } from "@hezos/aba-payway-sdk";
 import { auth } from "../auth/config";
 import { requireBearer } from "../middleware/require-bearer";
 import {
@@ -32,6 +33,49 @@ function toInteger(value: unknown): number | null {
     return Number.parseInt(value.trim(), 10);
   }
   return null;
+}
+
+function getRecordValue(value: unknown, key: string): unknown {
+  if (!value || typeof value !== "object") return undefined;
+  return (value as Record<string, unknown>)[key];
+}
+
+function getNestedValue(value: unknown, path: string[]): unknown {
+  let current = value;
+  for (const key of path) {
+    if (!current || typeof current !== "object") return undefined;
+    current = (current as Record<string, unknown>)[key];
+  }
+  return current;
+}
+
+function getPaywayStatusMessage(value: unknown): string {
+  return (
+    cleanText(getNestedValue(value, ["status", "message"])) ??
+    cleanText(getNestedValue(value, ["data", "message", "message"])) ??
+    cleanText(getNestedValue(value, ["message"])) ??
+    cleanText(getNestedValue(value, ["action"])) ??
+    cleanText(getNestedValue(value, ["data", "action"])) ??
+    ""
+  );
+}
+
+function getPaywayAction(value: unknown): string | null {
+  return (
+    cleanText(getNestedValue(value, ["data", "action"])) ??
+    cleanText(getNestedValue(value, ["action"]))
+  );
+}
+
+function getPaywayTransactionId(value: unknown): string | null {
+  return (
+    cleanText(getNestedValue(value, ["status", "tran_id"])) ??
+    cleanText(getNestedValue(value, ["data", "message", "tran_id"]))
+  );
+}
+
+function isPaywayPaymentSuccess(value: unknown): boolean {
+  return getPaywayAction(value)?.trim().toLowerCase() === "approved";
 }
 
 function getRequestHost(c: Context): string {
@@ -128,12 +172,42 @@ orderRoutes.post("/checkout", async (c) => {
   }
 
   try {
+    let verifiedPaywayReference: string | null = null;
+
+    if (paymentMethod === "aba_transfer") {
+      const payway = body?.payway && typeof body.payway === "object" ? body.payway : body;
+      const clientId = cleanText(getRecordValue(payway, "client_id"));
+      const deviceId = cleanText(getRecordValue(payway, "device_id"));
+      const requestTime = cleanText(getRecordValue(payway, "request_time"));
+      const token = cleanText(getRecordValue(payway, "token"));
+
+      if (!clientId || !deviceId || !requestTime || !token) {
+        return c.json({ message: "Confirmed ABA payment data is required before checkout" }, 400);
+      }
+
+      const paywayStatus = await checkPaymentStatus({
+        clientId,
+        deviceId,
+        requestTime,
+        token,
+      });
+
+      if (!isPaywayPaymentSuccess(paywayStatus)) {
+        return c.json({ message: "ABA payment is not confirmed yet" }, 402);
+      }
+
+      verifiedPaywayReference = getPaywayTransactionId(paywayStatus);
+    }
+
     const order = await createCheckoutOrder(tenantId, {
       customer_name: customerName,
       customer_phone: cleanText(body?.customer_phone),
       address_text: addressText,
       google_map_url: cleanText(body?.google_map_url),
       payment_method: paymentMethod as PaymentMethod,
+      payment_status: paymentMethod === "aba_transfer" ? "paid" : "unpaid",
+      payment_reference: verifiedPaywayReference,
+      paid_at: paymentMethod === "aba_transfer" ? new Date().toISOString() : null,
       currency,
       notes: cleanText(body?.notes),
       items: normalizedItems,
@@ -141,6 +215,10 @@ orderRoutes.post("/checkout", async (c) => {
 
     return c.json({ message: "Checkout created", order }, 201);
   } catch (error) {
+    if (error instanceof PayWayHttpError) {
+      return c.json(error.data, error.status as 400);
+    }
+
     const message = error instanceof Error ? error.message : "Unable to create checkout";
     return c.json({ message }, 400);
   }

@@ -1,0 +1,261 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - img "Coolhat logo" [ref=e8]
+          - generic [ref=e9]:
+            - generic [ref=e10]: Coolhat
+            - generic [ref=e11]: Virtual shop assistant for SMEs
+        - navigation [ref=e12]:
+          - link "Why Coolhat" [ref=e13] [cursor=pointer]:
+            - /url: "#why"
+          - link "How it works" [ref=e14] [cursor=pointer]:
+            - /url: "#how-it-works"
+          - link "Pricing" [ref=e15] [cursor=pointer]:
+            - /url: "#pricing"
+          - link "Ask Coolhat AI" [ref=e16] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e17]
+            - text: Ask Coolhat AI
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - generic [ref=e22]: Language
+            - combobox "Language" [ref=e23]:
+              - option "English" [selected]
+              - option "Khmer"
+          - button "View plans" [ref=e24] [cursor=pointer]
+          - button "Sign in" [ref=e25] [cursor=pointer]
+    - main [ref=e26]:
+      - generic [ref=e27]:
+        - img:
+          - img
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - img [ref=e31]
+              - generic [ref=e34]: AI shop assistant for SMEs
+            - heading "Your virtual shop assistant is here to help" [level=1] [ref=e35]
+            - paragraph [ref=e36]: Coolhat is an AI-powered webstore front builder for SMEs. It gives every shop a virtual assistant that already knows all your products, helps customers find the right items, and connects orders straight into Telegram so owners can manage everything from their phone.
+            - generic [ref=e37]:
+              - button "Browse Now" [ref=e38] [cursor=pointer]:
+                - text: Browse Now
+                - img [ref=e39]
+              - button "Start 14-day free trial" [ref=e41] [cursor=pointer]:
+                - text: Start 14-day free trial
+                - img [ref=e42]
+              - button "See how Coolhat works" [ref=e44] [cursor=pointer]:
+                - text: See how Coolhat works
+                - img [ref=e45]
+            - generic [ref=e47]:
+              - generic [ref=e48]: No credit card for trial
+              - generic [ref=e49]: Live Telegram assistant ? Product-aware AI ? Storefront in days
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - generic [ref=e54]:
+                - paragraph [ref=e55]: Live store chat
+                - paragraph [ref=e56]: Coolhat assistant ? Telegram
+              - generic [ref=e57]: Online - 24/7
+            - generic [ref=e58]:
+              - generic [ref=e59]:
+                - generic [ref=e60]: U
+                - generic [ref=e61]: Do you have something for sensitive skin under $20?
+              - generic [ref=e62]:
+                - generic [ref=e63]: AI
+                - generic [ref=e64]:
+                  - paragraph [ref=e65]: "I've found 3 products that match: all fragrance-free, made for sensitive skin and in your budget."
+                  - list [ref=e66]:
+                    - listitem [ref=e67]: Gentle Rice Cleanser - $14.50
+                    - listitem [ref=e68]: Calming Toner Mist - $11.90
+                    - listitem [ref=e69]: Soothing Night Cream - $19.80
+                  - paragraph [ref=e70]: Reply with the product number and I'll create a checkout link for you.
+            - paragraph [ref=e71]: Powered by your real product catalog, checkout flow, and Telegram Mini App - not a generic chatbot.
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - paragraph [ref=e75]: Why Coolhat
+          - heading "One assistant for your customers and your team." [level=2] [ref=e76]
+          - paragraph [ref=e77]: Coolhat combines an AI product expert, storefront builder, and Telegram Mini App into one simple flow, so small shops can sell online with the same experience as bigger brands.
+        - generic [ref=e78]:
+          - link "Learn more about AI that knows your products" [ref=e79] [cursor=pointer]:
+            - /url: "#why"
+            - generic [ref=e80]:
+              - heading "AI that knows your products" [level=3] [ref=e81]
+              - paragraph [ref=e82]: Coolhat connects directly to your real catalog, so the assistant can answer questions about ingredients, stock, pricing, and bundles instead of guessing.
+            - img "AI that knows your products illustration" [ref=e84]
+          - link "Learn more about Built for Telegram first" [ref=e85] [cursor=pointer]:
+            - /url: "#why"
+            - generic [ref=e86]:
+              - heading "Built for Telegram first" [level=3] [ref=e87]
+              - paragraph [ref=e88]: SME owners live in Telegram. Coolhat sends orders, updates, and customer chats straight to your phone so you don't need to learn a new dashboard.
+            - img "Built for Telegram first illustration" [ref=e90]
+          - link "Learn more about From idea to storefront in days" [ref=e91] [cursor=pointer]:
+            - /url: "#why"
+            - generic [ref=e92]:
+              - heading "From idea to storefront in days" [level=3] [ref=e93]
+              - paragraph [ref=e94]: Start from a simple description of your shop. Coolhat helps you generate products, copy, and a shoppable storefront without hiring a full dev team.
+            - img "From idea to storefront in days illustration" [ref=e96]
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - paragraph [ref=e100]: How it works
+          - heading "From product idea to AI-assisted storefront in three steps." [level=2] [ref=e101]
+        - generic [ref=e104]:
+          - generic [ref=e105]: "1"
+          - generic [ref=e106]: "2"
+          - generic [ref=e107]: "3"
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - img [ref=e111]
+            - heading "Describe your shop" [level=3] [ref=e114]
+            - paragraph [ref=e115]: Tell Coolhat about your products, pricing, and customers. It turns that into a ready-to-share storefront and product catalog.
+            - list [ref=e116]:
+              - listitem [ref=e117]:
+                - generic [ref=e120]: AI-generated product descriptions
+              - listitem [ref=e121]:
+                - generic [ref=e124]: Instant storefront preview
+              - listitem [ref=e125]:
+                - generic [ref=e128]: Easy edits at any time
+          - generic [ref=e129]:
+            - img [ref=e131]
+            - heading "Connect your Telegram" [level=3] [ref=e134]
+            - paragraph [ref=e135]: Link the channel you already use every day. New orders, buyer questions, and updates land right there.
+            - list [ref=e136]:
+              - listitem [ref=e137]:
+                - generic [ref=e140]: No new dashboard to learn
+              - listitem [ref=e141]:
+                - generic [ref=e144]: Real-time order notifications
+              - listitem [ref=e145]:
+                - generic [ref=e148]: Works with existing groups
+          - generic [ref=e149]:
+            - img [ref=e151]
+            - heading "Let the AI handle it" [level=3] [ref=e154]
+            - paragraph [ref=e155]: Your AI assistant answers product questions, recommends items, and generates clean checkout links for buyers.
+            - list [ref=e156]:
+              - listitem [ref=e157]:
+                - generic [ref=e160]: 24/7 customer responses
+              - listitem [ref=e161]:
+                - generic [ref=e164]: Smart product recommendations
+              - listitem [ref=e165]:
+                - generic [ref=e168]: One-tap checkout links
+      - generic [ref=e170]:
+        - generic [ref=e171]:
+          - generic [ref=e172]: Pricing
+          - heading "Simple plans for growing SMEs." [level=2] [ref=e173]
+          - paragraph [ref=e174]: Start free for 14 days. No credit card required. Scale as your business grows.
+        - generic [ref=e175]:
+          - generic [ref=e178]:
+            - generic [ref=e179]: No Risk!
+            - generic [ref=e180]:
+              - img [ref=e182]
+              - heading "Free Trial" [level=3] [ref=e187]
+              - paragraph [ref=e188]: Try Coolhat with no risk
+            - generic [ref=e189]:
+              - generic [ref=e191]: Free
+              - paragraph [ref=e192]: + 0% commission
+              - paragraph [ref=e193]: 14 days ? No credit card required
+            - generic [ref=e195]:
+              - generic [ref=e196]:
+                - img [ref=e198]
+                - generic [ref=e200]: Up to 50 products
+              - generic [ref=e201]:
+                - img [ref=e203]
+                - generic [ref=e205]: AI Sales Assistant (Fair Usage)
+              - generic [ref=e206]:
+                - img [ref=e208]
+                - generic [ref=e210]: Telegram Business Control
+              - generic [ref=e211]:
+                - img [ref=e213]
+                - generic [ref=e215]: ABA Pay + COD checkout
+              - generic [ref=e216]:
+                - img [ref=e218]
+                - generic [ref=e220]: CoolHat Branding
+              - generic [ref=e221]:
+                - img [ref=e223]
+                - generic [ref=e225]: Standard support
+            - button "Start Free Trial" [ref=e226]
+          - generic [ref=e229]:
+            - generic [ref=e230]: Most Popular!
+            - generic [ref=e231]:
+              - img [ref=e233]
+              - heading "Starter" [level=3] [ref=e235]
+              - paragraph [ref=e236]: Designed for growing SMEs
+            - generic [ref=e237]:
+              - generic [ref=e238]:
+                - generic [ref=e239]: $5
+                - generic [ref=e240]: /month
+              - paragraph [ref=e241]: + 1% commission per order
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - img [ref=e246]
+                - generic [ref=e248]: Up to 50 products
+              - generic [ref=e249]:
+                - img [ref=e251]
+                - generic [ref=e253]: AI Sales Assistant (Optimized)
+              - generic [ref=e254]:
+                - img [ref=e256]
+                - generic [ref=e258]: Telegram Integration
+              - generic [ref=e259]:
+                - img [ref=e261]
+                - generic [ref=e263]: ABA Pay + COD checkout
+              - generic [ref=e264]:
+                - img [ref=e266]
+                - generic [ref=e268]: Order Management
+              - generic [ref=e269]:
+                - img [ref=e271]
+                - generic [ref=e273]: Basic Analytics
+              - generic [ref=e274]:
+                - img [ref=e276]
+                - generic [ref=e278]: "\"Powered by CoolHat\" branding"
+            - button "Get Starter" [ref=e279]
+          - generic [ref=e282]:
+            - generic [ref=e283]:
+              - img [ref=e285]
+              - heading "Growth" [level=3] [ref=e288]
+              - paragraph [ref=e289]: For serious scaling businesses
+            - generic [ref=e290]:
+              - generic [ref=e291]:
+                - generic [ref=e292]: $10
+                - generic [ref=e293]: /month
+              - paragraph [ref=e294]: + 1% commission per order
+              - paragraph [ref=e295]: Optional commission cap ~$30/mo
+            - generic [ref=e297]:
+              - generic [ref=e298]:
+                - img [ref=e300]
+                - generic [ref=e302]: Unlimited products
+              - generic [ref=e303]:
+                - img [ref=e305]
+                - generic [ref=e307]: AI Sales Assistant (Higher Priority)
+              - generic [ref=e308]:
+                - img [ref=e310]
+                - generic [ref=e312]: Telegram Integration
+              - generic [ref=e313]:
+                - img [ref=e315]
+                - generic [ref=e317]: ABA Pay + COD checkout
+              - generic [ref=e318]:
+                - img [ref=e320]
+                - generic [ref=e322]: Advanced Analytics
+              - generic [ref=e323]:
+                - img [ref=e325]
+                - generic [ref=e327]: Branding removed
+              - generic [ref=e328]:
+                - img [ref=e330]
+                - generic [ref=e332]: Priority support
+            - button "Get Growth" [ref=e333]
+    - generic [ref=e334]:
+      - generic [ref=e335]:
+        - paragraph [ref=e337]:
+          - img [ref=e338]
+          - generic [ref=e341]: Ask Coolhat AI
+        - paragraph [ref=e342]: Get instant answers!
+        - paragraph [ref=e343]: Online - 24/7
+      - button "Toggle Ask Coolhat AI" [ref=e349]:
+        - img [ref=e352]
+    - contentinfo [ref=e355]:
+      - generic [ref=e356]:
+        - paragraph [ref=e357]: (c) 2026 Coolhat. Helping SMEs sell with an AI shop assistant.
+        - generic [ref=e358]:
+          - link "Why Coolhat" [ref=e359] [cursor=pointer]:
+            - /url: "#why"
+          - link "Pricing" [ref=e360] [cursor=pointer]:
+            - /url: "#pricing"
+  - button "Open Next.js Dev Tools" [ref=e366] [cursor=pointer]:
+    - img [ref=e367]

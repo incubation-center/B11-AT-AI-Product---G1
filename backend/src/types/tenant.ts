@@ -25,6 +25,7 @@ export type CreateTenantInput = {
   googleMapUrl?: string | null;
   logoUrl?: string | null;
   bannerUrl?: string | null;
+  paywayLinkUrl?: string | null;
   storefrontTemplate?: StorefrontTemplate | null;
 };
 

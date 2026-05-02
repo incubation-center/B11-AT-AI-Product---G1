@@ -38,6 +38,7 @@ export function StoreSetupForm() {
   const [googleMapUrl, setGoogleMapUrl] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
+  const [paywayLinkUrl, setPaywayLinkUrl] = useState('');
   const [error, setError] = useState('');
   const [subdomain, setSubdomain] = useState<SubdomainPreview>(null);
   const [isPending, startTransition] = useTransition();
@@ -85,6 +86,7 @@ export function StoreSetupForm() {
           google_map_url: googleMapUrl,
           logo_url: logoUrl,
           banner_url: bannerUrl,
+          payway_link_url: paywayLinkUrl.trim() || undefined,
         });
         router.push('/onboarding/template');
         router.refresh();
@@ -243,6 +245,14 @@ export function StoreSetupForm() {
               </Field>
             </div>
 
+            <Field label="ABA PayWay link URL">
+              <input
+                value={paywayLinkUrl}
+                onChange={(event) => setPaywayLinkUrl(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#002e6b]"
+                placeholder="https://link.payway.com.kh/ABAPAYW..."
+              />
+            </Field>
             {error ? (
               <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {error}
@@ -303,3 +313,4 @@ function FeatureChip({
     </div>
   );
 }
+

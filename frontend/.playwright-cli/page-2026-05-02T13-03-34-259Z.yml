@@ -1,0 +1,96 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - navigation [ref=e6]:
+          - link "electronic Super Store" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e8]: electronic
+            - generic [ref=e10]: Super Store
+          - generic [ref=e11]:
+            - link "Home" [ref=e12] [cursor=pointer]:
+              - /url: /
+            - link "Products" [ref=e13] [cursor=pointer]:
+              - /url: "#products"
+            - link "Cart" [ref=e14] [cursor=pointer]:
+              - /url: /cart
+          - link "0" [ref=e16] [cursor=pointer]:
+            - /url: /cart
+            - img [ref=e17]
+            - text: "0"
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - img "Super Store hero" [ref=e24]
+          - generic [ref=e26]:
+            - generic [ref=e27]:
+              - generic [ref=e28]:
+                - img "Super Store logo" [ref=e30]
+                - paragraph [ref=e31]: electronic
+              - generic [ref=e32]: Cart 0
+            - generic [ref=e33]:
+              - heading "Super Store" [level=1] [ref=e34]
+              - paragraph [ref=e35]: We sell electronic product from all around the world
+              - link "Shop now" [ref=e36] [cursor=pointer]:
+                - /url: "#products"
+        - complementary [ref=e37]:
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Products
+            - paragraph [ref=e40]: "1"
+          - generic [ref=e41]:
+            - paragraph [ref=e42]: Categories
+            - paragraph [ref=e43]: "1"
+          - paragraph [ref=e45]: One tap add-to-cart across all products.
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - heading "Browse Categories" [level=2] [ref=e48]
+          - paragraph [ref=e49]: Jump to your favorite section
+        - link "Electronic" [ref=e51] [cursor=pointer]:
+          - /url: "#electronic"
+          - paragraph [ref=e52]: Electronic
+      - article [ref=e56]:
+        - img "IPhone 18 Pro Max" [ref=e58]
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Electronic
+          - heading "IPhone 18 Pro Max" [level=3] [ref=e61]
+          - paragraph [ref=e62]: $1800.00
+          - generic [ref=e63]:
+            - button "Details" [active] [ref=e64]
+            - button "Add to cart" [ref=e65]
+      - dialog "IPhone 18 Pro Max" [ref=e78]:
+        - generic [ref=e79]:
+          - button "Close product details" [ref=e80]:
+            - img [ref=e81]
+          - generic [ref=e84]:
+            - paragraph [ref=e85]: Product details
+            - heading "IPhone 18 Pro Max" [level=3] [ref=e86]
+          - generic [ref=e88]:
+            - img "IPhone 18 Pro Max" [ref=e90]
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - generic [ref=e93]:
+                  - paragraph [ref=e94]: Category
+                  - paragraph [ref=e95]: Electronic
+                - generic [ref=e96]:
+                  - paragraph [ref=e97]: Price
+                  - paragraph [ref=e98]: $1800.00
+                - generic [ref=e99]:
+                  - paragraph [ref=e100]: Stock
+                  - paragraph [ref=e101]: "20"
+                - generic [ref=e102]:
+                  - paragraph [ref=e103]: Variants
+                  - paragraph [ref=e104]: None
+              - generic [ref=e105]:
+                - paragraph [ref=e106]: Description
+                - paragraph [ref=e107]: "Display: 6.9-inch Super Retina XDR OLED, 2868 x 1320 resolution, 120Hz adaptive refresh rate, and Always-On display. Camera System: A triple 48MP Fusion setup including a Main lens, Ultra Wide lens, and a new 100mm periscope Telephoto lens offering 8x optical-quality zoom. The front features an 18MP Center Stage camera. Battery & Charging: Offers up to 39 hours of video playback (the longest battery life in an iPhone) with a capacity of up to 5,088 mAh (eSIM model), supporting fast charging up to 50% in 20 minutes via USB-C. Storage & RAM: Available in 256GB, 512GB, 1TB, and 2TB storage options, paired with 12GB of LPDDR5X RAM. Dimensions & Weight: Measures 6.43 x 3.07 x 0.34 inches (163.4 x 78.0 x 8.75 mm) and weighs 233 grams (8.22 oz). Connectivity: Includes Wi-Fi 7, Bluetooth 6.0, USB-C 3.2, and satellite connectivity for Emergency SOS and Messages. Usage: The iPhone 18 Pro Max is designed for high-performance tasks, multimedia consumption, and photography, with long battery life for extended use. Suitability: Ideal for tech enthusiasts, professional photographers, and users who require a high-performance smartphone. Specs/Ingredients: 6.9-inch Super Retina XDR OLED, A triple 48MP camera system, up to 5,088 mAh battery, available in 256GB, 512GB, 1TB, and 2TB storage options. FAQs: Q1: What color options are available for the iPhone 18 Pro Max? Q2: What is the warranty period for the iPhone 18 Pro Max? Q3: How long is the battery life on the iPhone 18 Pro Max? Q4: What type of charging cable is compatible with the iPhone 18 Pro Max? Q5: Is the iPhone 18 Pro Max water-resistant?"
+              - generic [ref=e108]:
+                - generic [ref=e109]:
+                  - button "-" [ref=e110]
+                  - generic [ref=e111]: "1"
+                  - button "+" [ref=e112]
+                - button "Add to cart" [ref=e113]
+    - button "Ask This Store" [ref=e67]:
+      - img
+      - text: Ask This Store
+  - button "Open Next.js Dev Tools" [ref=e73] [cursor=pointer]:
+    - img [ref=e74]
+  - alert [ref=e77]

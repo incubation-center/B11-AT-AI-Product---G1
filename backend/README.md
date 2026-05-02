@@ -133,6 +133,9 @@ Common endpoints used by frontend:
 | GET | `/store/by-subdomain/:subdomain` | Public storefront profile lookup | Public |
 | GET | `/store/by-host` | Public storefront profile lookup by host subdomain | Public |
 
+`payway_link_url` is supported in `POST /tenants` and `PATCH /me/tenant` / `PATCH /tenants/:id`.  
+Backend validates this URL before saving and rejects invalid values.
+
 ### Telegram owner console endpoints
 
 | Method | Endpoint | Description | Auth |
@@ -203,6 +206,8 @@ Common endpoints used by frontend:
 | GET | `/store/by-subdomain/:subdomain/products` | Public list of active products for a store | Public |
 | GET | `/store/by-subdomain/:subdomain/products/:id` | Public active product detail (active variants only) | Public |
 | POST | `/checkout` | Create order from storefront (buyer checkout). Requires `customer_name`, `address_text`, `payment_method` (`cod` or `aba_transfer`), `currency` (`USD` or `KHR`), `items[]` (product_id, variant_id, qty). Returns order with ID. | Public |
+| POST | `/payway/init` | Initialize ABA PayWay payment using the current tenant's own `payway_link_url` resolved from request host subdomain (no default fallback URL). Requires `amount` > 0. | Public |
+| POST | `/payway/status` | Check ABA PayWay payment status (`client_id`, `device_id`, `request_time`, `token`). | Public |
 
 ### AI Product Draft endpoints (one question at a time)
 
@@ -363,6 +368,7 @@ await fetch(`${API_URL}/tenants`, {
     description: "Khmer beauty products",
     address_text: "Phnom Penh",
     google_map_url: "https://maps.google.com/...",
+    payway_link_url: "https://link.payway.com.kh/ABAPAYWxxxxxxxx",
     logo_url: "https://res.cloudinary.com/<cloud>/image/upload/...",
     banner_url: "https://res.cloudinary.com/<cloud>/image/upload/..."
   }),

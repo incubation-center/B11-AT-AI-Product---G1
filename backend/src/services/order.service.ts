@@ -16,6 +16,9 @@ type CheckoutInput = {
   address_text: string;
   google_map_url?: string | null;
   payment_method: "cod" | "aba_transfer";
+  payment_status?: "unpaid" | "paid";
+  payment_reference?: string | null;
+  paid_at?: string | null;
   currency: "USD" | "KHR";
   notes?: string | null;
   items: CheckoutItemInput[];
@@ -158,6 +161,7 @@ export async function createCheckoutOrder(tenantId: string, input: CheckoutInput
   const subtotal = money(subtotalNumber);
   const total = subtotal;
   const discount = "0.00";
+  const paymentStatus = input.payment_status ?? "unpaid";
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const now = new Date();
@@ -176,7 +180,7 @@ export async function createCheckoutOrder(tenantId: string, input: CheckoutInput
             googleMapUrl: cleanText(input.google_map_url),
             status: "pending",
             paymentMethod: input.payment_method,
-            paymentStatus: "unpaid",
+            paymentStatus,
             currency: input.currency,
             subtotal,
             discount,
@@ -205,9 +209,9 @@ export async function createCheckoutOrder(tenantId: string, input: CheckoutInput
           orderId: order.id,
           method: input.payment_method,
           amount: total,
-          reference: null,
-          status: "pending",
-          paidAt: null,
+          reference: cleanText(input.payment_reference),
+          status: paymentStatus === "paid" ? "confirmed" : "pending",
+          paidAt: paymentStatus === "paid" ? parsePaidAt(input.paid_at) : null,
         });
 
         return order;
