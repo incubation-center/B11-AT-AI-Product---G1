@@ -12,6 +12,7 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string().url().default("http://localhost:8080"),
   PUBLIC_URL: z.string().url().default("http://localhost:3000"),
   BETTER_AUTH_TRUSTED_ORIGINS: z.string().optional(),
+  BETTER_AUTH_COOKIE_DOMAIN: z.string().optional(),
   CORS_ORIGINS: z.string().optional(),
 
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),

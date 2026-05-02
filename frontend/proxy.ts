@@ -2,13 +2,15 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const PROTECTED_PREFIXES = ['/dashboard', '/onboarding'];
-const BETTER_AUTH_SESSION_COOKIE_KEY = 'better-auth.session_token';
+const BETTER_AUTH_SESSION_COOKIE_KEYS = ['better-auth.session_token', 'session_token'];
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const hasBetterAuthSessionCookie = request.cookies
     .getAll()
-    .some((cookie) => cookie.name.includes(BETTER_AUTH_SESSION_COOKIE_KEY));
+    .some((cookie) =>
+      BETTER_AUTH_SESSION_COOKIE_KEYS.some((key) => cookie.name.includes(key)),
+    );
   const isAuthenticated = hasBetterAuthSessionCookie;
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
