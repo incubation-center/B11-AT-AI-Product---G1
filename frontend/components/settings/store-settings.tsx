@@ -281,10 +281,10 @@ export function StoreSettings({
             />
           </div>
 
-          <div className="flex justify-end mt-2">
+          <div className="flex justify-stretch mt-2 sm:justify-end">
             <Button
               color="primary"
-              className="bg-[#002e6b]"
+              className="w-full bg-[#002e6b] sm:w-auto"
               onPress={handleUpdateStore}
               isLoading={isUpdatingStore}
             >

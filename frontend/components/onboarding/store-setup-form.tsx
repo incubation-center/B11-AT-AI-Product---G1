@@ -101,13 +101,13 @@ export function StoreSetupForm() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff3da,_#fff_42%,_#edf4ff)] px-4 py-10 text-[#002e6b]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff3da,_#fff_42%,_#edf4ff)] px-4 py-6 text-[#002e6b] sm:py-10">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.92fr_1.08fr]">
-        <section className="rounded-[34px] border border-white/70 bg-[linear-gradient(145deg,_#002e6b,_#0a4b93_54%,_#ffbd59)] p-8 text-white shadow-[0_30px_90px_rgba(0,46,107,0.22)]">
+        <section className="rounded-[28px] border border-white/70 bg-[linear-gradient(145deg,_#002e6b,_#0a4b93_54%,_#ffbd59)] p-5 text-white shadow-[0_30px_90px_rgba(0,46,107,0.22)] sm:rounded-[34px] sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
             Step 1
           </p>
-          <h1 className="mt-5 max-w-sm text-4xl font-semibold leading-tight">
+          <h1 className="mt-5 max-w-sm text-3xl font-semibold leading-tight sm:text-4xl">
             Build the store identity before anything else.
           </h1>
           <p className="mt-4 max-w-md text-sm leading-7 text-white/82">
@@ -138,14 +138,14 @@ export function StoreSetupForm() {
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-[34px] border border-slate-200 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8"
+          className="rounded-[28px] border border-slate-200 bg-white/92 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-[34px] sm:p-8"
         >
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#c61c2f]">
                 Store setup
               </p>
-              <h2 className="mt-2 text-3xl font-semibold text-[#002e6b]">
+              <h2 className="mt-2 text-2xl font-semibold text-[#002e6b] sm:text-3xl">
                 Create your tenant
               </h2>
             </div>
@@ -301,7 +301,7 @@ function FeatureChip({
 }) {
   return (
     <div className="rounded-[26px] border border-white/15 bg-white/10 p-4 backdrop-blur">
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/14">
           {icon}
         </div>

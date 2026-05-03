@@ -58,6 +58,7 @@ export function DangerZone({
               color="danger"
               variant="flat"
               startContent={<LogOut size={18} />}
+              className="w-full md:w-auto"
               onPress={onDeactivateStoreOpen}
             >
               Deactivate Store
@@ -78,6 +79,7 @@ export function DangerZone({
               color="danger"
               variant="solid"
               startContent={<Trash2 size={18} />}
+              className="w-full md:w-auto"
               onPress={onDeactivateAccountOpen}
               isDisabled={isDeactivatingAccount}
             >

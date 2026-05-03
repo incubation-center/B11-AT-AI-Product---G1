@@ -77,7 +77,7 @@ export const OrderDetailsDrawer = ({
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        base: 'max-w-[800px]',
+        base: 'mx-3 max-w-[800px] sm:mx-auto',
         header: 'border-b border-default-100',
         footer: 'border-t border-default-100',
       }}
@@ -86,9 +86,9 @@ export const OrderDetailsDrawer = ({
         {(handleClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-lg">Order {order.order_no}</span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <OrderStatusChip status={order.status} />
                   <PaymentStatusChip status={order.payment_status} />
                 </div>
@@ -173,6 +173,7 @@ export const OrderDetailsDrawer = ({
                                 size="sm"
                                 variant={isActive ? 'solid' : 'bordered'}
                                 color={isActive ? 'primary' : 'default'}
+                                className="max-sm:flex-1"
                                 isDisabled={isActive || updateStatus.isPending}
                                 isLoading={
                                   updateStatus.isPending &&
@@ -200,6 +201,7 @@ export const OrderDetailsDrawer = ({
                                 size="sm"
                                 variant={isActive ? 'solid' : 'bordered'}
                                 color={isActive ? 'primary' : 'default'}
+                                className="max-sm:flex-1"
                                 isDisabled={isActive || updatePayment.isPending}
                                 isLoading={
                                   updatePayment.isPending &&
@@ -240,7 +242,7 @@ export const OrderDetailsDrawer = ({
                             className="bg-default-50"
                           >
                             <CardBody className="py-2 px-3">
-                              <div className="flex justify-between items-start gap-2">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
                                   <p className="text-sm font-medium leading-tight">
                                     {item.product_name_snapshot}
@@ -312,7 +314,12 @@ export const OrderDetailsDrawer = ({
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="light" onPress={handleClose}>
+              <Button
+                color="danger"
+                variant="light"
+                className="w-full sm:w-auto"
+                onPress={handleClose}
+              >
                 Close
               </Button>
             </ModalFooter>

@@ -11,6 +11,8 @@ import {
   TableCell,
   Chip,
   Spinner,
+  Card,
+  CardBody,
 } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import type { Order } from '@/types/orders';
@@ -47,69 +49,149 @@ export function RecentOrdersTable({
   onOrderClick,
 }: RecentOrdersTableProps) {
   const t = useTranslations('dashboard.recentOrders');
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-40 items-center justify-center rounded-2xl bg-content1">
+        <Spinner color="primary" />
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="rounded-2xl bg-content1 p-6 text-center text-default-500">
+        {t('empty')}
+      </div>
+    );
+  }
+
   return (
-    <Table aria-label={t('tableAria')}>
-      <TableHeader>
-        <TableColumn>{t('orderNo')}</TableColumn>
-        <TableColumn>{t('customer')}</TableColumn>
-        <TableColumn>{t('amount')}</TableColumn>
-        <TableColumn>{t('status')}</TableColumn>
-        <TableColumn>{t('payment')}</TableColumn>
-        <TableColumn>{t('date')}</TableColumn>
-      </TableHeader>
-      <TableBody
-        emptyContent={isLoading ? t('loading') : t('empty')}
-        isLoading={isLoading}
-        loadingContent={<Spinner color="primary" />}
-      >
+    <>
+      <div className="grid gap-3 md:hidden">
         {orders.slice(0, 10).map((order) => (
-          <TableRow
+          <Card
             key={order.id}
-            onClick={() => onOrderClick(order)}
-            className="hover:bg-content2 cursor-pointer transition-colors"
+            isPressable
+            shadow="none"
+            className="w-full border border-default-200 bg-content1 text-left"
+            onPress={() => onOrderClick(order)}
           >
-            <TableCell className="font-mono text-small font-semibold">
-              {order.order_no}
-            </TableCell>
-            <TableCell>
-              <div className="flex flex-col">
-                <p className="font-semibold">{order.customer_name}</p>
-                <p className="text-small text-default-500">
-                  {order.customer_phone || t('naPhone')}
+            <CardBody className="gap-3 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-small font-semibold">
+                    {order.order_no}
+                  </p>
+                  <p className="truncate text-sm font-semibold">
+                    {order.customer_name}
+                  </p>
+                  <p className="text-small text-default-500">
+                    {order.customer_phone || t('naPhone')}
+                  </p>
+                </div>
+                <p className="shrink-0 text-sm font-semibold">
+                  {order.currency === 'USD'
+                    ? `$${parseFloat(order.total).toFixed(2)}`
+                    : `₱${parseFloat(order.total).toLocaleString()}`}
                 </p>
               </div>
-            </TableCell>
-            <TableCell className="font-semibold">
-              {order.currency === 'USD'
-                ? `$${parseFloat(order.total).toFixed(2)}`
-                : `₱${parseFloat(order.total).toLocaleString()}`}
-            </TableCell>
-            <TableCell>
-              <Chip
-                color={statusColorMap[order.status] || 'default'}
-                variant="flat"
-                size="sm"
-                className="capitalize"
-              >
-                {order.status}
-              </Chip>
-            </TableCell>
-            <TableCell>
-              <Chip
-                color={paymentStatusColorMap[order.payment_status] || 'default'}
-                variant="flat"
-                size="sm"
-                className="capitalize"
-              >
-                {order.payment_status}
-              </Chip>
-            </TableCell>
-            <TableCell className="text-small text-default-500">
-              {new Date(order.created_at).toLocaleDateString()}
-            </TableCell>
-          </TableRow>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Chip
+                    color={statusColorMap[order.status] || 'default'}
+                    variant="flat"
+                    size="sm"
+                    className="capitalize"
+                  >
+                    {order.status}
+                  </Chip>
+                  <Chip
+                    color={
+                      paymentStatusColorMap[order.payment_status] || 'default'
+                    }
+                    variant="flat"
+                    size="sm"
+                    className="capitalize"
+                  >
+                    {order.payment_status}
+                  </Chip>
+                </div>
+                <span className="text-small text-default-500">
+                  {new Date(order.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            </CardBody>
+          </Card>
         ))}
-      </TableBody>
-    </Table>
+      </div>
+
+      <div className="hidden w-full overflow-x-auto md:block">
+        <div className="min-w-[760px]">
+          <Table aria-label={t('tableAria')}>
+            <TableHeader>
+              <TableColumn>{t('orderNo')}</TableColumn>
+              <TableColumn>{t('customer')}</TableColumn>
+              <TableColumn>{t('amount')}</TableColumn>
+              <TableColumn>{t('status')}</TableColumn>
+              <TableColumn>{t('payment')}</TableColumn>
+              <TableColumn>{t('date')}</TableColumn>
+            </TableHeader>
+            <TableBody>
+              {orders.slice(0, 10).map((order) => (
+                <TableRow
+                  key={order.id}
+                  onClick={() => onOrderClick(order)}
+                  className="hover:bg-content2 cursor-pointer transition-colors"
+                >
+                  <TableCell className="font-mono text-small font-semibold">
+                    {order.order_no}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <p className="font-semibold">{order.customer_name}</p>
+                      <p className="text-small text-default-500">
+                        {order.customer_phone || t('naPhone')}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-semibold">
+                    {order.currency === 'USD'
+                      ? `$${parseFloat(order.total).toFixed(2)}`
+                      : `₱${parseFloat(order.total).toLocaleString()}`}
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      color={statusColorMap[order.status] || 'default'}
+                      variant="flat"
+                      size="sm"
+                      className="capitalize"
+                    >
+                      {order.status}
+                    </Chip>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      color={
+                        paymentStatusColorMap[order.payment_status] ||
+                        'default'
+                      }
+                      variant="flat"
+                      size="sm"
+                      className="capitalize"
+                    >
+                      {order.payment_status}
+                    </Chip>
+                  </TableCell>
+                  <TableCell className="text-small text-default-500">
+                    {new Date(order.created_at).toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </>
   );
 }

@@ -15,6 +15,8 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownItem,
+  Card,
+  CardBody,
 } from '@heroui/react';
 import { Search, MoreVertical, Eye, Trash2 } from 'lucide-react';
 import type { Order } from '@/types/orders';
@@ -158,38 +160,112 @@ export const OrderTable = ({
   }, [filterValue, t]);
 
   return (
-    <Table
-      aria-label={t('tableAria')}
-      topContent={topContent}
-      topContentPlacement="outside"
-    >
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn
-            key={column.uid}
-            align={column.uid === 'actions' ? 'center' : 'start'}
+    <div className="w-full">
+      <div className="md:hidden">
+        {topContent}
+        <div className="grid gap-3">
+          {filteredItems.map((order) => (
+            <Card
+              key={order.id}
+              shadow="none"
+              className="border border-default-200 bg-content1"
+            >
+              <CardBody className="gap-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-sm font-semibold">
+                      {order.order_no}
+                    </p>
+                    <p className="truncate text-sm font-semibold">
+                      {order.customer_name}
+                    </p>
+                    <p className="text-xs text-default-400">
+                      {order.customer_phone || t('noPhone')}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-sm font-semibold">
+                    {order.total} {order.currency}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <OrderStatusChip status={order.status} />
+                  <PaymentStatusChip status={order.payment_status} />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs text-default-500">
+                    {new Date(order.created_at).toLocaleDateString()}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      color="primary"
+                      onPress={() => onViewOrder(order.id)}
+                    >
+                      {t('viewDetails')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      color="danger"
+                      isDisabled={
+                        order.status === 'cancelled' ||
+                        order.status === 'completed'
+                      }
+                      onPress={() => onCancelOrder(order.id)}
+                    >
+                      {t('cancelOrder')}
+                    </Button>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          ))}
+          {!isLoading && filteredItems.length === 0 ? (
+            <div className="rounded-2xl bg-content1 p-6 text-center text-default-500">
+              {t('empty')}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
+        <div className="min-w-[860px]">
+          <Table
+            aria-label={t('tableAria')}
+            topContent={topContent}
+            topContentPlacement="outside"
           >
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody
-        items={filteredItems}
-        isLoading={isLoading}
-        emptyContent={t('empty')}
-      >
-        {(item) => (
-          <TableRow
-            key={item.id}
-            className="cursor-pointer"
-            onClick={() => onViewOrder(item.id)}
-          >
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+            <TableHeader columns={columns}>
+              {(column) => (
+                <TableColumn
+                  key={column.uid}
+                  align={column.uid === 'actions' ? 'center' : 'start'}
+                >
+                  {column.name}
+                </TableColumn>
+              )}
+            </TableHeader>
+            <TableBody
+              items={filteredItems}
+              isLoading={isLoading}
+              emptyContent={t('empty')}
+            >
+              {(item) => (
+                <TableRow
+                  key={item.id}
+                  className="cursor-pointer"
+                  onClick={() => onViewOrder(item.id)}
+                >
+                  {(columnKey) => (
+                    <TableCell>{renderCell(item, columnKey)}</TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
   );
 };

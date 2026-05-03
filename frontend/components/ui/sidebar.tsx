@@ -73,11 +73,24 @@ export const Sidebar = ({
   );
 };
 
-export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
+type SidebarBodyProps = Omit<
+  React.ComponentProps<typeof motion.div>,
+  'children'
+> & {
+  children: React.ReactNode;
+};
+
+export const SidebarBody = ({
+  children,
+  className,
+  ...props
+}: SidebarBodyProps) => {
   return (
     <>
-      <DesktopSidebar {...props} />
-      <MobileSidebar {...(props as React.ComponentProps<'div'>)} />
+      <DesktopSidebar className={className} {...props}>
+        {children}
+      </DesktopSidebar>
+      <MobileSidebar>{children}</MobileSidebar>
     </>
   );
 };
@@ -108,7 +121,6 @@ export const DesktopSidebar = ({
 };
 
 export const MobileSidebar = ({
-  className,
   children,
   ...props
 }: React.ComponentProps<'div'>) => {
@@ -118,39 +130,76 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          'flex h-16 w-full flex-none items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur md:hidden',
-          className,
+          'sticky top-0 z-40 flex h-16 w-full flex-none items-center justify-between border-b border-slate-200 bg-white/95 px-4 shadow-sm backdrop-blur md:hidden',
         )}
         {...props}
       >
-        <div className="flex justify-end z-20 w-full">
-          <Menu
-            className="cursor-pointer text-slate-800"
-            onClick={() => setOpen(!open)}
-          />
+        <div className="flex min-w-0 flex-col">
+          <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+            Menu
+          </span>
+          <span className="text-sm font-bold text-[#002e6b]">
+            Owner Dashboard
+          </span>
         </div>
+        <button
+          type="button"
+          aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={open}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-95"
+          onClick={() => setOpen(!open)}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ x: '-100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '-100%', opacity: 0 }}
-              transition={{
-                duration: 0.3,
-                ease: 'easeInOut',
-              }}
-              className={cn(
-                'fixed inset-0 z-[100] flex h-full w-full flex-col justify-between bg-[linear-gradient(180deg,_#f8fbff,_#eef4ff_48%,_#fff7eb)] p-6',
-                className,
-              )}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[9999] md:hidden"
             >
-              <div
-                className="absolute right-6 top-6 z-50 cursor-pointer text-slate-800"
-                onClick={() => setOpen(!open)}
+              <button
+                type="button"
+                aria-label="Close navigation menu backdrop"
+                className="absolute inset-0 h-full w-full bg-slate-950/45 backdrop-blur-[2px]"
+                onClick={() => setOpen(false)}
+              />
+
+              <motion.aside
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{
+                  duration: 0.28,
+                  ease: 'easeInOut',
+                }}
+                className="absolute right-0 top-0 flex h-dvh w-[86vw] max-w-[340px] flex-col overflow-hidden rounded-l-[28px] bg-white shadow-2xl"
               >
-                <X />
-              </div>
-              {children}
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      Navigation
+                    </p>
+                    <p className="text-sm font-bold text-[#002e6b]">
+                      Dashboard
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Close navigation menu"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                    onClick={() => setOpen(false)}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="flex min-h-0 flex-1 flex-col px-5 py-5">
+                  {children}
+                </div>
+              </motion.aside>
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,14 +27,14 @@ export function StorefrontCartModal({
   onClearCart,
 }: StorefrontCartModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const previousTotalItems = useRef(totalItems);
+  const [previousTotalItems, setPreviousTotalItems] = useState(totalItems);
 
-  useEffect(() => {
-    if (totalItems > previousTotalItems.current) {
+  if (totalItems !== previousTotalItems) {
+    if (totalItems > previousTotalItems) {
       setIsOpen(true);
     }
-    previousTotalItems.current = totalItems;
-  }, [totalItems]);
+    setPreviousTotalItems(totalItems);
+  }
 
   const estimatedTotalUsd = cartItems.reduce((sum, item) => {
     const parsed = Number(item.product.basePriceUsd ?? 0);

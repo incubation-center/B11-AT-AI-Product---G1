@@ -60,9 +60,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex min-w-0 flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 md:gap-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-[#002e6b]">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-[#002e6b] md:text-3xl">
+          {t('title')}
+        </h1>
         <p className="text-default-500 font-medium">{t('subtitle')}</p>
       </div>
 
@@ -71,9 +73,9 @@ export default function SettingsPage() {
         variant="underlined"
         classNames={{
           tabList:
-            'gap-6 w-full relative rounded-none p-0 border-b border-divider',
+            'gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto overflow-y-hidden',
           cursor: 'w-full bg-[#002e6b]',
-          tab: 'max-w-fit px-0 h-12',
+          tab: 'max-w-fit px-0 h-12 shrink-0',
           tabContent: 'group-data-[selected=true]:text-[#002e6b] font-semibold',
         }}
       >

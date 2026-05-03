@@ -59,7 +59,7 @@ export function DashboardSidebarLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="mx-auto flex h-screen w-full max-w-none flex-col overflow-hidden bg-[radial-gradient(circle_at_top,#fffdf8_0%,#f7f8fc_38%,#eef2f7_100%)] md:flex-row">
+    <div className="mx-auto flex h-dvh w-full max-w-none flex-col overflow-hidden bg-[radial-gradient(circle_at_top,#fffdf8_0%,#f7f8fc_38%,#eef2f7_100%)] md:flex-row">
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="h-screen justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
@@ -84,10 +84,10 @@ export function DashboardSidebarLayout({ children }: { children: ReactNode }) {
       </Sidebar>
 
       <main
-        className="flex h-full min-h-0 flex-1"
+        className="flex min-h-0 min-w-0 flex-1"
         aria-label={t('ownerWorkspace')}
       >
-        <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-5 overflow-y-auto p-3 md:p-8">
+        <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col gap-5 overflow-y-auto px-4 py-5 md:p-8">
           {children}
         </div>
       </main>

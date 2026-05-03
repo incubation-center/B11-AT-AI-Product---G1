@@ -59,11 +59,11 @@ export default function DashboardContent() {
   };
 
   return (
-    <main className="flex flex-col gap-8 py-8">
+    <main className="flex min-w-0 flex-col gap-6 py-4 md:gap-8 md:py-8">
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1>Dashboard</h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold md:text-3xl">Dashboard</h1>
           <p className="text-default-500 mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
@@ -138,7 +138,7 @@ export default function DashboardContent() {
       {/* Main Content Grid */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Recent Orders - Takes 2 columns on large screens */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
+        <div className="lg:col-span-2 flex min-w-0 flex-col gap-4">
           <h2 className="text-xl font-semibold">{t('recentOrders')}</h2>
           <RecentOrdersTable
             orders={orders.orders}
@@ -148,7 +148,7 @@ export default function DashboardContent() {
         </div>
 
         {/* Low Stock Items - Takes 1 column */}
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           <h2 className="text-xl font-semibold">{t('inventoryStatus')}</h2>
           <LowStockProducts
             items={lowStock.items}

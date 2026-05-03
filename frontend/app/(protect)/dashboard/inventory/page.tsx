@@ -33,16 +33,16 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 py-4">
+    <div className="flex min-w-0 flex-col gap-6 py-4 md:gap-8">
       {/* Header section */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1>{t('title')}</h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold md:text-3xl">{t('title')}</h1>
           <p className="text-default-500 mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex min-w-0 flex-col gap-6">
         <InventoryTable
           products={data?.data || []}
           isLoading={isLoading}

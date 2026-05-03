@@ -37,9 +37,9 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1>{t('title')}</h1>
+    <div className="flex min-w-0 flex-col gap-6">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold md:text-3xl">{t('title')}</h1>
         <p className="text-default-500 mt-1">{t('subtitle')}</p>
       </div>
 

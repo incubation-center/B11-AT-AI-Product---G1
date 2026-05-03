@@ -97,6 +97,15 @@
     animation: splash-slide 1.1s ease-in-out infinite;
   }
 
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .page-container {
     @apply mx-auto w-full max-w-page px-4 sm:px-6 lg:px-8 py-8;
   }

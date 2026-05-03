@@ -85,10 +85,10 @@ export function ProfileSettings({
               />
             </div>
           </div>
-          <div className="flex justify-end gap-3 mt-2">
+          <div className="flex justify-stretch gap-3 mt-2 sm:justify-end">
             <Button
               color="primary"
-              className="bg-[#002e6b]"
+              className="w-full bg-[#002e6b] sm:w-auto"
               onPress={() => onUpdateName(fullName)}
               isLoading={isUpdatingName}
             >
@@ -113,7 +113,7 @@ export function ProfileSettings({
         <Divider />
         <CardBody className="gap-6 py-6 font-semibold shadow-sm">
           <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between p-4 bg-default-50 rounded-xl border border-default-100">
+            <div className="flex flex-col gap-3 p-4 bg-default-50 rounded-xl border border-default-100 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div
                   className={
@@ -140,6 +140,7 @@ export function ProfileSettings({
                   size="sm"
                   variant="flat"
                   color="warning"
+                  className="w-full sm:w-auto"
                   onPress={onSendVerification}
                   isLoading={isSendingVerification}
                 >
@@ -148,7 +149,7 @@ export function ProfileSettings({
               )}
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-default-50 rounded-xl border border-default-100">
+            <div className="flex flex-col gap-3 p-4 bg-default-50 rounded-xl border border-default-100 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="text-primary">
                   <Lock size={20} />
@@ -164,6 +165,7 @@ export function ProfileSettings({
                 size="sm"
                 variant="flat"
                 color="primary"
+                className="w-full sm:w-auto"
                 onPress={() =>
                   profile?.email && onRequestPasswordReset(profile.email)
                 }

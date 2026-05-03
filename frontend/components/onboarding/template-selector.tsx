@@ -37,13 +37,13 @@ export function TemplateSelector() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#e8f1ff,_#fff_42%,_#fff3db)] px-4 py-10 text-[#002e6b]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#e8f1ff,_#fff_42%,_#fff3db)] px-4 py-6 text-[#002e6b] sm:py-10">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c61c2f]">
             Step 2
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight">
+          <h1 className="mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
             Choose the storefront language your buyers will feel first.
           </h1>
           <p className="mt-4 text-sm leading-7 text-slate-600">
