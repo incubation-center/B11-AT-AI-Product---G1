@@ -41,6 +41,8 @@ services:
       TELEGRAM_MINI_APP_SESSION_TTL_MINUTES: ${TELEGRAM_MINI_APP_SESSION_TTL_MINUTES:-480}
     expose:
       - "8080"
+    ports:
+      - "8080:8080"
     labels:
       - traefik.enable=true
       - traefik.http.routers.coolhat-backend.rule=Host(`coolhat-backend.eavheang.me`)
@@ -66,9 +68,14 @@ services:
       INTERNAL_API_URL: ${INTERNAL_API_URL:-http://backend:8080}
     expose:
       - "3000"
+    ports:
+      - "3000:3000"
     labels:
       - traefik.enable=true
       - traefik.http.routers.coolhat-frontend.rule=Host(`coolhat.eavheang.me`) || HostRegexp(`{subdomain:[a-z0-9-]+}.eavheang.me`)
+      - traefik.http.routers.coolhat-frontend-http.rule=Host(`coolhat.eavheang.me`) || HostRegexp(`{subdomain:[a-z0-9-]+}.eavheang.me`)
+      - traefik.http.routers.coolhat-frontend-http.entrypoints=http
+      - traefik.http.routers.coolhat-frontend-http.priority=11
       - traefik.http.routers.coolhat-frontend.entrypoints=https
       - traefik.http.routers.coolhat-frontend.tls=true
       - traefik.http.routers.coolhat-frontend.priority=10
