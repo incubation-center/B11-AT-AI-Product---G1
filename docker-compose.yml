@@ -68,8 +68,8 @@ services:
       - "3000"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.coolhat-frontend.rule=Host(`coolhat.eavheang.me`) || HostRegexp(`{subdomain:[a-z0-9-]+}.eavheang.me`)
-      - traefik.http.routers.coolhat-frontend-http.rule=Host(`coolhat.eavheang.me`) || HostRegexp(`{subdomain:[a-z0-9-]+}.eavheang.me`)
+      - traefik.http.routers.coolhat-frontend.rule=Host(`coolhat.eavheang.me`) || HostRegexp(`^[a-z0-9-]+\\.eavheang\\.me$`)
+      - traefik.http.routers.coolhat-frontend-http.rule=Host(`coolhat.eavheang.me`) || HostRegexp(`^[a-z0-9-]+\\.eavheang\\.me$`)
       - traefik.http.routers.coolhat-frontend-http.entrypoints=http
       - traefik.http.routers.coolhat-frontend-http.priority=11
       - traefik.http.routers.coolhat-frontend.entrypoints=https
