@@ -222,7 +222,9 @@
       "sendLink": "Send Link",
       "passwordReset": "Password Reset",
       "passwordResetDesc": "Send a password reset link to your email.",
-      "requestReset": "Request Reset"
+      "requestReset": "Request Reset",
+      "languagePreference": "Language",
+      "languagePreferenceDesc": "Change the language used across your dashboard."
     },
     "store": {
       "brandingTheme": "Branding & Theme",

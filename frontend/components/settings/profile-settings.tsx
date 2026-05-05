@@ -18,7 +18,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Lock,
+  Languages,
 } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/i18n/language-switcher';
 import { UserProfile } from '@/lib/profile';
 
 interface ProfileSettingsProps {
@@ -173,6 +175,25 @@ export function ProfileSettings({
               >
                 {t('requestReset')}
               </Button>
+            </div>
+
+            <div className="flex flex-col gap-3 p-4 bg-default-50 rounded-xl border border-default-100 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="text-primary">
+                  <Languages size={20} />
+                </div>
+                <div>
+                  <p className="text-sm">{t('languagePreference')}</p>
+                  <p className="text-xs text-default-500">
+                    {t('languagePreferenceDesc')}
+                  </p>
+                </div>
+              </div>
+              <LanguageSwitcher
+                showLabel={false}
+                className="w-full sm:w-auto"
+                selectClassName="w-full sm:w-auto"
+              />
             </div>
           </div>
         </CardBody>
