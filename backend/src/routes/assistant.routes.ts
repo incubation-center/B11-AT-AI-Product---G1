@@ -1,11 +1,13 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
 import { askBuyerAssistant } from "../services/assistant.service";
+import { getSubscriptionAccessForTenant } from "../services/subscription.service";
 import { getStoreBySubdomain } from "../services/tenant.service";
 
 const ASSISTANT_RATE_LIMIT_WINDOW_MS = 60_000;
 const ASSISTANT_RATE_LIMIT_MAX_REQUESTS = 20;
 const assistantRateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+const SUBSCRIPTION_REQUIRED_MESSAGE = "Subscription is required to use this feature.";
 
 function cleanText(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -93,6 +95,11 @@ assistantRoutes.post("/assistant/ask", async (c) => {
 
   const tenant = await getStoreBySubdomain(subdomain);
   if (!tenant) return c.json({ message: "Store not found" }, 404);
+
+  const access = await getSubscriptionAccessForTenant(tenant.id);
+  if (!access.allowed) {
+    return c.json({ message: SUBSCRIPTION_REQUIRED_MESSAGE }, 402);
+  }
 
   try {
     const result = await askBuyerAssistant({

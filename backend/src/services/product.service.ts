@@ -82,6 +82,15 @@ export async function createProduct(tenantId: string, input: CreateProductInput)
   return product;
 }
 
+export async function countActiveProducts(tenantId: string) {
+  const rows = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(products)
+    .where(and(eq(products.tenantId, tenantId), eq(products.isActive, true)));
+
+  return rows[0]?.count ?? 0;
+}
+
 export async function listProducts(
   tenantId: string,
   options: { q?: string; page?: number; pageSize?: number; includeInactive?: boolean }

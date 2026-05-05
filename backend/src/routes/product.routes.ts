@@ -14,6 +14,7 @@ import {
 } from "../services/product-draft.service";
 import {
   appendProductImageUrl,
+  countActiveProducts,
   createProduct,
   createVariant,
   deactivateProduct,
@@ -28,9 +29,11 @@ import {
   updateVariant,
   updateVariantStock,
 } from "../services/product.service";
+import { getSubscriptionAccessForTenant } from "../services/subscription.service";
 
 const AI_RATE_LIMIT_WINDOW_MS = 60_000;
 const AI_RATE_LIMIT_MAX_REQUESTS = 20;
+const SUBSCRIPTION_REQUIRED_MESSAGE = "Subscription is required to use this feature.";
 const aiRateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
 function cleanText(value: unknown): string | null {
@@ -222,6 +225,38 @@ async function resolveTenant(
   return { tenantId: tenant.id, requesterKey, response: null };
 }
 
+async function requireActiveSubscription(c: Context, tenantId: string) {
+  const access = await getSubscriptionAccessForTenant(tenantId);
+  if (!access.allowed) {
+    return {
+      access,
+      response: c.json({ message: SUBSCRIPTION_REQUIRED_MESSAGE }, 402),
+    };
+  }
+
+  return { access, response: null };
+}
+
+async function requireProductCapacity(c: Context, tenantId: string) {
+  const subscription = await requireActiveSubscription(c, tenantId);
+  if (subscription.response) return subscription;
+
+  const activeProductCount = await countActiveProducts(tenantId);
+  if (activeProductCount >= subscription.access.productLimit) {
+    return {
+      access: subscription.access,
+      response: c.json(
+        {
+          message: `Your plan allows up to ${subscription.access.productLimit} active products.`,
+        },
+        402
+      ),
+    };
+  }
+
+  return subscription;
+}
+
 function triggerAutoProductAiAnalysis(tenantId: string, productId: string, lang?: unknown) {
   void (async () => {
     try {
@@ -270,14 +305,20 @@ productRoutes.post("/products/ai/start", requireBearer, async (c) => {
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
   const requesterKey = resolved.requesterKey!;
-  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
-  if (rateLimited) return rateLimited;
 
   const body = await c.req.json().catch(() => null);
   const productId = cleanText(body?.product_id);
   const name = cleanText(body?.name);
   const basePriceUsd = toNumericString(body?.base_price_usd);
   const basePriceKhr = toNumericString(body?.base_price_khr);
+
+  const subscription = productId
+    ? await requireActiveSubscription(c, tenantId)
+    : await requireProductCapacity(c, tenantId);
+  if (subscription.response) return subscription.response;
+
+  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
+  if (rateLimited) return rateLimited;
 
   if (!productId) {
     if (!name) return c.json({ message: "name is required" }, 400);
@@ -320,6 +361,9 @@ productRoutes.post("/products/ai/answer", requireBearer, async (c) => {
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
   const requesterKey = resolved.requesterKey!;
+  const subscription = await requireActiveSubscription(c, tenantId);
+  if (subscription.response) return subscription.response;
+
   const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
   if (rateLimited) return rateLimited;
 
@@ -356,12 +400,22 @@ productRoutes.post("/products/ai/confirm", requireBearer, async (c) => {
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
   const requesterKey = resolved.requesterKey!;
-  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
-  if (rateLimited) return rateLimited;
 
   const body = await c.req.json().catch(() => null);
   const draftId = cleanText(body?.draft_id);
   if (!draftId) return c.json({ message: "draft_id is required" }, 400);
+
+  const draft = await getProductDraftById(tenantId, draftId);
+  if (!draft) return c.json({ message: "Draft not found" }, 404);
+
+  const initialInput = draft.initialInput as Record<string, unknown>;
+  const subscription = cleanText(initialInput.product_id)
+    ? await requireActiveSubscription(c, tenantId)
+    : await requireProductCapacity(c, tenantId);
+  if (subscription.response) return subscription.response;
+
+  const rateLimited = enforceAiRateLimit(c, tenantId, requesterKey);
+  if (rateLimited) return rateLimited;
 
   const result = await confirmProductDraft(tenantId, { draftId });
   if (result.error) {
@@ -449,6 +503,8 @@ productRoutes.post("/products", requireBearer, async (c) => {
   const resolved = await resolveTenant(c);
   if (resolved.response) return resolved.response;
   const tenantId = resolved.tenantId!;
+  const subscription = await requireProductCapacity(c, tenantId);
+  if (subscription.response) return subscription.response;
 
   const body = await c.req.json().catch(() => null);
   const name = cleanText(body?.name);

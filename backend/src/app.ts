@@ -11,6 +11,7 @@ import { paywayRoutes } from "./routes/payway.routes";
 import { productRoutes } from "./routes/product.routes";
 import { ragRoutes } from "./routes/rag.routes";
 import { rootRoutes } from "./routes/root.routes";
+import { subscriptionRoutes } from "./routes/subscription.routes";
 import { tenantRoutes } from "./routes/tenant.routes";
 import { telegramRoutes } from "./routes/telegram.routes";
 import { env } from "./env";
@@ -71,6 +72,7 @@ app.route("/", telegramRoutes);
 app.route("/", productRoutes);
 app.route("/", orderRoutes);
 app.route("/", paywayRoutes);
+app.route("/", subscriptionRoutes);
 app.route("/", ragRoutes);
 
 export default app;

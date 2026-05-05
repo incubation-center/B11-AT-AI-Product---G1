@@ -12,6 +12,7 @@ import {
   getStoreBySubdomain,
   updateMyTenant,
 } from "../services/tenant.service";
+import { getCurrentSubscriptionByTenantId, toSubscriptionSummary } from "../services/subscription.service";
 import { SHOP_TYPES, STOREFRONT_TEMPLATES } from "../types/tenant";
 import type { CreateTenantInput, ShopType, StorefrontTemplate, UpdateTenantInput } from "../types/tenant";
 import type { SessionUser } from "../types/auth";
@@ -143,9 +144,11 @@ tenantRoutes.get("/me/tenant", requireBearer, async (c) => {
   if (!sessionUser) return unauthorized(c);
 
   const tenant = await getMyTenant(sessionUser);
+  const subscription = tenant ? await getCurrentSubscriptionByTenantId(tenant.id) : null;
   return c.json({
     hasTenant: !!tenant,
     tenant: tenant ? withStoreUrl(tenant) : null,
+    subscription: toSubscriptionSummary(subscription ?? null),
   });
 });
 

@@ -51,6 +51,21 @@ export const paymentStatusEnum = pgEnum("payment_status", [
   "refunded",
 ]);
 
+export const subscriptionPlanEnum = pgEnum("subscription_plan", [
+  "free_trial",
+  "starter",
+  "growth",
+]);
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "trialing",
+  "active",
+  "payment_pending",
+  "past_due",
+  "expired",
+  "cancelled",
+]);
+
 // --------------------
 // Tables
 // --------------------
@@ -214,6 +229,39 @@ export const users = pgTable(
       isActiveIdx: index("tenants_is_active_idx").on(t.isActive),
     })
   );
+
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    plan: subscriptionPlanEnum("plan").notNull(),
+    status: subscriptionStatusEnum("status").notNull(),
+    amountUsd: numeric("amount_usd", { precision: 12, scale: 2 }).notNull(),
+    paywayClientId: text("payway_client_id"),
+    paywayDeviceId: text("payway_device_id"),
+    paywayRequestTime: text("payway_request_time"),
+    paywayToken: text("payway_token"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+    trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }),
+    currentPeriodStart: timestamp("current_period_start", { withTimezone: true }).notNull(),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }).notNull(),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    tenantIdx: index("subscriptions_tenant_id_idx").on(t.tenantId),
+    statusIdx: index("subscriptions_status_idx").on(t.status),
+    tenantCreatedAtIdx: index("subscriptions_tenant_created_at_idx").on(t.tenantId, t.createdAt),
+  })
+);
   
   export const products = pgTable(
     "products",
@@ -607,8 +655,16 @@ export const authAccountsRelations = relations(authAccounts, ({ one }) => ({
     products: many(products),
     orders: many(orders),
     drafts: many(productDrafts),
+    subscriptions: many(subscriptions),
     chatSessions: many(chatSessions),
     telegramLink: one(telegramLinks),
+  }));
+
+  export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [subscriptions.tenantId],
+      references: [tenants.id],
+    }),
   }));
   
   export const productsRelations = relations(products, ({ one, many }) => ({
@@ -740,6 +796,9 @@ export type NewUser = typeof users.$inferInsert;
   
   export type Tenant = typeof tenants.$inferSelect;
   export type NewTenant = typeof tenants.$inferInsert;
+
+  export type Subscription = typeof subscriptions.$inferSelect;
+  export type NewSubscription = typeof subscriptions.$inferInsert;
   
   export type Product = typeof products.$inferSelect;
   export type NewProduct = typeof products.$inferInsert;
