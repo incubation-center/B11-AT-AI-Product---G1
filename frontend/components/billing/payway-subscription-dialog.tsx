@@ -15,6 +15,7 @@ import {
 import {
   checkBillingPaywayStatus,
   initBillingPayway,
+  type BillingPaywayStatusInput,
   type PaidSubscriptionPlanId,
   type SubscriptionSummary,
 } from '@/lib/auth';
@@ -78,7 +79,7 @@ function getBackendPaywayExpiresAtMs(payment: Record<string, unknown> | null) {
 
 function getBillingPaywayStatusPayload(
   payment: Record<string, unknown> | null,
-) {
+): BillingPaywayStatusInput | null {
   const planId = getPaymentString(payment, 'plan_id');
   const clientId = getPaymentString(payment, 'client_id');
   const deviceId = getPaymentString(payment, 'device_id');
