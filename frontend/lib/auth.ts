@@ -34,9 +34,64 @@ export type TenantSummary = {
   isActive: boolean;
 };
 
+export type SubscriptionPlanId = 'free_trial' | 'starter' | 'growth';
+export type PaidSubscriptionPlanId = Extract<
+  SubscriptionPlanId,
+  'starter' | 'growth'
+>;
+
+export type SubscriptionStatus =
+  | 'trialing'
+  | 'active'
+  | 'payment_pending'
+  | 'past_due'
+  | 'expired'
+  | 'cancelled';
+
+export type SubscriptionSummary = {
+  id: string;
+  plan: SubscriptionPlanId;
+  status: SubscriptionStatus;
+  amountUsd: number;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string;
+  isAccessActive: boolean;
+  capabilities: {
+    productLimit: number;
+    aiMonthlyLimit: number;
+    removeBranding: boolean;
+  };
+};
+
 export type TenantStatusResponse = {
   hasTenant: boolean;
   tenant: TenantSummary | null;
+  subscription?: SubscriptionSummary | null;
+};
+
+export type BillingSubscriptionResponse = {
+  tenant: TenantSummary | null;
+  subscription: SubscriptionSummary | null;
+};
+
+export type BillingSubscriptionActionResponse = {
+  subscription: SubscriptionSummary | null;
+};
+
+export type BillingPaywayInitResponse = BillingSubscriptionActionResponse & {
+  payment: Record<string, unknown>;
+};
+
+export type BillingPaywayStatusResponse = BillingSubscriptionActionResponse & {
+  paywayStatus: unknown;
+};
+
+export type BillingPaywayStatusInput = {
+  planId: PaidSubscriptionPlanId;
+  clientId: string;
+  deviceId: string;
+  requestTime: string;
+  token: string;
 };
 
 export type TelegramLinkStatus = {
@@ -211,6 +266,44 @@ export async function protectedFetch<T>(path: string, init?: RequestInit) {
 
 export async function getTenantStatus() {
   return protectedFetch<TenantStatusResponse>('/me/tenant');
+}
+
+export async function getBillingSubscription() {
+  return protectedFetch<BillingSubscriptionResponse>('/billing/subscription');
+}
+
+export async function startBillingTrial() {
+  return protectedFetch<BillingSubscriptionActionResponse>('/billing/trial', {
+    method: 'POST',
+  });
+}
+
+export async function initBillingPayway(planId: PaidSubscriptionPlanId) {
+  return protectedFetch<BillingPaywayInitResponse>('/billing/payway/init', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ plan_id: planId }),
+  });
+}
+
+export async function checkBillingPaywayStatus(
+  input: BillingPaywayStatusInput,
+) {
+  return protectedFetch<BillingPaywayStatusResponse>('/billing/payway/status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      plan_id: input.planId,
+      client_id: input.clientId,
+      device_id: input.deviceId,
+      request_time: input.requestTime,
+      token: input.token,
+    }),
+  });
 }
 
 export async function createTenant(payload: CreateTenantPayload) {

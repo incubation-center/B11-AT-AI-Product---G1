@@ -2,7 +2,10 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const PROTECTED_PREFIXES = ['/dashboard', '/onboarding'];
-const BETTER_AUTH_SESSION_COOKIE_KEYS = ['better-auth.session_token', 'session_token'];
+const BETTER_AUTH_SESSION_COOKIE_KEYS = [
+  'better-auth.session_token',
+  'session_token',
+];
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

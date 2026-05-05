@@ -21,6 +21,8 @@ export function Pricing() {
       color: 'emerald',
       isFree: true,
       ctaLabel: t('startTrialCta'),
+      planId: 'free_trial',
+      ctaHref: '/sign-up?plan=free_trial',
       features: [
         t('features.free1'),
         t('features.free2'),
@@ -39,6 +41,8 @@ export function Pricing() {
       color: 'amber',
       popular: true,
       ctaLabel: t('getStarterCta'),
+      planId: 'starter',
+      ctaHref: '/sign-up?plan=starter',
       features: [
         t('features.starter1'),
         t('features.starter2'),
@@ -58,6 +62,8 @@ export function Pricing() {
       description: t('growthDesc'),
       color: 'blue',
       ctaLabel: t('getGrowthCta'),
+      planId: 'growth',
+      ctaHref: '/sign-up?plan=growth',
       features: [
         t('features.growth1'),
         t('features.growth2'),

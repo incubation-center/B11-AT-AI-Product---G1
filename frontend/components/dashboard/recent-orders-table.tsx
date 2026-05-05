@@ -173,8 +173,7 @@ export function RecentOrdersTable({
                   <TableCell>
                     <Chip
                       color={
-                        paymentStatusColorMap[order.payment_status] ||
-                        'default'
+                        paymentStatusColorMap[order.payment_status] || 'default'
                       }
                       variant="flat"
                       size="sm"

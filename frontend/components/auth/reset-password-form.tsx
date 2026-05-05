@@ -101,9 +101,7 @@ export function ResetPasswordForm({
             {t('createNewPassword')}
           </h1>
           <p className="text-sm text-black">
-            {token
-              ? t('resetWithTokenHelp')
-              : t('resetWithCodeHelp')}
+            {token ? t('resetWithTokenHelp') : t('resetWithCodeHelp')}
           </p>
         </div>
 

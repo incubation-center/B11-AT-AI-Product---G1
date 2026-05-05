@@ -53,7 +53,9 @@ export function StoreSettings({
     tenant?.description || '',
   );
   const [shopType, setShopType] = useState(tenant?.shopType || '');
-  const [paywayLinkUrl, setPaywayLinkUrl] = useState(tenant?.paywayLinkUrl || '');
+  const [paywayLinkUrl, setPaywayLinkUrl] = useState(
+    tenant?.paywayLinkUrl || '',
+  );
   const [selectedTemplate, setSelectedTemplate] = useState(
     normalizeStorefrontTheme(tenant?.storefrontTemplate),
   );
@@ -296,4 +298,3 @@ export function StoreSettings({
     </div>
   );
 }
-

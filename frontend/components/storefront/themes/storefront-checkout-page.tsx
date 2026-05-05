@@ -93,7 +93,8 @@ function getPaywayStatusMessage(payload: PaywayStatusResponse) {
 }
 
 function isPaywayPaymentSuccess(payload: PaywayStatusResponse) {
-  const actionText = `${payload.action ?? ''} ${payload.data?.action ?? ''}`.toLowerCase();
+  const actionText =
+    `${payload.action ?? ''} ${payload.data?.action ?? ''}`.toLowerCase();
   return actionText.split(/\s+/).includes('approved');
 }
 
@@ -227,7 +228,9 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
           .catch(() => ({}))) as PaywayInitResponse;
 
         if (!paywayResponse.ok) {
-          setError(paywayPayload.message ?? 'Unable to initialize ABA payment.');
+          setError(
+            paywayPayload.message ?? 'Unable to initialize ABA payment.',
+          );
           return;
         }
 
@@ -296,7 +299,8 @@ export function StorefrontCheckoutPage({ store }: StorefrontCheckoutPageProps) {
 
           if (!statusResponse.ok) {
             setPaywayStatusMessage(
-              statusPayload.message ?? 'Waiting for ABA payment confirmation...',
+              statusPayload.message ??
+                'Waiting for ABA payment confirmation...',
             );
           } else {
             const statusMessage = getPaywayStatusMessage(statusPayload);

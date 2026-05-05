@@ -52,9 +52,7 @@ export function AskAiPopup() {
                     <p className="text-[11px] uppercase tracking-[0.18em] text-red-100">
                       {t('instantAssistant')}
                     </p>
-                    <h3 className="mt-1 text-lg font-semibold">
-                      {t('title')}
-                    </h3>
+                    <h3 className="mt-1 text-lg font-semibold">{t('title')}</h3>
                     <p className="mt-1 text-xs text-red-100">
                       {t('recommendationsInSeconds')}
                     </p>
@@ -180,7 +178,6 @@ export function AskAiPopup() {
             >
               {open ? <X size={24} /> : <Sparkles size={24} />}
             </motion.div>
-
           </motion.button>
         </div>
       </div>

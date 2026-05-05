@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import {
   Bot,
+  CreditCard,
   LayoutDashboard,
   Package,
   Send,
@@ -50,6 +51,11 @@ export function DashboardSidebarLayout({ children }: { children: ReactNode }) {
       label: t('telegram'),
       href: '/dashboard/telegram',
       icon: <Bot className="h-5 w-5 flex-shrink-0 text-slate-700" />,
+    },
+    {
+      label: t('billing'),
+      href: '/billing',
+      icon: <CreditCard className="h-5 w-5 flex-shrink-0 text-slate-700" />,
     },
     {
       label: t('settings'),

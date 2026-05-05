@@ -25,5 +25,9 @@ export default async function DashboardLayout({
     redirect('/onboarding/template');
   }
 
+  if (!tenantStatus.subscription || !tenantStatus.subscription.isAccessActive) {
+    redirect('/billing?reason=subscription_required');
+  }
+
   return <DashboardSidebarLayout>{children}</DashboardSidebarLayout>;
 }

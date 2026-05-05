@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import type { SubscriptionPlanId } from '@/lib/auth';
 
 // Helper function to detect if text contains Khmer characters
 function hasKhmerText(text: string): boolean {
@@ -9,6 +11,7 @@ function hasKhmerText(text: string): boolean {
 }
 
 interface PricingTier {
+  planId: SubscriptionPlanId;
   name: string;
   icon: React.ReactNode;
   price: number | string;
@@ -19,6 +22,7 @@ interface PricingTier {
   popular?: boolean;
   color: string;
   ctaLabel?: string;
+  ctaHref?: string;
   isFree?: boolean;
 }
 
@@ -169,6 +173,7 @@ function CreativePricing({
               </div>
 
               <Button
+                asChild
                 className={cn(
                   'w-full h-11 font-semibold text-sm relative',
                   'border-2 border-zinc-900',
@@ -183,7 +188,9 @@ function CreativePricing({
                       : ['bg-[#002e6b] text-white hover:bg-[#003d8f]'],
                 )}
               >
-                {tier.ctaLabel ?? 'Get Started'}
+                <Link href={tier.ctaHref ?? `/billing?plan=${tier.planId}`}>
+                  {tier.ctaLabel ?? 'Get Started'}
+                </Link>
               </Button>
             </div>
           </div>
