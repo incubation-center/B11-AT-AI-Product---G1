@@ -36,6 +36,7 @@ const trustedOrigins = Array.from(
 );
 
 const authSecret = env.BETTER_AUTH_SECRET;
+const requireEmailVerification = env.NODE_ENV === "production";
 
 export const auth = betterAuth({
   baseURL,
@@ -61,7 +62,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification,
     sendResetPassword: async ({ user, url }) => {
       await sendResetPasswordEmail({
         to: user.email,
@@ -70,7 +71,7 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: requireEmailVerification,
     sendVerificationEmail: async ({ user, url }) => {
       await sendVerifyEmail({
         to: user.email,

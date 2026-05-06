@@ -356,7 +356,13 @@ export async function requestPasswordReset(email: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({
+        email,
+        redirectTo:
+          typeof window !== 'undefined'
+            ? `${window.location.origin}/reset-password`
+            : undefined,
+      }),
     },
   );
 }

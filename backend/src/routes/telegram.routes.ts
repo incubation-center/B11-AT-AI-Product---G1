@@ -107,6 +107,12 @@ telegramRoutes.post("/telegram/link-code", requireBearer, async (c) => {
   }
 });
 
+telegramRoutes.post("/webhook", async (c) => {
+  const update = await c.req.json().catch(() => null);
+  console.log("[telegram] /webhook update:", update);
+  return c.text("OK", 200);
+});
+
 telegramRoutes.post("/telegram/webhook", async (c) => {
   const configuredSecret = env.TELEGRAM_WEBHOOK_SECRET?.trim();
   const requestSecret = c.req.header("x-telegram-bot-api-secret-token")?.trim();
